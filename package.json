@@ -1,0 +1,26 @@
+{
+  "name": "blocker",
+  "version": "1.0.0",
+  "description": "Multiplayer online game using Phaser + WebSocket (Socket.IO)",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "",
+    "dev": "",
+    "lint": "standard --verbose | snazzy"
+  },
+  "author": "Nathachai Thongniran",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.10.2",
+    "shortid": "^2.2.6",
+    "socket.io": "^1.4.8"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.15.0",
+    "gulp": "^3.9.1",
+    "gulp-nodemon": "^2.1.0",
+    "nodemon": "^1.10.2",
+    "standard": "^8.0.0"
+  }
+}

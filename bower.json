@@ -1,0 +1,22 @@
+{
+  "name": "blocker",
+  "description": "Multiplayer online game using Phaser + WebSocket (Socket.IO)",
+  "main": "app.js",
+  "authors": [
+    "Nathachai Thongniran"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/jojoee/blocker",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/bower_components/",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap-sass-grid": "^4.0.0",
+    "phaser": "2.4.6"
+  }
+}

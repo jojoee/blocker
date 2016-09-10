@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+<title>Blocker: Multiplayer online game</title>
+<meta name="viewport" content="initial-scale=1">
+<link rel="stylesheet" href="/public/bower_components/bootstrap-sass-grid/css/bootstrap-sass-grid.css">
+<link rel="stylesheet" href="/public/styles/main.css">
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="wrapper">
+      <div id="game">
+      </div><!-- #game -->
+
+      <ul class="col-md-10" id="messages">
+      </ul><!-- #messages -->
+
+      <ul class="col-md-2" id="players">
+      </ul><!-- #players -->
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div id="report" class="report transition">
+  </div><!-- #report -->
+
+  <form id="form" action="">
+    <input
+      type="text"
+      id="text-input" autocomplete="off"
+      placeholder="Enter message here...">
+    <button id="form-btn">Send</button>
+  </form><!-- #form -->
+</div><!-- .footer -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="/common/config.js"></script>
+<script src="/common/util.js"></script>
+<script src="/public/bower_components/phaser/build/phaser.min.js"></script>
+<script src="/public/scripts/plugins/ScreenShake.js"></script>
+<script src="/public/scripts/config.js"></script>
+<script src="/public/scripts/RemotePlayer.js"></script>
+<script src="/public/scripts/main.js"></script>
+</body>
+</html>

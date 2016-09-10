@@ -1,0 +1,103 @@
+/*
+accent: #6870ab;
+grey: #eee;
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: monospace;
+}
+
+canvas {
+  display: block;
+}
+
+.monospace {
+  font-family: monospace;
+}
+
+.transition {
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  -ms-transition: all 0.2s ease;
+  -o-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+#game {
+  background-color: #eee;
+}
+
+#messages {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#messages li {
+  padding: 6px 12px;
+}
+
+#messages li:nth-child(odd) {
+  background: #eee;
+}
+
+#players {
+  border-left: 1px solid #eee;
+  padding: 12px;
+  list-style: none;
+}
+
+#players li {
+  padding-bottom: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#players li:nth-child(odd) {
+  background: #eee;
+}
+
+#players li.my {
+  color: #6870ab;
+}
+
+.footer {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+}
+
+.footer .report {
+  padding: 6px;
+  color: #6870ab;
+}
+
+.footer #form {
+  
+}
+
+.footer #text-input {
+  border: 0;
+  width: 90%;
+  height: 36px;
+  line-height: 36px;
+  padding-left: 12px;
+  float: left;
+  background-color: #eee;
+}
+
+.footer #form-btn {
+  float: left;
+  width: 10%;
+  height: 36px;
+  background: none;
+  border: none;
+}

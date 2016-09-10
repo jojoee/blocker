@@ -1,0 +1,13 @@
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+*DS_store
+
+logs
+npm-debug.log
+node_modules
+bower_components
