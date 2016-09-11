@@ -1,15 +1,32 @@
 var util = require('./../common/util'),
   commonConfig = require('./../common/config');
 
-// Player Info
-var Player = function(playerId) {
-  this.playerId = playerId; // can not be updated
+// Player
+// 
+// playerType:
+// - player
+// - bot
+var Player = function(playerId, playerType) {
+  if (playerType === undefined) playerType = 'player';
+
+  // unchange
+  this.playerId = playerId;
+  this.playerType = playerType;
+
   this.message = '';
   this.x = util.getRandomInt(0, commonConfig.game.worldWidth);
   this.y = util.getRandomInt(0, commonConfig.game.worldHeight);
   this.angle = util.getRandomInt(0, 360);
   this.latestTyping = util.getCurrentUtcTimestamp();
   this.latestUpdate = util.getCurrentUtcTimestamp(); // ignore typing
+
+  function getPlayerId() {
+    return this.playerId;
+  }
+
+  function getPlayerType() {
+    return this.playerType;
+  }
 
   function getX() {
     return this.x;
@@ -60,6 +77,14 @@ var Player = function(playerId) {
     this.latestTyping = util.getCurrentUtcTimestamp();
   }
 
+  function getPosition() {
+    return {
+      x: this.x,
+      y: this.y,
+      angle: this.angle,
+    }
+  }
+
   function updatePosition(position) {
     this.x = position.x;
     this.y = position.y;
@@ -70,6 +95,7 @@ var Player = function(playerId) {
     // public for client
     // private for server
     playerId: this.playerId,
+    playerType: this.playerType,
     x: this.x,
     y: this.y,
     angle: this.angle,
@@ -78,6 +104,8 @@ var Player = function(playerId) {
     latestTyping: this.latestTyping,
 
     // public for server
+    getPlayerId: getPlayerId,
+    getPlayerType: getPlayerType,
     getX: getX,
     setX: setX,
     getY: getY,
@@ -92,6 +120,7 @@ var Player = function(playerId) {
     updateLatestUpdate: updateLatestUpdate,
     updateLatestTyping: updateLatestTyping,
 
+    getPosition: getPosition,
     updatePosition: updatePosition,
   }
 }
