@@ -25,7 +25,7 @@ var IS_DEBUG = false,
   DEBUG_XPOS, // unused
   DEBUG_YPOS; // unused
 
-IS_DEBUG = true;
+// IS_DEBUG = true;
 
 /*================================================================ Socket (connect, disconnect, first-time only)
 */
@@ -142,7 +142,7 @@ function onPlayerTyping(player) {
 }
 
 function onPlayerMove(player) {
-  util.clientLog('Enemy is move');
+  // util.clientLog('Enemy is move');
 
   // game
   var enemyIdx = getEnemyIndexById(player.playerId);
