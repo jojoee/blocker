@@ -2,55 +2,52 @@
 var express = require('express'),
   app = express(),
   path = require('path'),
+  faker = require('faker'),
   server = require('http').Server(app),
   io = require('socket.io')(server),
   commonConfig = require('./common/config'),
   util = require('./common/util'),
-  serverConfig = require('./server/config'),
+  serverConfig = require('./server/config'), // unused
   shortid = require('shortid'),
   Player = require('./server/Player');
 
 // var
-var port = serverConfig.port,
+var port = commonConfig.serverPort,
   eventName = commonConfig.eventName,
   staticPath = path.join(__dirname + '/public'),
   commonPath = path.join(__dirname + '/common'),
   serverHeartbeat = 3000,
-  mapWidth = 800,
-  chatLogs = []; // 256
-  mapHeight = 600;
+  mapWidth = commonConfig.game.worldWidth,
+  mapHeight = commonConfig.game.worldHeight,
+  chatLogs = [],
+  maxChatLogs = 256,
+  isDebug = false;
 
 var players = [];
 // [ {Player1}, {Player2}, {Player3} ]
 
-/*================================================================ Util
+// Debug & testing
+// should be removed when deploy
+isDebug = true;
+generateFakeChatLogs();
+
+/*================================================================ Fake & Debug
 */
 
-function serverLog(title, data) {
-  var text = 'Server: ' + title;
+function generateFakeChatLogs() {
+  var i = 0,
+    nMessage = 12;
 
-  appLog(text, data);
-}
+  for (i = 0; i < nMessage; i++) {
+    var playerId = shortid.generate(),
+      player = new Player(playerId),
+      message = faker.lorem.sentence();
 
-function clientLog(title, data) {
-  var text = 'Player: ' + title;
+    player.setMessage(message);
+    player.updateLatestUpdate();
 
-  appLog(text, data);
-}
-
-// bug log
-function bugLog(data) {
-  serverLog('BUG', data);
-}
-
-function appLog(text, data) {
-  var text = util.getCurrentUtcTimestamp() + text;
-
-  if (data === undefined) {
-    data = '';
+    addToChatLogs(player);
   }
-
-  console.log(text, data);
 }
 
 /*================================================================ Socket util
@@ -63,6 +60,20 @@ function getCurrentOnlinePlayer() {
 
 /*================================================================ Game
 */
+
+// global
+// - chatLogs
+// - maxChatLogs
+// TODO: Refactor
+function addToChatLogs(player) {
+  var nLogs = chatLogs.length;
+
+  if (nLogs >= maxChatLogs) {
+    chatLogs.shift();
+  }
+
+  chatLogs.push(player);
+}
 
 // global
 // - players
@@ -105,9 +116,6 @@ function addPlayer(playerId) {
 
 // global
 // - players
-// 
-// TODO: Refactor (returned value when not found)
-// TODO: Error system
 function getPlayerIndexById(playerId) {
  var i = 0;
     nPlayers = players.length,
@@ -119,7 +127,7 @@ function getPlayerIndexById(playerId) {
     }
   }
 
-  bugLog('getPlayerIndexById: not found ' + playerId);
+  util.serverBugLog('getPlayerIndexById', 'Not found playerId', playerId);
 
   return -1;
 }
@@ -154,7 +162,7 @@ server.listen(port, function(err) {
     throw err;
     
   } else {
-    console.log('Listening on port: ' + port);
+    util.serverLog('Listening on port: ' + port);
   }
 });
 
@@ -164,30 +172,13 @@ server.listen(port, function(err) {
 io.on('connection', function(socket) {
   var socketId = socket.id,
     playerId = getUniquePlayerId(),
-    playerX = util.getRandomInt(0, mapWidth),
-    playerY = util.getRandomInt(0, mapHeight),
-    playerAngle = util.getRandomInt(0, 360),
-    player = new Player(playerId, playerX, playerY, playerAngle);
+    player = new Player(playerId);
 
-  clientLog(playerId, 'is connect');
-
-  // send existing players
-  // to this player
-  io.sockets.connected[socketId].emit(eventName.server.existingPlayers, players);
-
-  // add new player
-  players.push(player);
-
-  // send player id to player
-  io.sockets.connected[socketId].emit(eventName.server.playerInfo, player);
-
-  // broadcast to existing players
-  // about new player
-  socket.broadcast.emit(eventName.server.newPlayer, player);
+  util.serverLog(playerId + ' is connect');
 
   // disconnect
   socket.on('disconnect', function() {
-    clientLog(playerId, 'is disconnect');
+    util.serverLog(playerId + ' is disconnect');
 
     // remove player
     removePlayer(playerId);
@@ -196,26 +187,31 @@ io.on('connection', function(socket) {
     socket.broadcast.emit(eventName.server.disconnectedPlayer, player);
   });
 
-  // move
-  socket.on(eventName.player.move, function(player) {
-    var playerIdx = getPlayerIndexById(playerId);
+  // ready
+  socket.on(eventName.player.ready, function() {
+    // send playerInfo and existingPlayers
+    io.sockets.connected[socketId].emit(eventName.player.ready, {
+      playerInfo: player,
+      existingPlayerInfos: players,
+      existingChatLogs: chatLogs,
+    });
 
-    if (playerIdx > -1) {
-      players[playerIdx].setX(player.x);
-      players[playerIdx].setY(player.y);
-      players[playerIdx].setAngle(player.angle);
+    // broadcast to existing players
+    // about new player
+    socket.broadcast.emit(eventName.server.newPlayer, player);
 
-      socket.broadcast.emit(eventName.player.move, players[playerIdx]);
-    }
+    // add new player
+    players.push(player);
   });
 
   // message
   socket.on(eventName.player.message, function(player) {
     var playerIdx = getPlayerIndexById(playerId);
-    console.log(player);
 
     if (playerIdx > -1) {
       players[playerIdx].setMessage(player.message);
+      players[playerIdx].updateLatestUpdate();
+      addToChatLogs(players[playerIdx]);
       io.emit(eventName.player.message, players[playerIdx]);
     }
   });
@@ -230,24 +226,53 @@ io.on('connection', function(socket) {
       socket.broadcast.emit(eventName.player.typing, players[playerIdx]);
     }
   });
+
+  // move
+  socket.on(eventName.player.move, function(position) {
+    var playerIdx = getPlayerIndexById(playerId);
+
+    if (playerIdx > -1) {
+      players[playerIdx].updatePosition(position);
+      players[playerIdx].updateLatestUpdate();
+
+      socket.broadcast.emit(eventName.player.move, players[playerIdx]);
+    }
+  });
 });
 
-//================================================================
+/*================================================================ Log / Report
+*/
 
 function reportNumberOfCurrentOnlinePlayer() {
   var onlinePlayer = getCurrentOnlinePlayer();
   var text = 'Online player (number)';
 
-  serverLog(text, onlinePlayer);
+  util.serverLog(text, onlinePlayer);
 }
 
 function reportCurrentOnlinePlayer() {
   var text = 'Online player';
 
-  serverLog(text, players);
+  reportNumberOfCurrentOnlinePlayer();
+  util.serverLog(text, players);
 }
+
+function reportNumberOfChatLogs() {
+  util.serverLog('Chat logs (number)', chatLogs.length);
+}
+
+function reportChatLogs() {
+  reportNumberOfChatLogs();
+  util.serverLog('Chat logs', chatLogs);
+}
+
+/*================================================================ Interval
+*/
 
 setInterval(function() {
   reportNumberOfCurrentOnlinePlayer();
   // reportCurrentOnlinePlayer();
+  
+  reportNumberOfChatLogs();
+  // reportChatLogs();
 }, serverHeartbeat);

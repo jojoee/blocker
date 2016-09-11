@@ -7,8 +7,16 @@ var eventPlayerPrefix = 'player.',
   eventServerPrefix = 'server.';
 
 var config = {
+  serverPort: 3000,
+  game: {
+    worldWidth: 2000,
+    worldHeight: 2000,
+  },
   eventName: {
     player: {
+      // player is ready to connect
+      ready: eventPlayerPrefix + 'ready',
+
       // player send message
       message: eventPlayerPrefix + 'message',
 
@@ -19,12 +27,6 @@ var config = {
       move: eventPlayerPrefix + 'move',
     },
     server: {
-      // send player info
-      playerInfo: eventServerPrefix + 'player info',
-
-      // send existing players
-      existingPlayers: eventServerPrefix + 'existing players',
-
       // send new player
       newPlayer: eventServerPrefix + 'new player',
 
@@ -36,6 +38,8 @@ var config = {
 
 if (typeof module !== 'undefined' && module.exports != null) {
   module.exports = {
+    serverPort: config.serverPort,
+    game: config.game,
     eventName: config.eventName
-  }
+  };
 }

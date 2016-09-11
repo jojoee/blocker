@@ -1,11 +1,13 @@
-var util = require('./../common/util');
+var util = require('./../common/util'),
+  commonConfig = require('./../common/config');
 
-var Player = function(playerId, startX, startY, startAngle, latestUpdate) {
-  this.playerId = playerId;
-  this.x = startX;
-  this.y = startY;
-  this.angle = startAngle;
+// Player Info
+var Player = function(playerId) {
+  this.playerId = playerId; // can not be updated
   this.message = '';
+  this.x = util.getRandomInt(0, commonConfig.game.worldWidth);
+  this.y = util.getRandomInt(0, commonConfig.game.worldHeight);
+  this.angle = util.getRandomInt(0, 360);
   this.latestTyping = util.getCurrentUtcTimestamp();
   this.latestUpdate = util.getCurrentUtcTimestamp(); // ignore typing
 
@@ -14,7 +16,6 @@ var Player = function(playerId, startX, startY, startAngle, latestUpdate) {
   }
 
   function setX(x) {
-    this.updateLatestUpdate();
     this.x = x;
   }
 
@@ -23,7 +24,6 @@ var Player = function(playerId, startX, startY, startAngle, latestUpdate) {
   }
 
   function setY(y) {
-    this.updateLatestUpdate();
     this.y = y;
   }
 
@@ -32,7 +32,6 @@ var Player = function(playerId, startX, startY, startAngle, latestUpdate) {
   }
 
   function setAngle(angle) {
-    this.updateLatestUpdate();
     this.angle = angle;
   }
 
@@ -41,7 +40,6 @@ var Player = function(playerId, startX, startY, startAngle, latestUpdate) {
   }
 
   function setMessage(message) {
-    this.updateLatestUpdate();
     this.message = message;
   }
 
@@ -60,6 +58,12 @@ var Player = function(playerId, startX, startY, startAngle, latestUpdate) {
 
   function updateLatestTyping() {
     this.latestTyping = util.getCurrentUtcTimestamp();
+  }
+
+  function updatePosition(position) {
+    this.x = position.x;
+    this.y = position.y;
+    this.angle = position.angle;
   }
 
   return {
@@ -86,8 +90,10 @@ var Player = function(playerId, startX, startY, startAngle, latestUpdate) {
     getLatestUpdate: this.getLatestUpdate,
     // setLatestUpdate: setLatestUpdate,
     updateLatestUpdate: updateLatestUpdate,
-    updateLatestTyping: updateLatestTyping
+    updateLatestTyping: updateLatestTyping,
+
+    updatePosition: updatePosition,
   }
 }
 
-module.exports = Player
+module.exports = Player;

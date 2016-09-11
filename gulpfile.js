@@ -2,9 +2,10 @@
 
 var gulp = require('gulp'),
   browserSync = require('browser-sync').create(),
+  commonConfig = require('./common/config'),
   serverConfig = require('./server/config');
 
-var serverPort = serverConfig.port,
+var serverPort = commonConfig.serverPort,
   brwoserSyncPort = serverConfig.brwoserSyncPort;
 
 gulp.task('serve', function() {
@@ -16,9 +17,9 @@ gulp.task('serve', function() {
 
   var watchOpt = { interval: 500 };
 
-  gulp.watch('./public/scripts/*.js', watchOpt).on('change', browserSync.reload);
-  gulp.watch('./public/styles/*.css', watchOpt).on('change', browserSync.reload);
-  gulp.watch('./public/index.html',   watchOpt).on('change', browserSync.reload);
+  gulp.watch('./public/scripts/**/*.js',  watchOpt).on('change', browserSync.reload);
+  gulp.watch('./public/styles/*.css',     watchOpt).on('change', browserSync.reload);
+  gulp.watch('./public/index.html',       watchOpt).on('change', browserSync.reload);
 });
 
 gulp.task('default', ['serve']);

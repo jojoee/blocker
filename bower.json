@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "bootstrap-sass-grid": "^4.0.0",
-    "phaser": "2.4.6"
+    "phaser": "^2.6.2",
+    "phaser-state-transition-plugin": "^0.1.6"
   }
 }

@@ -1,6 +1,15 @@
 /*
-accent: #6870ab;
-grey: #eee;
+accent : #6870ab;
+grey   : #eee;
+white  : #fff;
+
+z-index
+- 2: sidebar
+- 3: footer
+- 3: github ribbon
+*/
+
+/*================================================================ General
 */
 
 * {
@@ -9,15 +18,25 @@ grey: #eee;
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
   overflow: hidden;
   font-family: monospace;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 canvas {
   display: block;
 }
+
+/*================================================================ Common
+*/
 
 .monospace {
   font-family: monospace;
@@ -31,22 +50,37 @@ canvas {
   transition: all 0.2s ease;
 }
 
-#game {
+/*================================================================ Main
+*/
+
+#game-wrap {
   background-color: #eee;
 }
 
-#messages {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
+/*================================================================ Sidebar
+*/
+
+#sidebar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 100%;
+  z-index: 2;
+  background-color: #fff;
+  opacity: .4;
 }
 
-#messages li {
-  padding: 6px 12px;
+#sidebar:hover {
+  opacity: .8;
 }
 
-#messages li:nth-child(odd) {
-  background: #eee;
+.widget {
+  width: 100%;
+}
+
+.widget > ul {
+  width: 100%;
 }
 
 #players {
@@ -65,23 +99,40 @@ canvas {
   background: #eee;
 }
 
-#players li.my {
-  color: #6870ab;
+#players li.player {
+  background-color: #6870ab;
+  color: #fff;
 }
 
-.footer {
+/*================================================================ Footer
+*/
+
+.footer-wrap {
   position: absolute;
   width: 100%;
   bottom: 0;
+  opacity: .6;
+  z-index: 3;
+}
+
+.footer-wrap:hover,
+.footer-wrap:active
+.footer-wrap:focus {
+  opacity: 1;
+}
+
+.footer {
+  position: relative;
 }
 
 .footer .report {
   padding: 6px;
   color: #6870ab;
+  height: 27px;
 }
 
 .footer #form {
-  
+  height: 36px;
 }
 
 .footer #text-input {
@@ -100,4 +151,58 @@ canvas {
   height: 36px;
   background: none;
   border: none;
+  background-color: #fff;
+}
+
+#log-wrap {
+  width: 100%;
+  height: 220px;
+  overflow-y: scroll;
+}
+
+#logs {
+  width: 100%;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#logs li {
+  padding: 6px 12px;
+}
+
+#logs li:nth-child(odd) {
+  background: #eee;
+}
+
+/*================================================================ Others
+*/
+
+/* http://tholman.com/github-corners/ */
+@keyframes octocat-wave{
+  0%,100% { transform: rotate(0) }
+  20%,60% { transform: rotate(-25deg) }
+  40%,80% { transform: rotate(10deg) }
+}
+
+.github-corner {
+  z-index: 4;
+  position: absolute;
+  top: 0;
+  border: 0;
+  right: 0;
+}
+
+.github-corner:hover .octo-arm {
+  animation: octocat-wave 560ms ease-in-out
+}
+
+@media (max-width:500px) {
+  .github-corner:hover .octo-arm {
+    animation: none
+  }
+
+  .github-corner .octo-arm {
+    animation: octocat-wave 560ms ease-in-out
+  }
 }

@@ -7,6 +7,7 @@
 *.gz
 *DS_store
 
+bk
 logs
 npm-debug.log
 node_modules
