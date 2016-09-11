@@ -48,7 +48,8 @@ Multiplayer online game using Phaser + WebSocket (Socket.IO).
 - [ ] Add social meta (og meta)
 - [x] Add [Github ribbon](http://tholman.com/github-corners/)
 - [ ] Add Social share
-- [ ] Bot player
+- [x] Bot player
+- [ ] Bot (make it smoother)
 - [ ] Fix enemy animation
 - [ ] Fix angle
 - [ ] Plugin: Screen shaker when player's attacked
