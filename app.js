@@ -61,10 +61,6 @@ function getCurrentOnlinePlayer() {
 /*================================================================ Game
 */
 
-// global
-// - chatLogs
-// - maxChatLogs
-// TODO: Refactor
 function addToChatLogs(player) {
   var nLogs = chatLogs.length;
 
@@ -75,8 +71,6 @@ function addToChatLogs(player) {
   chatLogs.push(player);
 }
 
-// global
-// - players
 function isDuplicatedId(playerId) {
   var i = 0;
     nPlayers = players.length,
@@ -94,8 +88,6 @@ function isDuplicatedId(playerId) {
   return isDuplicated;
 }
 
-// global
-// - players (isDuplicatedId)
 function getUniquePlayerId() {
   var playerId,
     isDuplicated = true;
@@ -108,14 +100,6 @@ function getUniquePlayerId() {
   return playerId;
 }
 
-// global
-// - players
-function addPlayer(playerId) {
-  players.push(playerId);
-}
-
-// global
-// - players
 function getPlayerIndexById(playerId) {
  var i = 0;
     nPlayers = players.length,
@@ -132,8 +116,6 @@ function getPlayerIndexById(playerId) {
   return -1;
 }
 
-// global
-// - players
 function removePlayer(playerId) {
   var playerIdx = getPlayerIndexById(playerId);
 
