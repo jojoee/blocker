@@ -8,6 +8,10 @@ Multiplayer online game using Phaser + WebSocket (Socket.IO).
 4. Start: `node app.js`
 5. Enjoy!
 
+## Deploy
+1. Install `pm2`: `npm install pm2 -g`
+2. Run app: `pm2 start app.js`
+
 ## Guideline
 ```
 1. Base javascript style: [Airbnb](https://github.com/airbnb/javascript)
@@ -90,6 +94,9 @@ Multiplayer online game using Phaser + WebSocket (Socket.IO).
 - [ ] Log filter
 - [ ] Set animation when join / die / rebirth
 - [ ] Set emitter
+- [x] Using [pm2](https://github.com/Unitech/pm2) for deploy
+- [ ] Minimap
+- [ ] Using [hashids](http://hashids.org/) to generate id instead
 
 ## In considering
 - [ ] [appmetrics.js](https://github.com/ebidel/appmetrics.js)
