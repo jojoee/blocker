@@ -689,7 +689,6 @@ Play.prototype = {
         } else {
           // update player + weapon rotation
           this.updateCreatureRotationByFollowingMouse(this.player);
-          this.updateCreatureShadow(this.player);
           this.playDashParticle(this.player);
         }
       }
@@ -806,6 +805,10 @@ Play.prototype = {
   },
 
   preRender: function() {
+    // All shadow will update here
+
+    this.updateCreatureShadow(this.player);
+
     this.zombieGroup.forEachAlive(function(monster) {
       this.updateCreatureWeapon(monster);
       this.updateCreatureShadow(monster);
