@@ -364,7 +364,7 @@ Play.prototype = {
   },
 
   playRecoverParticle: function(creature) {
-    console.log('playRecoverParticle');
+    // console.log('playRecoverParticle');
 
     this.recoverEmitterGroup.x = creature.x;
     this.recoverEmitterGroup.y = creature.y;
@@ -372,7 +372,7 @@ Play.prototype = {
   },
 
   playDamageParticle: function(creature) {
-    console.log('playDamageParticle');
+    // console.log('playDamageParticle');
 
     this.damageEmitterGroup.x = creature.x;
     this.damageEmitterGroup.y = creature.y;
@@ -633,27 +633,27 @@ Play.prototype = {
   },
 
   onPlayerOverlapZombie: function(player, monster) {
-    console.log('onPlayerOverlapZombie');
+    // console.log('onPlayerOverlapZombie');
   },
 
   onPlayerOverlapMachine: function(player, monster) {
-    console.log('onPlayerOverlapMachine');
+    // console.log('onPlayerOverlapMachine');
   },
 
   onPlayerOverlapBat: function(player, monster) {
-    console.log('onPlayerOverlapBat');
+    // console.log('onPlayerOverlapBat');
   },
 
   onMachineLaserOverlapPlayer: function(laser, player) {
-    console.log('onMachineLaserOverlapPlayer')
+    // console.log('onMachineLaserOverlapPlayer')
   },
 
   onPlayerArrowOverlapStone: function(arrow, stone) {
-    console.log('onPlayerArrowOverlapStone');
+    // console.log('onPlayerArrowOverlapStone');
   },
 
   onPlayerArrowOverlapMonster: function(arrow, monster) {
-    console.log('onPlayerArrowOverlapMonster');
+    // console.log('onPlayerArrowOverlapMonster');
     
     this.playDamageParticle(monster);
     arrow.kill();
