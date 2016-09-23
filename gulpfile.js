@@ -35,11 +35,11 @@ var gulp = require('gulp'),
   vinylBuffer = require('vinyl-buffer'),
   vinylSourceStream = require('vinyl-source-stream'),
   lodashAssign = require('lodash.assign'),
-  commonConfig = require('./common/config'),
+  config = require('./common/config'),
   serverConfig = require('./server/config');
 
-var serverPort = commonConfig.serverPort,
-  isProd = commonConfig.isProd,
+var serverPort = config.serverPort,
+  isProd = config.isProd,
   brwoserSyncPort = serverConfig.brwoserSyncPort,
   browserSyncUrl = 'http://localhost:' + serverPort,
   browserSyncOpt = {

@@ -4,20 +4,20 @@
 
 console.log('Blocker - The Hunter is welcome!');
 
-var commonConfig = require('./../../../common/config'),
+var config = require('./../../../common/config'),
   clientConfig = require('./config'),
   clientModule = require('./module'),
-  socketUrl = location.protocol + '//' + location.hostname + ':' + commonConfig.serverPort;
+  socketUrl = location.protocol + '//' + location.hostname + ':' + config.serverPort;
 
 window.FAKER = require('faker');
-window.COMMON_MODULE = require('./../../../common/module'),
-  window.EVENT_NAME = commonConfig.eventName;
-window.IS_PROD = commonConfig.isProd;
-window.IS_DEBUG = commonConfig.isDebug;
-window.IS_DUMMY = commonConfig.isDummy;
-window.IS_ONLINE = commonConfig.isOnline;
-window.GAME_WORLD_WIDTH = commonConfig.game.worldWidth;
-window.GAME_WORLD_HEIGHT = commonConfig.game.worldHeight;
+window.COMMON_MODULE = require('./../../../common/module');
+window.EVENT_NAME = config.eventName;
+window.IS_PROD = config.isProd;
+window.IS_DEBUG = config.isDebug;
+window.IS_DUMMY = config.isDummy;
+window.IS_ONLINE = config.isOnline;
+window.GAME_WORLD_WIDTH = config.game.worldWidth;
+window.GAME_WORLD_HEIGHT = config.game.worldHeight;
 window.SOCKET = io(socketUrl);
 window.WINDOW_WIDTH = window.innerWidth;
 window.WINDOW_HEIGHT = window.innerHeight;
