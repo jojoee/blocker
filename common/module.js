@@ -216,9 +216,10 @@ var Message = function(playerId, text, utcTimestamp) {
  */
 var CreatureInfo = function(life, maxLife) {
   if (typeof maxLife == 'undefined') maxLife = life;
+  if (typeof id === 'undefined') id = UTIL.getRandomId();
 
   /** @type {string} */
-  this.id = '';
+  this.id = id;
 
   /** @type {numberr} */
   this.life = life;
@@ -235,17 +236,6 @@ var CreatureInfo = function(life, maxLife) {
   /** @type {number} immortal delay (milliseconds) */
   this.immortalDelay = 800;
 
-  /**
-   * Initialize creature
-   * 
-   * @param {string} [id]
-   */
-  function init(id) {
-    if (typeof id === 'undefined') id = UTIL.getRandomId();
-
-    this.id = id;
-  }
-
   function updateLastDamageTimestamp() {
     this.lastDamageTimestamp = UTIL.getCurrentUtcTimestamp();
   }
@@ -261,51 +251,107 @@ var CreatureInfo = function(life, maxLife) {
     lastDamageTimestamp: this.lastDamageTimestamp,
     lastRecoverTimestamp: this.lastRecoverTimestamp,
     immortalDelay: this.immortalDelay,
-    init: init,
     updateLastDamageTimestamp: updateLastDamageTimestamp,
     updateLastRecoverTimestamp: updateLastRecoverTimestamp,
   };
 };
 
 /**
- * Monster object
- * (unused)
- * 
- * @param {string} id
+ * Creature
+ * TODO: fix DI
  */
-var Monster = function(id) {
+var Creature = function(info, phrInfo, misc) {
+  this.info = info;
+  this.phrInfo = phrInfo;
+  this.misc = misc;
 
+  this.lastPos = {};
+  this.label = {};
+
+  /** @type {Sprite} Phaser sprite object (shadow sprite) */
+  this.shadow = {};
+
+  /** @type {Sprite} Phaser sprite object */
+  this.weapon = {};
+
+  /** @type {Group} Phaser group object */
+  this.bullet = {};
 };
 
-/**
- * Zombie object
- * (unused)
- * 
- * @param {string} id
- */
-var Zombie = function(id) {
-
+var Hero = function() {
+  var info = new CreatureInfo(10),
+    phrInfo = {
+      speed: 200, // unsed
+      angleSpeed: 200, // unused
+    },
+    misc = {
+      visibleRange: 300, // unused
+      fireRate: 500, // 2 fire/sec 
+      nextFireTimestamp: 0,
+      nBullets: 40,
+      bulletSpeed: 500,
+    };
+  
+  Creature.call(this, info, phrInfo, misc);
 };
+Hero.prototype = Object.create(Creature.prototype);
+Hero.prototype.constructor = Hero;
 
-/**
- * Machine object
- * (unused)
- * 
- * @param {string} id
- */
-var Machine = function(id) {
-
+var Zombie = function() {
+  var info = new CreatureInfo(5, 8),
+    phrInfo = {
+      spriteName: 'zombie',
+      width: 46,
+      height: 46,
+      bodyOffset: 6,
+      bodyMass: -100,
+    },
+    misc = {
+      visibleRange: 300,
+    };
+  
+  Creature.call(this, info, phrInfo, misc);
 };
+Zombie.prototype = Object.create(Creature.prototype);
+Zombie.prototype.constructor = Zombie;
 
-/**
- * Bat object
- * (unused)
- * 
- * @param {string} id
- */
-var Bat = function(id) {
-
+var Machine = function() {
+  var info = new CreatureInfo(5),
+    phrInfo = {
+      spriteName: 'machine',
+      width: 46,
+      height: 46,
+      bodyOffset: 6,
+      bodyMass: -100,
+    },
+    misc = {
+      visibleRange: 300,
+      fireRate: 1000, // 1 fire/sec
+      nextFireTimestamp: 0,
+      nBullets: 40,
+      bulletSpeed: 500,
+    };
+  
+  Creature.call(this, info, phrInfo, misc);
 };
+Machine.prototype = Object.create(Creature.prototype);
+Machine.prototype.constructor = Machine;
+
+var Bat = function() {
+  var info = new CreatureInfo(3),
+    phrInfo = {
+      spriteName: 'bat',
+      width: 46,
+      height: 46,
+      bodyOffset: 8,
+      bodyMass: 0,
+    },
+    misc = {};
+  
+  Creature.call(this, info, phrInfo, misc);
+};
+Bat.prototype = Object.create(Creature.prototype);
+Bat.prototype.constructor = Bat;
 
 module.exports = {
   // GameUtil: GameUtil,
@@ -314,8 +360,8 @@ module.exports = {
   CreatureInfo: CreatureInfo,
   // Creature: Creature,
   // Player: Player,
-  // Monster: Monster,
-  // Zombie: Zombie,
-  // Machine: Machine,
-  // Bat: Bat,
+  Hero: Hero,
+  Zombie: Zombie,
+  Machine: Machine,
+  Bat: Bat,
 };

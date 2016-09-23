@@ -1,8 +1,11 @@
 var CONFIG = require('./config'),
   UI = require('./../ui'),
   DATA = require('./../../../../common/data'),
-  CREATURE_DATA = DATA.Creature,
-  ITEM_DATA = DATA.Item;
+  MODULE = require('./../../../../common/module'),
+  Hero = MODULE.Hero,
+  Zombie = MODULE.Zombie,
+  Machine = MODULE.Machine,
+  Bat = MODULE.Bat;
 
 Play = function(GAME) {
   this.cursors;
@@ -61,35 +64,38 @@ Play.prototype = {
         align: 'left',
       },
       label = GAME.add.text(0, 0, '', labelStyle);
-    
+
     creature.addChild(label);
-    creature.blrLabel = label;
+    creature.blr.label = label;
     this.updateCreatureLabel(creature);
   },
 
   updateCreatureLabel: function(creature) {
     this.updateCreatureLabelText(creature);
+
+    // update label position only 1 time
+    // cause we using `child`
     this.updateCreatureLabelPosition(creature);
   },
 
   updateCreatureLabelText: function(creature) {
-    var labeltext = creature.blrInfo.id + ' ' + creature.blrInfo.life;
-    creature.blrLabel.setText(labeltext);
+    var labeltext = creature.blr.info.id + ' ' + creature.blr.info.life;
+    creature.blr.label.setText(labeltext);
   },
 
   updateCreatureLabelPosition: function(creature) {
     var labelLeftOffset = 0,
       labelTopOffset = -10;
-      
-    creature.blrLabel.x = -(creature.blrLabel.width / 2) - labelLeftOffset;
-    creature.blrLabel.y = -(creature.height / 2) - (creature.blrLabel.height / 2) + labelTopOffset;
+
+    creature.blr.label.x = -(creature.blr.label.width / 2) - labelLeftOffset;
+    creature.blr.label.y = -(creature.height / 2) - (creature.blr.label.height / 2) + labelTopOffset;
   },
 
   updateCreatureLastPosition: function(creature) {
-    creature.blrLastPos = {
+    creature.blr.lastPos = {
       x: creature.x,
       y: creature.y,
-      rotation: creature.rotation
+      rotation: creature.rotation,
     };
   },
 
@@ -98,15 +104,11 @@ Play.prototype = {
    */
   spawnZombie: function() {
     // init
-    var monster = this.spawnMonster(this.zombieGroup, CREATURE_DATA.zombie.phrInfo);
+    var monsterBlr = new Zombie();
+    var monster = this.spawnMonster(this.zombieGroup, monsterBlr.phrInfo);
+    monster.blr = monsterBlr;
+    this.updateCreatureLastPosition(monster);
     monster.animations.add('blink', [0, 1, 0]);
-    monster.blr = CREATURE_DATA.zombie.blr;
-    monster.blrInfo = CREATURE_DATA.zombie.blrInfo;
-    monster.blrLastPos = CREATURE_DATA.zombie.blrLastPos;
-    monster.blrLabel = CREATURE_DATA.zombie.blrLabel;
-    monster.blrShadow = CREATURE_DATA.zombie.blrShadow;
-    monster.blrWeapon = CREATURE_DATA.zombie.blrWeapon;
-    monster.blrInfo.init();
     monster.body.collideWorldBounds = true;
     this.setCreatureLabel(monster);
 
@@ -115,31 +117,27 @@ Play.prototype = {
     shadow.anchor.set(0.1);
     shadow.scale.setTo(0.7, 0.7);
     shadow.alpha = .3;
-    monster.blrShadow = shadow;
-    this.zombieShadowGroup.add(monster.blrShadow);
+    monster.blr.shadow = shadow;
+    this.zombieShadowGroup.add(monster.blr.shadow);
 
     // weapon
     var weapon = GAME.add.sprite(monster.x, monster.y, 'handsWeapon');
     weapon.anchor.set(0.5);
     weapon.animations.add('attack', [0, 1, 2, 3, 4]);
     weapon.animations.play('attack', 10, true, false);
-    monster.blrWeapon = weapon;
-    this.zombieWeaponGroup.add(monster.blrWeapon);
+    monster.blr.weapon = weapon;
+    this.zombieWeaponGroup.add(monster.blr.weapon);
 
     // optional
   },
 
   spawnMachine: function() {
     // init
-    var monster = this.spawnMonster(this.machineGroup, CREATURE_DATA.machine.phrInfo);
+    var monsterBlr = new Machine();
+    var monster = this.spawnMonster(this.machineGroup, monsterBlr.phrInfo);
+    monster.blr = monsterBlr;
+    this.updateCreatureLastPosition(monster);
     monster.animations.add('blink', [0, 1, 0]);
-    monster.blr = CREATURE_DATA.machine.blr;
-    monster.blrInfo = CREATURE_DATA.machine.blrInfo;
-    monster.blrLastPos = CREATURE_DATA.machine.blrLastPos;
-    monster.blrLabel = CREATURE_DATA.machine.blrLabel;
-    monster.blrShadow = CREATURE_DATA.machine.blrShadow;
-    monster.blrWeapon = CREATURE_DATA.machine.blrWeapon;
-    monster.blrInfo.init();
     monster.body.collideWorldBounds = true;
     this.setCreatureLabel(monster);
 
@@ -148,27 +146,22 @@ Play.prototype = {
     shadow.anchor.set(0.1);
     shadow.scale.setTo(0.7, 0.7);
     shadow.alpha = .3;
-    monster.blrShadow = shadow;
-    this.machineShadowGroup.add(monster.blrShadow);
+    monster.blr.shadow = shadow;
+    this.machineShadowGroup.add(monster.blr.shadow);
 
     // weapon
     var weapon = GAME.add.sprite(monster.x, monster.y, 'laserTurretWeapon');
     weapon.anchor.set(0.5);
     weapon.animations.add('attack', [0, 1, 2]);
     weapon.animations.play('attack', 10, true, false);
-    monster.blrWeapon = weapon;
-    this.machineWeaponGroup.add(monster.blrWeapon);
+    monster.blr.weapon = weapon;
+    this.machineWeaponGroup.add(monster.blr.weapon);
 
     // bullet
-    monster.blr.fireRate = 1000; // 1 fire/sec 
-    monster.blr.nextFireTimestamp = 0;
-    monster.blr.nBullets = 40;
-    monster.blr.bulletSpeed = 500;
-
     var bulletGroup = GAME.add.group();
     bulletGroup.enableBody = true;
     bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    bulletGroup.createMultiple(monster.blr.nBullets, 'laserBullet');
+    bulletGroup.createMultiple(monster.blr.misc.nBullets, 'laserBullet');
     bulletGroup.setAll('anchor.x', 0.5);
     bulletGroup.setAll('anchor.y', 0.5);
     bulletGroup.setAll('outOfBoundsKill', true);
@@ -183,15 +176,11 @@ Play.prototype = {
    */
   spawnBat: function() {
     // init
-    var monster = this.spawnMonster(this.batGroup, CREATURE_DATA.bat.phrInfo);
+    var monsterBlr = new Bat();
+    var monster = this.spawnMonster(this.batGroup, monsterBlr.phrInfo);
+    monster.blr = monsterBlr;
+    this.updateCreatureLastPosition(monster);
     monster.animations.add('blink', [0, 1, 0]);
-    monster.blr = CREATURE_DATA.bat.blr;
-    monster.blrInfo = CREATURE_DATA.bat.blrInfo;
-    monster.blrLastPos = CREATURE_DATA.bat.blrLastPos;
-    monster.blrLabel = CREATURE_DATA.bat.blrLabel;
-    monster.blrShadow = CREATURE_DATA.bat.blrShadow;
-    monster.blrWeapon = CREATURE_DATA.bat.blrWeapon;
-    monster.blrInfo.init();
     monster.body.collideWorldBounds = true;
     this.setCreatureLabel(monster);
 
@@ -200,40 +189,40 @@ Play.prototype = {
     shadow.anchor.set(0.1);
     shadow.scale.setTo(0.5, 0.5);
     shadow.alpha = .3;
-    monster.blrShadow = shadow;
-    this.batShadowGroup.add(monster.blrShadow);
+    monster.blr.shadow = shadow;
+    this.batShadowGroup.add(monster.blr.shadow);
 
     // weapon
     var weapon = GAME.add.sprite(monster.x, monster.y, 'wingsWeapon');
     weapon.anchor.set(0.5);
     weapon.animations.add('attack', [0, 1, 2, 3]);
     weapon.animations.play('attack', 10, true, false);
-    monster.blrWeapon = weapon;
-    this.batWeaponGroup.add(monster.blrWeapon);
+    monster.blr.weapon = weapon;
+    this.batWeaponGroup.add(monster.blr.weapon);
 
     // optional
     monster.scale.setTo(0.7, 0.7);
-    monster.blrWeapon.scale.setTo(0.7, 0.7);
+    monster.blr.weapon.scale.setTo(0.7, 0.7);
   },
 
   /**
    * Spawn monster
    * 
    * @param {Array.Group} monsterGroup - array of Phaser Group
-   * @param {CreatureInfo} monsterData
+   * @param {CreatureInfo} monsterPhrInfo
    * @param {number}
    * @return {DisplayObject} Phaser DisplayObject
    */
-  spawnMonster: function(monsterGroup, monsterData, startPosX, startPosY) {
+  spawnMonster: function(monsterGroup, monsterPhrInfo, startPosX, startPosY) {
     if (typeof startPosX === 'undefined') startPosX = UTIL.getRandomInt(0, GAME_WORLD_WIDTH);
     if (typeof startPosY === 'undefined') startPosY = UTIL.getRandomInt(0, GAME_WORLD_HEIGHT);
-    var monsterSpriteName = monsterData.spriteName,
-      monsterBodyOffset = monsterData.bodyOffset,
-      monsterBodyWidth = monsterData.width,
-      monsterBodyHeight = monsterData.height,
+    var monsterSpriteName = monsterPhrInfo.spriteName,
+      monsterBodyOffset = monsterPhrInfo.bodyOffset,
+      monsterBodyWidth = monsterPhrInfo.width,
+      monsterBodyHeight = monsterPhrInfo.height,
       monsterBodyWidthSize = monsterBodyWidth - monsterBodyOffset * 2,
       monsterBodyHeightSize = monsterBodyHeight - monsterBodyOffset * 2,
-      monsterBodyMass = monsterData.bodyMass;
+      monsterBodyMass = monsterPhrInfo.bodyMass;
 
     var monster = monsterGroup.create(startPosX, startPosY, monsterSpriteName);
     GAME.physics.enable(monster);
@@ -257,21 +246,21 @@ Play.prototype = {
    * @param {[type]} tile     [description]
    */
   onCreatureOverlapWell: function(creature, tile) {
-    // console.log('onCreatureOverlapWell - ' + creature.blrInfo.id + ' is on well');
+    // console.log('onCreatureOverlapWell - ' + creature.blr.info.id + ' is on well');
 
     this.onCreatureIsRecovered(creature, 'well');
   },
 
   onCreatureIsRecovered: function(creature, recoveredFrom) {
-    if (creature.blrInfo.life < creature.blrInfo.maxLife) {
+    if (creature.blr.info.life < creature.blr.info.maxLife) {
       var ts = UTIL.getCurrentUtcTimestamp();
 
-      if (ts > creature.blrInfo.lastRecoverTimestamp + creature.blrInfo.immortalDelay) {
-        var logText = '+1 life (' + ++creature.blrInfo.life + ' > ' + creature.blrInfo.life + ') ' +
-          creature.blrInfo.id + ' was recovered from ' + recoveredFrom;
+      if (ts > creature.blr.info.lastRecoverTimestamp + creature.blr.info.immortalDelay) {
+        var logText = '+1 life (' + creature.blr.info.life++ + ' > ' + creature.blr.info.life + ') ' +
+          creature.blr.info.id + ' was recovered from ' + recoveredFrom;
         UI.addTextToLogList(logText);
 
-        creature.blrInfo.updateLastRecoverTimestamp();
+        creature.blr.info.updateLastRecoverTimestamp();
         this.playRecoverParticle(creature);
         creature.animations.play('recover', 10, false, false);
 
@@ -287,7 +276,7 @@ Play.prototype = {
    * @param {[type]} tile     [description]
    */
   onCreatureOverlapFire: function(creature, tile) {
-    // console.log('onCreatureOverlapFire - ' + creature.blrInfo.id + ' is on fire');
+    // console.log('onCreatureOverlapFire - ' + creature.blr.info.id + ' is on fire');
 
     this.onCreatureIsDamaged(creature, 'fire');
   },
@@ -299,24 +288,24 @@ Play.prototype = {
   onCreatureIsDamaged: function(creature, damageFrom) {
     var ts = UTIL.getCurrentUtcTimestamp();
 
-    if (ts > creature.blrInfo.lastDamageTimestamp + creature.blrInfo.immortalDelay) {
-      var logText = '-1 life (' + --creature.blrInfo.life + ' > ' + creature.blrInfo.life + ') ' + 
-        creature.blrInfo.id + ' was damaged from ' + damageFrom;
+    if (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay) {
+      var logText = '-1 life (' + creature.blr.info.life-- + ' > ' + creature.blr.info.life + ') ' +
+        creature.blr.info.id + ' was damaged from ' + damageFrom;
       UI.addTextToLogList(logText);
 
-      creature.blrInfo.updateLastDamageTimestamp();
+      creature.blr.info.updateLastDamageTimestamp();
       this.playDamageParticle(creature);
       creature.animations.play('blink', 10, false, false);
 
       // is die
-      if (creature.blrInfo.life <= 0) {
-        var logText = creature.blrInfo.id + ' was died by ' + damageFrom;
+      if (creature.blr.info.life <= 0) {
+        var logText = creature.blr.info.id + ' was died by ' + damageFrom;
         UI.addTextToLogList(logText);
 
         creature.alive = false;
         creature.kill();
-        creature.blrWeapon.kill();
-        creature.blrShadow.kill();
+        creature.blr.weapon.kill();
+        creature.blr.shadow.kill();
 
       } else {
         this.updateCreatureLabelText(creature);
@@ -364,16 +353,12 @@ Play.prototype = {
   },
 
   playRecoverParticle: function(creature) {
-    // console.log('playRecoverParticle');
-
     this.recoverEmitterGroup.x = creature.x;
     this.recoverEmitterGroup.y = creature.y;
     this.recoverEmitterGroup.start(true, 280, null, 20);
   },
 
   playDamageParticle: function(creature) {
-    // console.log('playDamageParticle');
-
     this.damageEmitterGroup.x = creature.x;
     this.damageEmitterGroup.y = creature.y;
     this.damageEmitterGroup.start(true, 280, null, 20);
@@ -480,7 +465,7 @@ Play.prototype = {
 
     // bg
     GAME.stage.backgroundColor = '#3db148';
-    
+
     // map - floor
     var map = GAME.add.tilemap('mapTile');
     map.addTilesetImage('map');
@@ -543,6 +528,8 @@ Play.prototype = {
 
     // player - body
     this.player = GAME.add.sprite(startPosX, startPosY, 'hero');
+    this.player.blr = new Hero();
+    this.updateCreatureLastPosition(this.player);
     this.player.animations.add('blink', [0, 1, 0]);
     this.player.animations.add('recover', [0, 2, 0]);
     this.player.anchor.set(0.5);
@@ -552,40 +539,26 @@ Play.prototype = {
     this.player.body.tilePadding.set(playerOffset, playerOffset);
     this.player.body.maxAngular = 500;
     this.player.body.angularDrag = 50;
-    this.player.phrInfo = CREATURE_DATA.hero.phrInfo;
-    this.player.blr = CREATURE_DATA.hero.blr;
-    this.player.blrInfo = CREATURE_DATA.hero.blrInfo;
-    this.player.blrLastPos = CREATURE_DATA.hero.blrLastPos;
-    this.player.blrLabel = CREATURE_DATA.hero.blrLabel;
-    this.player.blrShadow = CREATURE_DATA.hero.blrShadow;
-    this.player.blrWeapon = CREATURE_DATA.hero.blrWeapon;
-    this.player.blrBullet = CREATURE_DATA.hero.blrBullet;
 
-    this.player.blrInfo.init();
-    this.setCreatureLabel(this.player);
-    this.playerGroup.add(this.player);
-
-    this.player.blrShadow = shadowTmp;
-    this.playerShadowGroup.add(this.player.blrShadow);
-    this.player.blrWeapon = weaponTmp;
-    this.playerWeaponGroup.add(this.player.blrWeapon);
-
-    // bullet
-    this.player.blr.fireRate = 500; // 2 fire/sec 
-    this.player.blr.nextFireTimestamp = 0;
-    this.player.blr.nBullets = 40;
-    this.player.blr.bulletSpeed = 500;
-
+    // player - bullet
     var bulletGroup = GAME.add.group();
     bulletGroup.enableBody = true;
     bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    bulletGroup.createMultiple(this.player.blr.nBullets, 'arrowBullet');
+    bulletGroup.createMultiple(this.player.blr.misc.nBullets, 'arrowBullet');
     bulletGroup.setAll('anchor.x', 0.5);
     bulletGroup.setAll('anchor.y', 0.5);
     bulletGroup.setAll('outOfBoundsKill', true);
     bulletGroup.setAll('checkWorldBounds', true);
-    this.player.blrBullet = bulletGroup;
-    this.playerArrowGroup.add(this.player.blrBullet);
+
+    // player
+    this.playerGroup.add(this.player);
+    this.setCreatureLabel(this.player);
+    this.player.blr.shadow = shadowTmp;
+    this.playerShadowGroup.add(this.player.blr.shadow);
+    this.player.blr.weapon = weaponTmp;
+    this.playerWeaponGroup.add(this.player.blr.weapon);
+    this.player.blr.bullet = bulletGroup;
+    this.playerArrowGroup.add(this.player.blr.bullet);
 
     // map - tree
     this.treeGroup = map.createLayer(2);
@@ -622,7 +595,7 @@ Play.prototype = {
 
     GAME.world.bringToTop(this.playerWeaponGroup);
     GAME.world.bringToTop(this.enemyGroup); // unused
-    GAME.world.bringToTop(this.playerGroup);    
+    GAME.world.bringToTop(this.playerGroup);
 
     GAME.world.bringToTop(this.playerArrowGroup);
     GAME.world.bringToTop(this.machineLaserGroup);
@@ -654,7 +627,7 @@ Play.prototype = {
 
   onPlayerArrowOverlapMonster: function(arrow, monster) {
     // console.log('onPlayerArrowOverlapMonster');
-    
+
     this.playDamageParticle(monster);
     arrow.kill();
     this.onCreatureIsDamaged(monster, 'arrow');
@@ -688,7 +661,7 @@ Play.prototype = {
 
     // overlap - player arrow with stoneGroup
     GAME.physics.arcade.overlap(this.playerArrowGroup, this.stoneGroup, this.onPlayerArrowOverlapStone, null, this);
-    
+
     // overlap - player arrow with monster
     GAME.physics.arcade.overlap(this.playerArrowGroup, this.zombieGroup, this.onPlayerArrowOverlapMonster, null, this);
     GAME.physics.arcade.overlap(this.playerArrowGroup, this.machineGroup, this.onPlayerArrowOverlapMonster, null, this);
@@ -718,9 +691,9 @@ Play.prototype = {
             newY = this.player.y,
             newRotation = Math.atan2(
               GAME.input.y - (this.player.position.y - GAME.camera.y),
-              GAME.input.x - (this.player.position.x - GAME.camera.x) 
+              GAME.input.x - (this.player.position.x - GAME.camera.x)
             );
-            
+
           this.player.rotation = newRotation;
           this.playDashParticle(this.player);
           this.updateCreatureWeapon(this.player);
@@ -733,18 +706,18 @@ Play.prototype = {
         // fire arrow
 
         var ts = UTIL.getCurrentUtcTimestamp();
-        if (ts > this.player.blr.nextFireTimestamp &&
-          this.player.blrBullet.countDead() > 0) {
-          
-          // 2 bullet/sec (cause we have 7 frame per animation)
-          this.player.blrWeapon.animations.play('attack', 14, false, false);
-          this.player.blr.nextFireTimestamp = ts + this.player.blr.fireRate;
+        if (ts > this.player.blr.misc.nextFireTimestamp &&
+          this.player.blr.bullet.countDead() > 0) {
 
-          var bullet = this.player.blrBullet.getFirstExists(false);
-          bullet.reset(this.player.blrWeapon.x, this.player.blrWeapon.y);
+          // 2 bullet/sec (cause we have 7 frame per animation)
+          this.player.blr.weapon.animations.play('attack', 14, false, false);
+          this.player.blr.misc.nextFireTimestamp = ts + this.player.blr.misc.fireRate;
+
+          var bullet = this.player.blr.bullet.getFirstExists(false);
+          bullet.reset(this.player.blr.weapon.x, this.player.blr.weapon.y);
           bullet.rotation = GAME.physics.arcade.moveToPointer(
             bullet,
-            this.player.blr.bulletSpeed,
+            this.player.blr.misc.bulletSpeed,
             GAME.input.activePointer
           );
         }
@@ -755,39 +728,39 @@ Play.prototype = {
 
     // monster - zombie
     this.zombieGroup.forEachAlive(function(monster) {
-      this.updateCreatureLastPosition(monster);
+      this.updateCreatureLabelText(monster);
     }, this);
 
     // monster - machine
+    /*
     this.machineGroup.forEachAlive(function(monster) {
-      this.updateCreatureLastPosition(monster);
-
-      if (GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.visibleRange) {
+      if (GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
         var ts = UTIL.getCurrentUtcTimestamp();
 
         if (ts > monster.nextFireTimestamp &&
           monster.bulletGroup.countDead() > 0) {
 
           monster.nextFireTimestamp = UTIL.getCurrentUtcTimestamp() + monster.fireRate; 
-          var bullet = monster.blrBullet.getFirstDead();
-          bullet.reset(monster.blrWeapon.x, monster.blrWeapon.y);
+          var bullet = monster.blr.bullet.getFirstDead();
+          bullet.reset(monster.blr.weapon.x, monster.blr.weapon.y);
           bullet.rotation = GAME.physics.arcade.moveToObject(bullet, this.player, monster.bulletSpeed);
         }
       }
     }, this);
+    */
 
     // monster - bat
     this.batGroup.forEachAlive(function(monster) {
-        this.updateCreatureLastPosition(monster);
+      this.updateCreatureLabelText(monster);
     }, this);
   },
 
   isCreatureMove: function(creature) {
-    return (creature.x !== creature.blrLastPos.x || creature.y !== creature.blrLastPos.y);  
+    return (creature.x !== creature.blr.lastPos.x || creature.y !== creature.blr.lastPos.y);
   },
 
   isCreatureRotate: function(creature) {
-    return (creature.rotation !== creature.blrLastPos.rotation);
+    return (creature.rotation !== creature.blr.lastPos.rotation);
   },
 
   updateCreatureShadow: function(creature, newX, newY) {
@@ -796,8 +769,8 @@ Play.prototype = {
 
     if (creature.alive) {
       if (this.isCreatureMove(creature)) {
-        creature.blrShadow.x = newX;
-        creature.blrShadow.y = newY;
+        creature.blr.shadow.x = newX;
+        creature.blr.shadow.y = newY;
       }
     }
   },
@@ -809,11 +782,11 @@ Play.prototype = {
 
     if (creature.alive) {
       if (this.isCreatureMove(creature)) {
-        creature.blrWeapon.x = newX;
-        creature.blrWeapon.y = newY;
+        creature.blr.weapon.x = newX;
+        creature.blr.weapon.y = newY;
       }
 
-      creature.blrWeapon.rotation = newRotation;
+      creature.blr.weapon.rotation = newRotation;
     }
   },
 
@@ -837,22 +810,23 @@ Play.prototype = {
       this.updateCreatureShadow(monster);
     }, this);
   },
-  
+
   render: function() {
     if (IS_DEBUG) {
+      /*
       GAME.debug.bodyInfo(this.player, 32, 32);
-      GAME.debug.body(this.player);
-
       GAME.debug.spriteInfo(this.player, 32, 164);
-      GAME.debug.spriteInfo(this.player.blrWeapon, 32, 264);
+      */
+
+      GAME.debug.body(this.player);
 
       this.zombieGroup.forEachAlive(function(monster) {
         GAME.debug.body(monster);
       }, this);
 
-      // this.machineGroup.forEachAlive(function(monster) {
-      //   GAME.debug.body(monster);
-      // }, this);
+      this.machineGroup.forEachAlive(function(monster) {
+        GAME.debug.body(monster);
+      }, this);
 
       this.batGroup.forEachAlive(function(monster) {
         GAME.debug.body(monster);
