@@ -69,8 +69,8 @@ Load.prototype = {
     GAME.load.image('damageParticle', CONFIG.assetPath + '/image/particle/damage.png');
     GAME.load.image('recoverParticle', CONFIG.assetPath + '/image/particle/recover.png');
 
-    // fx
-    GAME.load.image('shadow', CONFIG.assetPath + '/image/fx/shadow.png');
+    // misc
+    GAME.load.image('shadow', CONFIG.assetPath + '/image/misc/shadow.png');
 
     // weapon
     GAME.load.spritesheet('handsWeapon', CONFIG.assetPath + '/image/weapon/hands.png', 80, 70);

@@ -5,6 +5,8 @@
 *.out
 *.pid
 *.gz
+*.tmx
+*.psd
 *DS_store
 
 bk

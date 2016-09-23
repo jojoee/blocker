@@ -121,7 +121,7 @@ Play.prototype = {
     // weapon
     var weapon = GAME.add.sprite(monster.x, monster.y, 'handsWeapon');
     weapon.anchor.set(0.5);
-    weapon.animations.add('attack', [0, 1, 2, 3, 4, 5]);
+    weapon.animations.add('attack', [0, 1, 2, 3, 4]);
     weapon.animations.play('attack', 10, true, false);
     monster.blrWeapon = weapon;
     this.zombieWeaponGroup.add(monster.blrWeapon);
@@ -545,7 +545,7 @@ Play.prototype = {
 
     // player - weapon
     var weaponTmp = GAME.add.sprite(startPosX, startPosY, 'bowWeapon');
-    weaponTmp.animations.add('attack', [0, 1, 2, 3, 4, 5, 6]);
+    weaponTmp.animations.add('attack', [0, 1, 2, 3, 4, 5, 0]);
     weaponTmp.anchor.set(0.3, 0.5);
     weaponTmp.scale.setTo(0.5);
 
