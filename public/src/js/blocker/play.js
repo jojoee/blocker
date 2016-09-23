@@ -687,17 +687,10 @@ Play.prototype = {
           this.player.body.velocity.setTo(0, 0);
 
         } else {
-          var newX = this.player.x,
-            newY = this.player.y,
-            newRotation = Math.atan2(
-              GAME.input.y - (this.player.position.y - GAME.camera.y),
-              GAME.input.x - (this.player.position.x - GAME.camera.x)
-            );
-
-          this.player.rotation = newRotation;
-          this.playDashParticle(this.player);
-          this.updateCreatureWeapon(this.player);
+          // update player + weapon rotation
+          this.updateCreatureRotationByFollowingMouse(this.player);
           this.updateCreatureShadow(this.player);
+          this.playDashParticle(this.player);
         }
       }
 
@@ -709,6 +702,10 @@ Play.prototype = {
         if (ts > this.player.blr.misc.nextFireTimestamp &&
           this.player.blr.bullet.countDead() > 0) {
 
+          // update player + weapon rotation
+          this.updateCreatureRotationByFollowingMouse(this.player);
+
+          // update bullet
           // 2 bullet/sec (cause we have 7 frame per animation)
           this.player.blr.weapon.animations.play('attack', 14, false, false);
           this.player.blr.misc.nextFireTimestamp = ts + this.player.blr.misc.fireRate;
@@ -753,6 +750,24 @@ Play.prototype = {
     this.batGroup.forEachAlive(function(monster) {
       this.updateCreatureLabelText(monster);
     }, this);
+  },
+
+  /**
+   * Update creature follow the mouse
+   * So, this function will update
+   * - body rotation
+   * - weapon rotation
+   */
+  updateCreatureRotationByFollowingMouse: function(creature) {
+    var newX = creature.x,
+      newY = creature.y,
+      newRotation = Math.atan2(
+        GAME.input.y - (creature.position.y - GAME.camera.y),
+        GAME.input.x - (creature.position.x - GAME.camera.x)
+      );
+
+    creature.rotation = newRotation;
+    this.updateCreatureWeapon(creature);
   },
 
   isCreatureMove: function(creature) {
