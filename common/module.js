@@ -216,10 +216,9 @@ var Message = function(playerId, text, utcTimestamp) {
  */
 var CreatureInfo = function(life, maxLife) {
   if (typeof maxLife == 'undefined') maxLife = life;
-  if (typeof id === 'undefined') id = UTIL.getRandomId();
 
   /** @type {string} */
-  this.id = id;
+  this.id = '';
 
   /** @type {numberr} */
   this.life = life;
@@ -236,24 +235,20 @@ var CreatureInfo = function(life, maxLife) {
   /** @type {number} immortal delay (milliseconds) */
   this.immortalDelay = 800;
 
-  function updateLastDamageTimestamp() {
-    this.lastDamageTimestamp = UTIL.getCurrentUtcTimestamp();
-  }
+  // initialize
+  this.init();
+};
 
-  function updateLastRecoverTimestamp() {
-    this.lastRecoverTimestamp = UTIL.getCurrentUtcTimestamp();
-  }
+CreatureInfo.prototype.updateLastDamageTimestamp = function() {
+  this.lastDamageTimestamp = UTIL.getCurrentUtcTimestamp();
+};
 
-  return {
-    id: this.id,
-    life: this.life,
-    maxLife: this.maxLife,
-    lastDamageTimestamp: this.lastDamageTimestamp,
-    lastRecoverTimestamp: this.lastRecoverTimestamp,
-    immortalDelay: this.immortalDelay,
-    updateLastDamageTimestamp: updateLastDamageTimestamp,
-    updateLastRecoverTimestamp: updateLastRecoverTimestamp,
-  };
+CreatureInfo.prototype.updateLastRecoverTimestamp = function() {
+  this.lastRecoverTimestamp = UTIL.getCurrentUtcTimestamp();
+};
+
+CreatureInfo.prototype.init = function() {
+  this.id = UTIL.getRandomId();
 };
 
 /**
