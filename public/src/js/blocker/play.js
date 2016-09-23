@@ -19,7 +19,7 @@ Play = function(GAME) {
   this.stoneGroup;
 
   // item
-  this.itemGroup;
+  this.potionGroup; // unused
 
   // monster
   this.zombieShadowGroup;
@@ -56,6 +56,7 @@ Play = function(GAME) {
   // input
   this.cursors; // unused
   this.spaceKey;
+  this.enterKey;
 };
 
 Play.prototype = {
@@ -316,6 +317,14 @@ Play.prototype = {
     }
   },
 
+  onOverlapStone: function() {
+    console.log('onOverlapStone');
+  },
+
+  onOverlapBush: function() {
+    console.log('onOverlapBush');
+  },
+
   setDashEmitter: function() {
     var nEmitter = 60;
 
@@ -403,7 +412,7 @@ Play.prototype = {
     this.stoneGroup = GAME.add.group();
 
     // item
-    this.itemGroup = GAME.add.group();
+    this.potionGroup = GAME.add.group(); // unused
 
     // monster
     this.zombieShadowGroup = GAME.add.group();
@@ -475,13 +484,13 @@ Play.prototype = {
     // map - floor
     var map = GAME.add.tilemap('mapTile');
     map.addTilesetImage('map');
-    map.setTileIndexCallback(5, this.onCreatureOverlapWell, this);
-    map.setTileIndexCallback(6, this.onCreatureOverlapFire, this);
+    
     this.floorGroup = map.createLayer(0);
     this.floorGroup.resizeWorld();
+    map.setTileIndexCallback(5, this.onCreatureOverlapWell, this, this.floorGroup);
+    map.setTileIndexCallback(6, this.onCreatureOverlapFire, this, this.floorGroup);
 
     // map - stone (rock, bush)
-    this.stoneGroup;
     this.stoneGroup = map.createLayer(1);
     map.setCollision([1, 3], true, this.stoneGroup);
     map.forEach(function(tile) {
@@ -586,7 +595,7 @@ Play.prototype = {
     GAME.world.bringToTop(this.recoverEmitterGroup);
     GAME.world.bringToTop(this.damageEmitterGroup);
 
-    GAME.world.bringToTop(this.itemGroup);
+    GAME.world.bringToTop(this.potionGroup); // unused
 
     GAME.world.bringToTop(this.zombieShadowGroup);
     GAME.world.bringToTop(this.machineShadowGroup);
@@ -629,8 +638,8 @@ Play.prototype = {
     // console.log('onMachineLaserOverlapPlayer')
   },
 
-  onPlayerArrowOverlapStone: function(arrow, stone) {
-    // console.log('onPlayerArrowOverlapStone');
+  onPlayerArrowOverlapStoneGroup: function(arrow, stone) {
+    // console.log('onPlayerArrowOverlapStoneGroup');
   },
 
   onPlayerArrowOverlapMonster: function(arrow, monster) {
@@ -663,12 +672,6 @@ Play.prototype = {
     GAME.physics.arcade.overlap(this.playerGroup, this.zombieGroup, this.onPlayerOverlapZombie, null, this);
     GAME.physics.arcade.overlap(this.playerGroup, this.machineGroup, this.onPlayerOverlapMachine, null, this);
     GAME.physics.arcade.overlap(this.playerGroup, this.batGroup, this.onPlayerOverlapBat, null, this);
-
-    // overlap - machine laser with player
-    GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
-
-    // overlap - player arrow with stoneGroup
-    GAME.physics.arcade.overlap(this.playerArrowGroup, this.stoneGroup, this.onPlayerArrowOverlapStone, null, this);
 
     // overlap - player arrow with monster
     GAME.physics.arcade.overlap(this.playerArrowGroup, this.zombieGroup, this.onPlayerArrowOverlapMonster, null, this);
@@ -765,18 +768,32 @@ Play.prototype = {
   },
 
   /**
+   * get rotation between creature and mouse
+   * 
+   * @param {[type]} creature
+   * @returns {number} rotation
+   */
+  getRotationBetweenCreatureAndMouse: function(creature) {
+    var result = Math.atan2(
+      GAME.input.y - (creature.position.y - GAME.camera.y),
+      GAME.input.x - (creature.position.x - GAME.camera.x)
+    );
+
+    return result;
+  },
+
+  /**
    * Update creature follow the mouse
    * So, this function will update
    * - body rotation
    * - weapon rotation
+   * 
+   * @param {[type]} creature
    */
   updateCreatureRotationByFollowingMouse: function(creature) {
     var newX = creature.x,
       newY = creature.y,
-      newRotation = Math.atan2(
-        GAME.input.y - (creature.position.y - GAME.camera.y),
-        GAME.input.x - (creature.position.x - GAME.camera.x)
-      );
+      newRotation = this.getRotationBetweenCreatureAndMouse(creature);
 
     creature.rotation = newRotation;
     this.updateCreatureWeapon(creature);
@@ -844,10 +861,8 @@ Play.prototype = {
 
   render: function() {
     if (IS_DEBUG) {
-      /*
-      GAME.debug.bodyInfo(this.player, 32, 32);
-      GAME.debug.spriteInfo(this.player, 32, 164);
-      */
+      // GAME.debug.bodyInfo(this.player, 32, 32);
+      // GAME.debug.spriteInfo(this.player, 32, 164);
 
       GAME.debug.body(this.player);
 
