@@ -392,12 +392,7 @@ Play.prototype = {
   },
 
   preload: function() {
-    GAME.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    GAME.scale.pageAlignHorizontally = true;
-    GAME.scale.pageAlignVertically = true;
-    GAME.scale.setResizeCallback(function() {
-      GAME.scale.setGameSize(window.innerWidth, window.innerHeight);
-    });
+    
   },
 
   init: function() {
@@ -441,6 +436,14 @@ Play.prototype = {
     GAME.canvas.oncontextmenu = function(e) {
       e.preventDefault()
     };
+
+    // scale
+    GAME.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    GAME.scale.pageAlignHorizontally = true;
+    GAME.scale.pageAlignVertically = true;
+    GAME.scale.setResizeCallback(function() {
+      GAME.scale.setGameSize(window.innerWidth, window.innerHeight);
+    });
   },
 
   create: function() {
