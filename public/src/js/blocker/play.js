@@ -265,21 +265,17 @@ Play.prototype = {
   onCreatureIsRecovered: function(creature, recoveredFrom) {
     if (creature.blrInfo.life < creature.blrInfo.maxLife) {
       var ts = UTIL.getCurrentUtcTimestamp();
-        lastHealTimestamp = creature.blrInfo.lastHealTimestamp,
-        immortalDelay = creature.blrInfo.immortalDelay;
 
-      if (ts > lastHealTimestamp + immortalDelay) {
-        creature.blrInfo.life++;
-        creature.blrInfo.updateLastHealTimestamp();
-
-        var logText = '+1 life (' + creature.blrInfo.life + ') ' +
+      if (ts > creature.blrInfo.lastRecoverTimestamp + creature.blrInfo.immortalDelay) {
+        var logText = '+1 life (' + ++creature.blrInfo.life + ' > ' + creature.blrInfo.life + ') ' +
           creature.blrInfo.id + ' was recovered from ' + recoveredFrom;
-
         UI.addTextToLogList(logText);
 
-        this.updateCreatureLabelText(creature);
+        creature.blrInfo.updateLastRecoverTimestamp();
         this.playRecoverParticle(creature);
-        creature.animations.play('heal', 10, false, false);
+        creature.animations.play('recover', 10, false, false);
+
+        this.updateCreatureLabelText(creature);
       }
     }
   },
@@ -302,18 +298,15 @@ Play.prototype = {
    */
   onCreatureIsDamaged: function(creature, damageFrom) {
     var ts = UTIL.getCurrentUtcTimestamp();
-      lastFireTimestamp = creature.blrInfo.lastFireTimestamp,
-      immortalDelay = creature.blrInfo.immortalDelay;
 
-    if (ts > lastFireTimestamp + immortalDelay) {
-      creature.blrInfo.life--;
-      creature.blrInfo.updateLastFireTimestamp();
-
-      var logText = '-1 life (' + creature.blrInfo.life + ') ' +
+    if (ts > creature.blrInfo.lastDamageTimestamp + creature.blrInfo.immortalDelay) {
+      var logText = '-1 life (' + --creature.blrInfo.life + ' > ' + creature.blrInfo.life + ') ' + 
         creature.blrInfo.id + ' was damaged from ' + damageFrom;
       UI.addTextToLogList(logText);
 
+      creature.blrInfo.updateLastDamageTimestamp();
       this.playDamageParticle(creature);
+      creature.animations.play('blink', 10, false, false);
 
       // is die
       if (creature.blrInfo.life <= 0) {
@@ -327,7 +320,6 @@ Play.prototype = {
 
       } else {
         this.updateCreatureLabelText(creature);
-        creature.animations.play('blink', 10, false, false);        
       }
     }
   },
@@ -552,7 +544,7 @@ Play.prototype = {
     // player - body
     this.player = GAME.add.sprite(startPosX, startPosY, 'hero');
     this.player.animations.add('blink', [0, 1, 0]);
-    this.player.animations.add('heal', [0, 2, 0]);
+    this.player.animations.add('recover', [0, 2, 0]);
     this.player.anchor.set(0.5);
     GAME.physics.enable(this.player);
     this.player.body.collideWorldBounds = true;

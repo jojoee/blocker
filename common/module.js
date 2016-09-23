@@ -230,10 +230,10 @@ var CreatureInfo = function(life, maxLife) {
   this.lastDamageTimestamp = 0;
 
   /** @type {number} last recover timestamp */
-  this.lastRecoverTimstamp = 0;
+  this.lastRecoverTimestamp = 0;
 
   /** @type {number} immortal delay (milliseconds) */
-  this.immortalDelay = 300;
+  this.immortalDelay = 800;
 
   /**
    * Initialize creature
@@ -246,24 +246,24 @@ var CreatureInfo = function(life, maxLife) {
     this.id = id;
   }
 
-  function updateLastFireTimestamp() {
-    this.lastFireTimestamp = UTIL.getCurrentUtcTimestamp();
+  function updateLastDamageTimestamp() {
+    this.lastDamageTimestamp = UTIL.getCurrentUtcTimestamp();
   }
 
-  function updateLastHealTimestamp() {
-    this.lastHealTimestamp = UTIL.getCurrentUtcTimestamp();
+  function updateLastRecoverTimestamp() {
+    this.lastRecoverTimestamp = UTIL.getCurrentUtcTimestamp();
   }
 
   return {
     id: this.id,
     life: this.life,
     maxLife: this.maxLife,
-    lastFireTimestamp: this.lastFireTimestamp,
-    lastHealTimestamp: this.lastHealTimestamp,
+    lastDamageTimestamp: this.lastDamageTimestamp,
+    lastRecoverTimestamp: this.lastRecoverTimestamp,
     immortalDelay: this.immortalDelay,
     init: init,
-    updateLastFireTimestamp: updateLastFireTimestamp,
-    updateLastHealTimestamp: updateLastHealTimestamp,
+    updateLastDamageTimestamp: updateLastDamageTimestamp,
+    updateLastRecoverTimestamp: updateLastRecoverTimestamp,
   };
 };
 
