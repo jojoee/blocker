@@ -1,65 +1,62 @@
 <!doctype html>
 <html>
 <head>
-<title>Blocker - The Slayer: Multiplayer online game</title>
+<title>Blocker - The Hunter: Multiplayer online game</title>
 <meta name="viewport" content="initial-scale=1">
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+<style>
+@font-face { font-family: 'Roboto', sans-serif; }
+.roboto { font-family: 'Roboto', sans-serif; }
+</style>
 <link rel="stylesheet" href="/public/bower_components/bootstrap-sass-grid/css/bootstrap-sass-grid.css">
-<link rel="stylesheet" href="/public/styles/main.css">
+<link rel="stylesheet" href="/public/dist/css/main.css">
 <!--
 __________.__                 __                 
 \______   \  |   ____   ____ |  | __ ___________ 
- |    |  _/  |  /  _ \_/ ___\|  |/ // __ \_  __ \
- |    |   \  |_(  <_> )  \___|    <\  ___/|  | \/
- |______  /____/\____/ \___  >__|_ \\___  >__|   
+|    |  _/  |  /  _ \_/ ___\|  |/ // __ \_  __ \
+|    |   \  |_(  <_> )  \___|    <\  ___/|  | \/
+|______  /____/\____/ \___  >__|_ \\___  >__|   
         \/                 \/     \/    \/       
 -->
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-83939353-1', 'auto');
-  ga('send', 'pageview');
-</script>
 </head>
 <body>
+<div class="logo roboto">
+  Blocker - The Hunter: Multiplayer online game
+</div>
 <div class="container-fluid">
   <div class="row">
     <div class="wrapper">
       <div id="game-wrap">
-      </div><!-- #game-wrap -->
+      </div>
+      <!-- #game-wrap -->
     </div>
   </div>
 </div>
 
 <div id="sidebar" class="sidebar transition">
-  <div id="player-wrap" class="widget">
-    <ul class="col-md-2" id="players">
-    </ul><!-- #players -->
+  <div id="player-widget" class="widget player-widget">
+    <ul class="players" id="players">
+      
+    </ul>
+    <!-- #players -->
   </div>
 </div>
 
-<div class="footer-wrap transition">
-  <div class="footer">
-    <div id="report" class="report transition">
-    </div><!-- #report -->
+<div class="footer transition">
+  <div id="log-wrap">
+    <ul id="logs">
+    </ul>
+    <!-- #logs -->
+  </div>
 
-    <div id="log-wrap">
-      <ul id="logs">
-      </ul><!-- #logs -->
-    </div>
-
-    <form id="form" action="">
-      <input
-        type="text"
-        id="text-input" autocomplete="off"
-        placeholder="Enter message here...">
-      <button id="form-btn">Send</button>
-    </form><!-- #form -->
-  </div><!-- .footer -->
+  <!--
+  <form id="form" action="">
+    <input type="text" id="text-input" autocomplete="off" placeholder="Enter message here...">
+    <button id="form-btn">Send</button>
+  </form>
+  -->
 </div>
-
+<!--
 <a href="https://github.com/jojoee/blocker"
   class="github-corner"
   aria-label="View source on Github">
@@ -69,18 +66,10 @@ __________.__                 __
     <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
   </svg>
 </a>
+-->
 <script src="/socket.io/socket.io.js"></script>
 <script src="/public/bower_components/phaser/build/phaser.min.js"></script>
 <script src="/public/bower_components/phaser-state-transition-plugin/dist/phaser-state-transition-plugin.min.js"></script>
-<script src="/public/scripts/plugins/ScreenShake.js"></script>
-<script src="/common/config.js"></script>
-<script src="/common/util.js"></script>
-<script src="/public/scripts/config.js"></script>
-<script src="/public/scripts/ui.js"></script>
-<script src="/public/scripts/class/Hero.js"></script>
-<script src="/public/scripts/class/Player.js"></script>
-<script src="/public/scripts/class/Enemy.js"></script>
-<script src="/public/scripts/game.js"></script>
-<script src="/public/scripts/main.js"></script>
+<script src="/public/dist/js/bundle.js"></script>
 </body>
 </html>

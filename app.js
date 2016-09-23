@@ -1,185 +1,177 @@
-// import
-var express = require('express'),
-  app = express(),
-  path = require('path'),
-  faker = require('faker'),
-  server = require('http').Server(app),
-  io = require('socket.io')(server),
-  commonConfig = require('./common/config'),
-  util = require('./common/util'),
-  serverConfig = require('./server/config'), // unused
-  shortid = require('shortid'),
-  Player = require('./server/Player');
+/**
+ * Server entry file
+ */
 
-// var
-var port = commonConfig.serverPort,
-  eventName = commonConfig.eventName,
-  staticPath = path.join(__dirname + '/public'),
-  commonPath = path.join(__dirname + '/common'),
-  serverHeartbeat = 50,
-  mapWidth = commonConfig.game.worldWidth,
-  mapHeight = commonConfig.game.worldHeight,
-  chatLogs = [],
-  maxChatLogs = 256,
-  isDebug = false;
+var EXPRESS = require('express'),
+  APP = EXPRESS(),
+  PATH = require('path'),
+  FAKER = require('faker'),
+  Hashids = require('hashids'),
+  HASHIDS = new Hashids(),
+  SHORTID = require('shortid'),
+  SERVER = require('http').Server(APP),
+  IO = require('socket.io')(SERVER),
+  UTIL = require('./common/util'),
+  CONFIG = require('./common/config'),
+  SERVER_CONFIG = require('./server/config'),
+  MODULE = require('./common/module'),
+  SERVER_MODULE = require('./server/module'),
+  Message = MODULE.Message;
 
-var players = [];
+var SERVER_PORT = CONFIG.serverPort,
+  EVENT_NAME = CONFIG.eventName,
+  STATIC_PATH = PATH.join(__dirname + '/public'),
+  COMMON_PATH = PATH.join(__dirname + '/common'),
+  SERVER_HEARTBEAT = 100,
+  GAME_WORLD_WIDTH = CONFIG.game.worldWidth,
+  MAP_HEIGHT = CONFIG.game.worldHeight,
+  CHAT_LOGS = [],
+  MAX_CHAT_LOGS = 256,
+  IS_DEBUG = CONFIG.isDebug,
+  IS_DUMMY = CONFIG.isDummy;
+
+var PLAYERS = [];
 // [ {Player1}, {Player2}, {Player3} ]
 
-// Debug & testing
-// should be removed when deploy
-// isDebug = true; // unused
+/*================================================================ App & Init
+ */
 
-generateFakeChatLogs();
-generateFakePlayers();
+// Set static file
+APP.use('/public', EXPRESS.static(STATIC_PATH));
+APP.use('/common', EXPRESS.static(COMMON_PATH));
+
+APP.get('/', function(req, res) {
+  res.sendFile(STATIC_PATH + '/index.html');
+});
+
+SERVER.listen(SERVER_PORT, function(err) {
+  if (err) {
+    throw err;
+
+  } else {
+    UTIL.serverLog('Listening on port: ' + SERVER_PORT);
+  }
+});
+
+if (IS_DUMMY) {
+  dummyFakeChatLogs();
+  dummyFakePlayers();
+}
 
 /*================================================================ Fake & Debug
-*/
+ */
 
-function generateFakeChatLogs() {
-  var i = 0,
-    nMessage = 12;
+/**
+ * Dummy fake chat logs
+ * TODO: complete it
+ */
+function dummyFakeChatLogs() {
 
-  for (i = 0; i < nMessage; i++) {
-    var playerId = shortid.generate(),
-      player = new Player(playerId),
-      message = faker.lorem.sentence();
-
-    player.setMessage(message);
-    player.updateLatestUpdate();
-
-    addToChatLogs(player);
-  }
 }
 
-function generateFakePlayers() {
-  var i = 0,
-    nPlayers = 8;
+/**
+ * Dummy fake players
+ * TODO: complete it
+ */
+function dummyFakePlayers() {
 
-  for (i = 0; i < nPlayers; i++) {
-    var playerId = getUniquePlayerId(),
-      player = new Player(playerId, 'bot');
-
-    players.push(player);
-  }
 }
 
-/*================================================================ Fake & Debug - move bot
-*/
+/*================================================================ Socket UTIL
+ */
 
-function getRandomWalkPosition(oldPosition) {
-  var step = 10,
-    newPosition = {
-      x: oldPosition.x + util.getRandomInt(-step, step),
-      y: oldPosition.y + util.getRandomInt(-step, step),
-    };
-
-  if (newPosition.x < 0) {
-    newPosition.x = 0;
-
-  } else if (newPosition.x > mapWidth) {
-    newPosition.x = mapWidth;
-  }
-
-  if (newPosition.x < 0) {
-    newPosition.x = 0;
-    
-  } else if (newPosition.x > mapHeight) {
-    newPosition.x = mapHeight;
-  }
-
-  return newPosition;
-}
-
-function moveBotPlayers() {
-  var i = 0,
-    nPlayers = players.length;
-
-  for (i = 0; i < nPlayers; i++) {
-    if (players[i].getPlayerType() === 'bot') {
-      var oldPosition = players[i].getPosition(),
-        newPosition = getRandomWalkPosition(oldPosition);
-
-      players[i].updatePosition(newPosition);
-      players[i].updateLatestUpdate();
-
-      io.emit(eventName.player.move, players[i]);
-    }
-  }
-}
-
-/*================================================================ Socket util
-*/
-
-// unused
-// http://stackoverflow.com/questions/10275667/socket-io-connected-user-count
+/**
+ * Get number of real players by checking io connection
+ * (unused)
+ *
+ * @see http://stackoverflow.com/questions/10275667/socket-io-connected-user-count
+ * 
+ * @returns {number}
+ */
 function getNumberOfRealPlayer() {
-  return io.engine.clientsCount;
+  return IO.engine.clientsCount;
 }
 
 /*================================================================ Game
-*/
+ */
 
-function addToChatLogs(player) {
-  var nLogs = chatLogs.length;
+/**
+ * Add Message object to chat logs
+ * 
+ * @param {Message} message
+ */
+function addToChatLogs(message) {
+  var nLogs = CHAT_LOGS.length;
 
-  if (nLogs >= maxChatLogs) {
-    chatLogs.shift();
+  if (nLogs >= MAX_CHAT_LOGS) {
+    CHAT_LOGS.shift();
   }
 
-  chatLogs.push(player);
+  CHAT_LOGS.push(message);
 }
 
+/**
+ * Is duplicated id
+ * TODO: complete it
+ * 
+ * @param {string} playerId
+ * @returns {boolean}
+ */
 function isDuplicatedId(playerId) {
-  var i = 0;
-    nPlayers = players.length,
-    isDuplicated = false;
-
-  for (i = 0; i < nPlayers; i++) {
-    var c = players[i];
-
-    if (c.playerId == playerId) {
-      isDuplicated = true;
-      break;
-    }
-  }
+  var isDuplicated = false;
 
   return isDuplicated;
 }
 
+/**
+ * Get unique player id
+ * TODO: complete it
+ * 
+ * @returns {string}
+ */
 function getUniquePlayerId() {
-  var playerId,
-    isDuplicated = true;
 
-  while (isDuplicated) {
-    playerId = shortid.generate();
-    isDuplicated = isDuplicatedId(playerId);
-  }
-
-  return playerId;
 }
 
+/**
+ * Get player index by id
+ * TODO: complete it
+ * 
+ * @param {string} playerId
+ * @returns {number} return integer number when it's found (return if not found)
+ */
 function getPlayerIndexById(playerId) {
- var i = 0;
-    nPlayers = players.length,
-    isFound = false;
+  var isFound = false;
 
-  for (i = 0; i < nPlayers; i++) {
-    if (players[i].playerId == playerId) {
-      return i;
-    }
+  if (!isFound) {
+    UTIL.serverBugLog('getPlayerIndexById', 'Not found playerId', playerId);
   }
-
-  util.serverBugLog('getPlayerIndexById', 'Not found playerId', playerId);
 
   return -1;
 }
 
+/**
+ * Check this player is already
+ * exists in the server 
+ * 
+ * @param {string} playerId
+ * @returns {boolean}
+ */
+function isExistingPlayer(playerId) {
+  return (getPlayerIndexById(playerId) > -1)
+}
+
+/**
+ * Remove player out of PLAYERS
+ * 
+ * @param {string} playerId
+ * @returns
+ */
 function removePlayer(playerId) {
   var playerIdx = getPlayerIndexById(playerId);
 
   if (playerIdx > -1) {
-    players.splice(playerIdx, 1);
+    PLAYERS.splice(playerIdx, 1);
 
     return true;
   }
@@ -187,192 +179,172 @@ function removePlayer(playerId) {
   return false;
 }
 
+/**
+ * Get bot players
+ * TODO: complete it
+ * 
+ * @returns
+ */
 function getBotPlayers() {
-  var i = 0,
-    nPlayers = players.length,
-    bots = [];
-
-  for (i = 0; i < nPlayers; i++) {
-    if (players[i].getPlayerType() === 'bot') {
-      bots.push(players[i]);
-    }
-  }
+  var bots;
 
   return bots;
 }
 
+/**
+ * Get number of bot players
+ * TODO: complete it
+ * 
+ * @returns {number}
+ */
 function getNumberOfBotPlayers() {
   var bots = getBotPlayers();
 
   return bots.length;
 }
 
+/**
+ * Get real players
+ * TODO: complete it
+ * 
+ * @returns
+ */
 function getRealPlayers() {
-  var i = 0,
-    nPlayers = players.length,
-    realPlayers = [];
-
-  for (i = 0; i < nPlayers; i++) {
-    if (players[i].getPlayerType() === 'player') {
-      realPlayers.push(players[i]);
-    }
-  }
+  var realPlayers = [];
 
   return realPlayers;
 }
 
+/**
+ * Get number of real players
+ * TODO: complete it
+ * 
+ * @returns
+ */
 function getNumberOfRealPlayers() {
   var realPlayers = getRealPlayers();
 
   return realPlayers.length;
 }
 
-/*================================================================ App
-*/
-
-// Set static file
-app.use('/public', express.static(staticPath));
-app.use('/common', express.static(commonPath));
-
-app.get('/', function(req, res) {
-  res.sendFile(staticPath + '/index.html');
-});
-
-server.listen(port, function(err) {
-  if (err) {
-    throw err;
-    
-  } else {
-    util.serverLog('Listening on port: ' + port);
-  }
-});
-
 /*================================================================ Socket
-*/
+ */
 
-io.on('connection', function(socket) {
+IO.on('connection', function(socket) {
   var socketId = socket.id,
-    playerId = getUniquePlayerId(),
-    player = new Player(playerId);
+    playerId = getUniquePlayerId();
 
-  util.serverLog(playerId + ' is connect');
+  UTIL.serverLog(playerId + ' is connect');
 
   // disconnect
   socket.on('disconnect', function() {
-    util.serverLog(playerId + ' is disconnect');
+    UTIL.serverLog(playerId + ' is disconnect');
 
     // remove player
     removePlayer(playerId);
 
     // send disconnected player
-    socket.broadcast.emit(eventName.server.disconnectedPlayer, player);
+    // TODO: complete it
+    var data = {};
+    socket.broadcast.emit(EVENT_NAME.server.disconnectedPlayer, data);
   });
 
   // ready
-  socket.on(eventName.player.ready, function() {
-    // send playerInfo and existingPlayers
-    io.sockets.connected[socketId].emit(eventName.player.ready, {
-      playerInfo: player,
-      existingPlayerInfos: players,
-      existingChatLogs: chatLogs,
-    });
+  socket.on(EVENT_NAME.player.ready, function() {
 
-    // broadcast to existing players
-    // about new player
-    socket.broadcast.emit(eventName.server.newPlayer, player);
+    // send data to new connection
+    // - playerInfo
+    // - existingPlayers
+    // 
+    // TODO: complete it
+    var data = {};
+    IO.sockets.connected[socketId].emit(EVENT_NAME.player.ready, data);
+
+    // broadcast new player data
+    // to existing players
+    //
+    // TODO: complete it
+    var newPlayerData = {};
+    socket.broadcast.emit(EVENT_NAME.server.newPlayer, newPlayerData);
 
     // add new player
-    players.push(player);
+    PLAYERS.push(newPlayerData);
   });
 
   // message
-  socket.on(eventName.player.message, function(player) {
+  // TODO: complete it
+  socket.on(EVENT_NAME.player.message, function(player) {
     var playerIdx = getPlayerIndexById(playerId);
 
-    if (playerIdx > -1) {
-      players[playerIdx].setMessage(player.message);
-      players[playerIdx].updateLatestUpdate();
-      addToChatLogs(players[playerIdx]);
-      io.emit(eventName.player.message, players[playerIdx]);
+    if (isExistingPlayer(playerId)) {
+      var data = {};
+      IO.emit(EVENT_NAME.player.message, data);
     }
   });
 
   // typing
   // (quite duplicate with message)
-  socket.on(eventName.player.typing, function() {
+  // TODO: complete it
+  socket.on(EVENT_NAME.player.typing, function() {
     var playerIdx = getPlayerIndexById(playerId);
 
-    if (playerIdx > -1) {
-      players[playerIdx].updateLatestTyping();
-      socket.broadcast.emit(eventName.player.typing, players[playerIdx]);
+    if (isExistingPlayer(playerId)) {
+      var data = {};
+      socket.broadcast.emit(EVENT_NAME.player.typing, data);
     }
   });
 
   // move
-  socket.on(eventName.player.move, function(position) {
+  // TODO: complete it
+  socket.on(EVENT_NAME.player.move, function(position) {
     var playerIdx = getPlayerIndexById(playerId);
 
-    if (playerIdx > -1) {
-      players[playerIdx].updatePosition(position);
-      players[playerIdx].updateLatestUpdate();
-
-      socket.broadcast.emit(eventName.player.move, players[playerIdx]);
+    if (isExistingPlayer(playerId)) {
+      var data = {};
+      socket.broadcast.emit(EVENT_NAME.player.move, data);
     }
   });
 });
 
 /*================================================================ Log / Report
-*/
+ */
 
 function reportPlayers() {
-  util.serverLog('Players', players);
+  UTIL.serverLog('Players', PLAYERS);
 }
 
 function reportNumberOfPlayers() {
-  util.serverLog('Players', players.length);
+  UTIL.serverLog('Players', PLAYERS.length);
 }
 
 function reportBotPlayers() {
-  util.serverLog('Bots', getBotPlayers());
+  UTIL.serverLog('Bots', getBotPlayers());
 }
 
 function reportNumberOfBotPlayers() {
-  util.serverLog('Bots', getNumberOfBotPlayers());
+  UTIL.serverLog('Bots', getNumberOfBotPlayers());
 }
 
 function reportRealPlayers() {
-  util.serverLog('Real players', getRealPlayers());
+  UTIL.serverLog('Real PLAYERS', getRealPlayers());
 }
 
 function reportNumberOfRealPlayers() {
-  util.serverLog('Real players', getNumberOfRealPlayers());
+  UTIL.serverLog('Real PLAYERS', getNumberOfRealPlayers());
 }
 
 function reportNumberOfChatLogs() {
-  util.serverLog('Chat logs (number)', chatLogs.length);
+  UTIL.serverLog('Chat logs (number)', CHAT_LOGS.length);
 }
 
 function reportChatLogs() {
   reportNumberOfChatLogs();
-  util.serverLog('Chat logs', chatLogs);
+  UTIL.serverLog('Chat logs', CHAT_LOGS);
 }
 
 /*================================================================ Interval
-*/
+ */
 
 setInterval(function() {
-  moveBotPlayers();
-
-  // console.log('--------------------------------');
-
-  // reportPlayers();
-  // reportBotPlayers();
-  // reportRealPlayers();
-  // reportChatLogs();
-
-  // reportNumberOfPlayers();
-  // reportNumberOfBotPlayers();
-  // reportNumberOfRealPlayers();
-  // reportNumberOfChatLogs();
-
-}, serverHeartbeat);
+  // 
+}, SERVER_HEARTBEAT);

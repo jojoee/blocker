@@ -5,8 +5,7 @@
     "*.log",
     "node_modules/*",
     "public/*",
-    "gulpfile.js",
-    "gulpfile-combine.js"
+    "gulpfile.js"
   ],
   "execMap": {
 

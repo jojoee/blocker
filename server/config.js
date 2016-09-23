@@ -1,5 +1,10 @@
-module.exports = {
+/**
+ * Server config
+ */
 
+var serverConfig = {
   // dev
-  brwoserSyncPort: 4000,
+  brwoserSyncPort: 8002,
 };
+
+module.exports = serverConfig;

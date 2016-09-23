@@ -1,0 +1,194 @@
+@import 'variable';
+
+/*
+z-index
+- 2: sidebar
+- 3: footer
+- 3: github ribbon
+*/
+
+/*================================================================ General
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: monospace;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  display: block;
+}
+
+// scrollbar
+// https://css-tricks.com/custom-scrollbars-in-webkit/
+// http://cssdeck.com/labs/css3-webkit-vertical-scrollbars/
+// https://webdesign.tutsplus.com/articles/quick-tip-styling-scrollbars-to-match-your-ui-design--webdesign-9430
+// http://stackoverflow.com/questions/7725652/css-scrollbar-style-cross-browser
+// http://stackoverflow.com/questions/9251354/css-customized-scroll-bar-in-div
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  opacity: 1;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(256, 256, 256, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(256, 256, 256, 0.5);
+}
+
+/*================================================================ Common
+*/
+
+.monospace {
+  font-family: monospace;
+}
+
+.transition {
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  -ms-transition: all 0.2s ease;
+  -o-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+/*================================================================ Main
+*/
+
+#game-wrap {
+  background-color: @grey;
+}
+
+.logo {
+  position: absolute;
+  opacity: 0;
+}
+
+/*================================================================ Sidebar
+*/
+
+#sidebar {
+  pointer-events: none; // cannot scroll
+  position: absolute;
+  top: 0;
+  right: -6px; // hide scrollbar
+  width: 100px;
+  height: 100%;
+  z-index: 2;
+  overflow-x: hidden;
+  opacity: .6;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.widget {
+  padding: 12px;
+  width: 100%;
+
+  > ul {
+    width: 100%;
+  }
+}
+
+.player-widget {
+  list-style: none;
+
+  li {
+    text-overflow: ellipsis;
+    padding-bottom: 3px;
+    overflow: hidden;
+    color: @grey;
+  }
+}
+
+/*================================================================ Footer
+*/
+
+.footer {
+  pointer-events: none;
+  position: relative;
+}
+
+#log-wrap {
+  width: 100%;
+  height: 220px;
+  overflow-y: scroll;
+  position: absolute;
+  overflow: hidden;
+
+  // http://stackoverflow.com/questions/16670931/hide-scroll-bar-but-still-being-able-to-scroll
+  // force remove scrollbar
+  left: 6px;
+  bottom: 6px;
+}
+
+#logs {
+  overflow: hidden;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+
+  li {
+    text-overflow: ellipsis;
+    color: @white;
+  }
+}
+
+/*================================================================ Others
+*/
+
+// http://tholman.com/github-corners/
+@keyframes octocat-wave{
+  0%,100% { transform: rotate(0) }
+  20%,60% { transform: rotate(-25deg) }
+  40%,80% { transform: rotate(10deg) }
+}
+
+.github-corner {
+  z-index: 4;
+  position: absolute;
+  top: 0;
+  border: 0;
+  right: 0;
+
+  &:hover {
+
+    .octo-arm {
+      animation: octocat-wave 560ms ease-in-out
+    }
+  }
+
+  @media (max-width:500px) {
+    .octo-arm {
+      animation: octocat-wave 560ms ease-in-out
+    }
+
+    &:hover {
+
+      .octo-arm {
+        animation: none
+      }
+    }
+  }
+}

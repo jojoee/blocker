@@ -1,16 +1,38 @@
-// player = client
-// 
-// `player` is something that interact by player (e.g. message)
-// other else is `server` (e.g. existingPlayers, newPlayer)
+/**
+ * Server config
+ * 
+ * Event name
+ * `player`: is something that interact by player (e.g. message)
+ * `server`: other else is (e.g. newPlayer)
+ */
 
 var eventPlayerPrefix = 'player.',
   eventServerPrefix = 'server.';
 
-var config = {
-  serverPort: 3000,
+var commonConfig = {
+  // prod should be true
+  isOnline: false,
+  isProd: false,
+
+  // dev should be true
+  isDebug: true,
+
+  // dummy
+  isDummy: true,
+
+  // others
+  serverPort: 8001,
   game: {
-    worldWidth: 2000,
-    worldHeight: 2000,
+    worldWidth: 2300,
+    worldHeight: 2300,
+  },
+  hero: {
+    width: 46,
+    height: 46,
+  },
+  monster: {
+    width: 46,
+    height: 46,
   },
   eventName: {
     player: {
@@ -36,10 +58,4 @@ var config = {
   }
 };
 
-if (typeof module !== 'undefined' && module.exports != null) {
-  module.exports = {
-    serverPort: config.serverPort,
-    game: config.game,
-    eventName: config.eventName
-  };
-}
+module.exports = commonConfig;
