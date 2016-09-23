@@ -17,7 +17,7 @@ for develop the client side, please run - `gulp watch`
 2. Build client script: `gulp`
 3. Run app: `pm2 start app.js`
 
-## Code guideline
+## Code guideline & Naming we use
 ```
 1. Base javascript style: [Airbnb](https://github.com/airbnb/javascript)
 2. Global variable should be UPPERCASE
@@ -31,56 +31,66 @@ for develop the client side, please run - `gulp watch`
   except getIndex
   e.g.
   - getIndexOfPlayer: number, -1 (default)
+
+*note*
+- Monster
+  + Zombie
+  + Machine
+  + Bat
+
+- Creature
+  + Monster
+  + Hero
 ```
 
-## Known bugs
-- [ ] When enemy was pushed to the `well` or `fire` area, it doesn't call `hitWell` or `hitFire` event
-- [ ] When creature overlap `well` / `fire` floor, it do not work properly
-
 ## TODO
-- [ ] `spacebar` can fire arrow
-- [ ] Respawn monster when it's died
-- [ ] Monster path finder, [1](http://jojoee.github.io/phaser-examples/games/paths-face/), [2](http://jojoee.github.io/phaser-examples/games/boids-steering/), [3](http://jojoee.github.io/phaser-examples/games/easystarjs/)
-- [ ] Creature sight feature, [1](http://jojoee.github.io/phaser-examples/games/bresenham-light/), [2](http://www.emanueleferonato.com/wp-content/uploads/2014/10/survival/), [3](http://jojoee.github.io/phaser-examples/games/horror-ray-casting/)
-- [ ] Player / Enemy can collect item in the floor
+- [x] `spacebar` can fire arrow
+- [x] Respawn monster when it's died
 - [ ] Message icon and message bouble when send the message
-- [ ] Responsive (support mobile / tablet user)
-- [ ] Tutorial for development
+- [ ] Fix birth point of creature 
+- [ ] Machine fire laser
+- [ ] Monster (random walk)
+- [ ] Phaser server side
+- [ ] Make it online
 - [x] Implement webfont
 - [x] Implement module pattern both client and server
 - [x] Gulp.js for client development
 - [x] Nodemon for server development
-- [ ] Redirect all pages to root (cause we only use root page)
-- [ ] Monster (random walk)
 - [x] Weapon behind the player
 - [x] Move player body in front of weapon
 - [x] Map by [Tiled Map Editor](http://www.mapeditor.org/)
 - [x] Control: Mouse (mouse over keyboard)
+- [ ] Redirect all pages to root (cause we only use root page)
 - [ ] Add deploy shell script
-- [ ] Knockback when creature is hitted
+- [ ] Day / Night system
+- [ ] Monster path finder, [1](http://jojoee.github.io/phaser-examples/games/paths-face/), [2](http://jojoee.github.io/phaser-examples/games/boids-steering/), [3](http://jojoee.github.io/phaser-examples/games/easystarjs/)
+- [ ] Player / Enemy can collect item in the floor
+- [ ] Implement [Shields.io](https://shields.io/)
+- [ ] Minimap
+- [ ] Creature sight feature, [1](http://jojoee.github.io/phaser-examples/games/bresenham-light/), [2](http://www.emanueleferonato.com/wp-content/uploads/2014/10/survival/), [3](http://jojoee.github.io/phaser-examples/games/horror-ray-casting/)
+- [ ] Tutorial for development
+- [ ] Arorw / Laser is killed when hit stoneGroup
+- [ ] Responsive (support mobile / tablet user)
+- [ ] Support screen when resizing 
 - [ ] Add test (TDD) with test-task-runner, [1](https://github.com/gulpjs/gulp/blob/master/docs/recipes/mocha-test-runner-with-gulp.md)
-- [ ] Fix resize
-- [ ] Inner-scroll
 - [x] Universal / Isomorphic concepts
-- [x] Fix enemy animation
-- [x] Fix angle
 - [ ] Plugin: Screen shaker when player's attacked
-- [ ] Update global variable on server side code
 - [ ] HUD
 - [x] Bring `creature label` to the top
 - [x] Player always top
 - [ ] Boss mode
-- [ ] Score board
+- [ ] Score system
+- [ ] Score board (Leader board)
 - [ ] Update Favicon
 - [x] Concat + Minify
 - [ ] Cache (server)
 - [ ] Cache (client with Service Worker)
+- [ ] Knockback when creature is hitted
 - [x] Log system
 - [ ] Error system
 - [ ] Testing
 - [ ] Document
 - [ ] Analysis
-- [ ] Fix gulp (when new image was added, it's does not copy to `dist` folder)
 - [ ] Optimize / Profiling
 - [ ] Quality tools (e.g. sonarqube)
 - [x] Preload / Loading screen
@@ -89,21 +99,15 @@ for develop the client side, please run - `gulp watch`
 - [ ] Refactor
 - [ ] Refactor (in term of encapsulation)
 - [ ] Local storage
-- [ ] Monster + A* algorithm
 - [ ] Update DocBlockr
-- [ ] Day / Night system
 - [ ] Character selector
 - [ ] Implement monster nest
 - [ ] Update all graphics + Font
-- [ ] Support resize screen
 - [ ] Multi line chat
 - [x] Log combat (e.g. atk, kill)
 - [ ] Log filter
 - [x] Set emitter
 - [x] Using [pm2](https://github.com/Unitech/pm2) for deploy
-- [ ] Minimap
-- [ ] Using [hashids](http://hashids.org/) to generate id instead
-- [ ] Implement [Shields.io](https://shields.io/)
 
 ## TODO: Online
 - [ ] Online mode
@@ -133,6 +137,7 @@ for develop the client side, please run - `gulp watch`
 - [ ] Optimize player list (e.g. using `Angular`, etc.)
 - [x] CSS preprocessor
 - [ ] Create own `screen-shake` plugin
+- [ ] Using [hashids](http://hashids.org/) to generate id instead
 
 ## Reference & Tutorial & Plugin && Tool
 - Inspired by [Blocker](http://blockergame.com/)
