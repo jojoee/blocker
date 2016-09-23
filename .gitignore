@@ -7,6 +7,9 @@
 *.gz
 *.tmx
 *.psd
+*.zip
+*.rar
+*.tar.gz
 *DS_store
 
 bk
