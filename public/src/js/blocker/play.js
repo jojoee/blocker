@@ -8,8 +8,7 @@ var CONFIG = require('./config'),
   Bat = MODULE.Bat;
 
 Play = function(GAME) {
-  this.cursors;
-
+  
   this.nZombies = 8;
   this.nMachines = 8;
   this.nBats = 8;
@@ -53,6 +52,10 @@ Play = function(GAME) {
   this.treeGroup;
   this.skyGroup; // unused
   this.nameGroup; // unused
+  
+  // input
+  this.cursors; // unused
+  this.spaceKey;
 };
 
 Play.prototype = {
@@ -566,8 +569,10 @@ Play.prototype = {
     // camera
     GAME.camera.follow(this.player);
 
-    // control
-    this.cursors = GAME.input.keyboard.createCursorKeys();
+    // keyboard
+    this.cursors = GAME.input.keyboard.createCursorKeys(); // unused
+    this.spaceKey = GAME.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.enterKey = GAME.input.keyboard.addKey(Phaser.Keyboard.ENTER);
 
     // reorder z-index (hack)
     GAME.world.bringToTop(this.floorGroup);
@@ -694,29 +699,10 @@ Play.prototype = {
       }
 
       // input -  right
-      if (GAME.input.activePointer.rightButton.isDown) {
+      if (GAME.input.activePointer.rightButton.isDown ||
+        this.spaceKey.isDown) {
         // fire arrow
-
-        var ts = UTIL.getCurrentUtcTimestamp();
-        if (ts > this.player.blr.misc.nextFireTimestamp &&
-          this.player.blr.bullet.countDead() > 0) {
-
-          // update player + weapon rotation
-          this.updateCreatureRotationByFollowingMouse(this.player);
-
-          // update bullet
-          // 2 bullet/sec (cause we have 7 frame per animation)
-          this.player.blr.weapon.animations.play('attack', 14, false, false);
-          this.player.blr.misc.nextFireTimestamp = ts + this.player.blr.misc.fireRate;
-
-          var bullet = this.player.blr.bullet.getFirstExists(false);
-          bullet.reset(this.player.blr.weapon.x, this.player.blr.weapon.y);
-          bullet.rotation = GAME.physics.arcade.moveToPointer(
-            bullet,
-            this.player.blr.misc.bulletSpeed,
-            GAME.input.activePointer
-          );
-        }
+        this.heroFireArrow(this.player);
       }
 
       this.updateCreatureLastPosition(this.player);
@@ -749,6 +735,30 @@ Play.prototype = {
     this.batGroup.forEachAlive(function(monster) {
       this.updateCreatureLabelText(monster);
     }, this);
+  },
+
+  heroFireArrow: function(hero) {
+    var ts = UTIL.getCurrentUtcTimestamp();
+
+    if (ts > hero.blr.misc.nextFireTimestamp &&
+      hero.blr.bullet.countDead() > 0) {
+
+      // update player + weapon rotation
+      this.updateCreatureRotationByFollowingMouse(hero);
+
+      // update bullet
+      // 2 bullet/sec (cause we have 7 frame per animation)
+      hero.blr.weapon.animations.play('attack', 14, false, false);
+      hero.blr.misc.nextFireTimestamp = ts + hero.blr.misc.fireRate;
+
+      var bullet = hero.blr.bullet.getFirstExists(false);
+      bullet.reset(hero.blr.weapon.x, hero.blr.weapon.y);
+      bullet.rotation = GAME.physics.arcade.moveToPointer(
+        bullet,
+        hero.blr.misc.bulletSpeed,
+        GAME.input.activePointer
+      );
+    }
   },
 
   /**
