@@ -2,6 +2,8 @@ var CONFIG = require('./config'),
   UI = require('./../ui'),
   DATA = require('./../../../../common/data'),
   MODULE = require('./../../../../common/module'),
+  Position = MODULE.Position,
+  Vector = MODULE.Vector,
   Hero = MODULE.Hero,
   Zombie = MODULE.Zombie,
   Machine = MODULE.Machine,
@@ -61,6 +63,16 @@ Play = function(GAME) {
 
 Play.prototype = {
 
+  getRandomCreaturePosition: function() {
+    var x = UTIL.getRandomInt(0, GAME_WORLD_WIDTH),
+      y = UTIL.getRandomInt(0, GAME_WORLD_HEIGHT),
+      result = new Position(x, y);
+
+    console.log(result);
+
+    return result;
+  },
+
   setCreatureLabel: function(creature) {
     var labelStyle = {
         font: '13px ' + CONFIG.mainFontFamily,
@@ -103,6 +115,12 @@ Play.prototype = {
     };
   },
 
+  logCreatureRespawning: function(creature) {
+    var logText = creature.blr.misc.creatureType + ' ' + creature.blr.info.id +
+      ' (' + creature.blr.info.life + ') is respawn at ' + creature.body.x + ', ' + creature.body.y;
+    UI.addTextToLogList(logText);
+  },
+
   /**
    * Spawn zombie
    */
@@ -133,6 +151,9 @@ Play.prototype = {
     this.zombieWeaponGroup.add(monster.blr.weapon);
 
     // optional
+
+    // misc
+    this.logCreatureRespawning(monster);
   },
 
   spawnMachine: function() {
@@ -173,6 +194,9 @@ Play.prototype = {
     monster.bulletGroup = bulletGroup;
 
     // optional
+
+    // misc
+    this.logCreatureRespawning(monster);
   },
 
   /**
@@ -207,6 +231,9 @@ Play.prototype = {
     // optional
     monster.scale.setTo(0.7, 0.7);
     monster.blr.weapon.scale.setTo(0.7, 0.7);
+
+    // misc
+    this.logCreatureRespawning(monster);
   },
 
   /**
@@ -260,8 +287,8 @@ Play.prototype = {
       var ts = UTIL.getCurrentUtcTimestamp();
 
       if (ts > creature.blr.info.lastRecoverTimestamp + creature.blr.info.immortalDelay) {
-        var logText = '+1 life (' + creature.blr.info.life++ + ' > ' + creature.blr.info.life + ') ' +
-          creature.blr.info.id + ' was recovered from ' + recoveredFrom;
+        var logText = '+1 life ' + creature.blr.misc.creatureType + ' ' + creature.blr.info.id +
+          ' (' + creature.blr.info.life++ + ' > ' + creature.blr.info.life + ')  was recovered from ' + recoveredFrom;
         UI.addTextToLogList(logText);
 
         creature.blr.info.updateLastRecoverTimestamp();
@@ -293,8 +320,8 @@ Play.prototype = {
     var ts = UTIL.getCurrentUtcTimestamp();
 
     if (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay) {
-      var logText = '-1 life (' + creature.blr.info.life-- + ' > ' + creature.blr.info.life + ') ' +
-        creature.blr.info.id + ' was damaged from ' + damageFrom;
+      var logText = '-1 life ' + creature.blr.misc.creatureType + ' ' + creature.blr.info.id +
+        ' (' + creature.blr.info.life-- + ' > ' + creature.blr.info.life + ')  was damaged from ' + damageFrom;
       UI.addTextToLogList(logText);
 
       creature.blr.info.updateLastDamageTimestamp();
@@ -303,18 +330,41 @@ Play.prototype = {
 
       // is die
       if (creature.blr.info.life <= 0) {
-        var logText = creature.blr.info.id + ' was died by ' + damageFrom;
+        var logText = creature.blr.misc.creatureType + ' ' + creature.blr.info.id + ' was died by ' + damageFrom;
         UI.addTextToLogList(logText);
 
-        creature.alive = false;
-        creature.kill();
-        creature.blr.weapon.kill();
-        creature.blr.shadow.kill();
+        // disable - kill monster @24092016-0120
+        //
+        // creature.alive = false;
+        // creature.kill();
+        // creature.blr.weapon.kill();
+        // creature.blr.shadow.kill();
+
+        // respawn
+        // - set init info
+        // - random position
+        this.respawnCreature(creature);
 
       } else {
         this.updateCreatureLabelText(creature);
       }
     }
+  },
+
+  /**
+   * Respawn creature
+   * 
+   * @param {[type]} creature
+   */
+  respawnCreature: function(creature) {
+    var newPosition = this.getRandomCreaturePosition();
+
+    creature.blr.info.init();
+    creature.reset(newPosition.x, newPosition.y);
+    this.updateCreatureLabelText(creature);
+    this.updateCreatureWeapon(creature);
+    this.updateCreatureShadow(creature);
+    this.logCreatureRespawning(creature);
   },
 
   onOverlapStone: function() {
@@ -807,6 +857,14 @@ Play.prototype = {
     return (creature.rotation !== creature.blr.lastPos.rotation);
   },
 
+  /**
+   * Update creature shadow
+   * using creature position by default
+   * 
+   * @param {[type]} creature
+   * @param {number} [newX]
+   * @param {number} [newY]
+   */
   updateCreatureShadow: function(creature, newX, newY) {
     if (typeof newX === 'undefined') newX = creature.x;
     if (typeof newY === 'undefined') newY = creature.y;
@@ -819,6 +877,15 @@ Play.prototype = {
     }
   },
 
+  /**
+   * Update creature weapon Vector
+   * using creature position by default
+   * 
+   * @param {[type]} creature
+   * @param {number} [newX]
+   * @param {number} [newY]
+   * @param {number} [newRotation]
+   */
   updateCreatureWeapon: function(creature, newX, newY, newRotation) {
     if (typeof newX === 'undefined') newX = creature.x;
     if (typeof newY === 'undefined') newY = creature.y;
@@ -861,6 +928,19 @@ Play.prototype = {
 
   render: function() {
     if (IS_DEBUG) {
+      var startedPosX = 32,
+        startedPosY = 100,
+        yStep = 20;
+
+      GAME.debug.text('zombieGroup living ' + this.zombieGroup.countLiving(), startedPosX, startedPosY += yStep);
+      GAME.debug.text('zombieGroup dead ' + this.zombieGroup.countDead(), startedPosX, startedPosY += yStep);
+
+      GAME.debug.text('machineGroup living ' + this.machineGroup.countLiving(), startedPosX, startedPosY += yStep);
+      GAME.debug.text('machineGroup dead ' + this.machineGroup.countDead(), startedPosX, startedPosY += yStep);
+
+      GAME.debug.text('batGroup living ' + this.batGroup.countLiving(), startedPosX, startedPosY += yStep);
+      GAME.debug.text('batGroup dead ' + this.batGroup.countDead(), startedPosX, startedPosY += yStep);
+
       // GAME.debug.bodyInfo(this.player, 32, 32);
       // GAME.debug.spriteInfo(this.player, 32, 164);
 

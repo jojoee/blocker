@@ -68,46 +68,50 @@ var GameUtil = {
  * 
  * @param {number} x
  * @param {number} y
- * @param {number} [angle=0]
  * 
  * @returns {Object}
  */
-var Position = function(x, y, angle) {
-  if (typeof angle === 'undefined') angle = 0;
+var Position = function(x, y) {
+  this.x = x;
+  this.y = y;
+};
+
+/**
+ * Vector class
+ * 
+ * @param {number} x
+ * @param {number} y
+ * @param {number} [rotation=0]
+ * 
+ * @returns {Object}
+ */
+var Vector = function(x, y, rotation) {
+  if (typeof rotation === 'undefined') rotation = 0;
   this.x = x;
   this.y = x;
-  this.angle = angle;
+  this.rotation = rotation;
+};
 
-  /**
-   * Export Position object in json format
-   * 
-   * @return {Object}
-   */
-  function toJson() {
-    return {
-      x: this.x,
-      y: this.y,
-      angle: this.angle,
-    }
-  }
-
-  function update(x, y, angle) {
-    this.x = x;
-    this.y = y;
-    this.angle = angle;
-  }
-
-  function updateByJson(pos) {
-    this.x = pos.x;
-    this.y = pos.y;
-    this.angle = pos.angle;
-  }
-
-  return {
-    toJson: toJson,
-    update: update,
-    updateByJson: updateByJson,
+Vector.prototype.toJson = function() {
+  var result = {
+    x: this.x,
+    y: this.y,
+    rotation: this.rotation,
   };
+
+  return result; 
+};
+
+Vector.prototype.update = function(x, y, rotation) {
+  this.x = x;
+  this.y = y;
+  this.rotation = rotation;
+};
+
+Vector.prototype.updateByJson = function(obj) {
+  this.x = obj.x;
+  this.y = obj.y;
+  this.rotation = obj.rotation;
 };
 
 /**
@@ -221,7 +225,10 @@ var CreatureInfo = function(life, maxLife) {
   this.id = '';
 
   /** @type {numberr} */
-  this.life = life;
+  this.life = 1;
+
+  /** @type {number} initialize */
+  this.initialLife = life;
 
   /** @type {number} */
   this.maxLife = maxLife;
@@ -249,6 +256,7 @@ CreatureInfo.prototype.updateLastRecoverTimestamp = function() {
 
 CreatureInfo.prototype.init = function() {
   this.id = UTIL.getRandomId();
+  this.life = this.initialLife;
 };
 
 /**
@@ -280,6 +288,7 @@ var Hero = function() {
       angleSpeed: 200, // unused
     },
     misc = {
+      creatureType: 'hero',
       visibleRange: 300, // unused
       fireRate: 500, // 2 fire/sec 
       nextFireTimestamp: 0,
@@ -302,6 +311,7 @@ var Zombie = function() {
       bodyMass: -100,
     },
     misc = {
+      creatureType: 'zombie',
       visibleRange: 300,
     };
   
@@ -320,6 +330,7 @@ var Machine = function() {
       bodyMass: -100,
     },
     misc = {
+      creatureType: 'machine',
       visibleRange: 300,
       fireRate: 1000, // 1 fire/sec
       nextFireTimestamp: 0,
@@ -341,7 +352,9 @@ var Bat = function() {
       bodyOffset: 8,
       bodyMass: 0,
     },
-    misc = {};
+    misc = {
+      creatureType: 'bat',
+    };
   
   Creature.call(this, info, phrInfo, misc);
 };
@@ -350,7 +363,7 @@ Bat.prototype.constructor = Bat;
 
 module.exports = {
   // GameUtil: GameUtil,
-  // Position: Position,
+  Position: Position,
   Message: Message,
   CreatureInfo: CreatureInfo,
   // Creature: Creature,
