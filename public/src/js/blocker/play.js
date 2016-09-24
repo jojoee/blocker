@@ -377,7 +377,8 @@ Play.prototype = {
   onCreatureIsDamaged: function(creature, damageFrom) {
     var ts = UTIL.getCurrentUtcTimestamp();
 
-    if (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay) {
+    if (!creature.blr.misc.isImmortal &&
+      (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay)) {
       var logText = '-1 life ' + creature.blr.misc.creatureType + ' ' + creature.blr.info.id +
         ' (' + creature.blr.info.life-- + ' > ' + creature.blr.info.life + ')  was damaged from ' + damageFrom;
       UI.addTextToLogList(logText);
@@ -772,6 +773,9 @@ Play.prototype = {
     this.playerWeaponGroup.add(this.player.blr.weapon);
     this.player.blr.bullet = bulletGroup;
     this.playerArrowGroup.add(this.player.blr.bullet);
+    if (IS_IMMORTAL) {
+      this.player.blr.misc.isImmortal = true;
+    }
 
     // map - tree
     this.treeGroup = map.createLayer(2);

@@ -294,6 +294,7 @@ var Hero = function() {
       nextFireTimestamp: 0,
       nBullets: 40,
       bulletSpeed: 500,
+      isImmortal: false,
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -313,6 +314,7 @@ var Zombie = function() {
     misc = {
       creatureType: 'zombie',
       visibleRange: 300,
+      isImmortal: false,
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -336,6 +338,7 @@ var Machine = function() {
       nextFireTimestamp: 0,
       nBullets: 40,
       bulletSpeed: 500,
+      isImmortal: false,
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -354,6 +357,7 @@ var Bat = function() {
     },
     misc = {
       creatureType: 'bat',
+      isImmortal: false,
     };
   
   Creature.call(this, info, phrInfo, misc);

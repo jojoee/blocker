@@ -16,6 +16,7 @@ window.IS_PROD = config.isProd;
 window.IS_DEBUG = config.isDebug;
 window.IS_DUMMY = config.isDummy;
 window.IS_ONLINE = config.isOnline;
+window.IS_IMMORTAL = config.isImmortal;
 window.GAME_WORLD_WIDTH = config.game.worldWidth;
 window.GAME_WORLD_HEIGHT = config.game.worldHeight;
 window.SOCKET = io(socketUrl);
@@ -25,6 +26,8 @@ window.CLIENT_HEARTHBEAT = 1000;
 window.UI = require('./ui');
 window.UTIL = require('./../../../common/util');
 window.GAME = new Phaser.Game(WINDOW_WIDTH, WINDOW_HEIGHT, Phaser.CANVAS, 'game-wrap');
+
+window.IS_IMMORTAL = true;
 
 var blocker = require('./blocker');
 blocker.Util.init();

@@ -18,6 +18,7 @@ var commonConfig = {
   isDebug: true,
 
   // dummy
+  isImmortal: false,
   isDummy: true,
 
   // others
