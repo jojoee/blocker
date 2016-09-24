@@ -67,12 +67,60 @@ Play = function(GAME) {
 
 Play.prototype = {
 
-  getRandomCreaturePosition: function() {
-    var x = UTIL.getRandomInt(0, GAME_WORLD_WIDTH),
-      y = UTIL.getRandomInt(0, GAME_WORLD_HEIGHT),
-      result = new Position(x, y);
+  /**
+   * Get started creature position
+   * not allow to birth at
+   * - fire 
+   * - bush
+   * - stone
+   * 
+   * note
+   * it's work, if the monster sprite is not over than
+   * mapTileWidth and mapTileHeight
+   * 
+   * @returns {Position} return birth(able) position
+   */
+  getRandomStartedCreaturePosition: function() {
+    var nTileWidth = this.VTMap.nTileWidth,
+      nTileHeight = this.VTMap.nTileHeight,
+      tileWidth = this.VTMap.mapTileWidth,
+      tileHeight = this.VTMap.mapTileHeight;
+    
+    var tileIndexX,
+      tileIndexY,
+      isUnBirthAble = true;
 
-    console.log(result);
+    while (isUnBirthAble) {
+      tileIndexX = UTIL.getRandomInt(0, nTileWidth - 1);
+      tileIndexY = UTIL.getRandomInt(0, nTileHeight - 1);
+
+      if (this.VTMap.data[tileIndexY][tileIndexX] !== 1 &&
+      this.VTMap.data[tileIndexY][tileIndexX] !== 3 &&
+      this.VTMap.data[tileIndexY][tileIndexX] !== 6) {
+        isUnBirthAble = false;
+      }
+    }
+    
+    // we got point (0, 0) of the tile
+    // so we need to convert it to middle point of this tile
+    var zeroPos = this.convertTileIndexToPoint(tileIndexX, tileIndexY),
+      midelPos = new Position(zeroPos.x + tileWidth / 2, zeroPos.y + tileHeight / 2);
+    
+    return midelPos;
+  },
+
+  /**
+   * Convert tile index to point (0, 0)
+   * 
+   * @param {number} tileIndexX - index of tile x
+   * @param {number} tileIndexY - index of tile y
+   * 
+   * @returns {Position} return position of tile at (0, 0) 
+   */
+  convertTileIndexToPoint: function(tileIndexX, tileIndexY) {
+    var x = tileIndexX * this.VTMap.mapTileWidth,
+      y = tileIndexY * this.VTMap.mapTileHeight,
+      result = new Position(x, y);
 
     return result;
   },
@@ -248,12 +296,13 @@ Play.prototype = {
    * 
    * @param {Array.Group} monsterGroup - array of Phaser Group
    * @param {CreatureInfo} monsterPhrInfo
-   * @param {number}
+   * @param {Position} startPos - started position
+   * 
    * @return {DisplayObject} Phaser DisplayObject
    */
-  spawnMonster: function(monsterGroup, monsterPhrInfo, startPosX, startPosY) {
-    if (typeof startPosX === 'undefined') startPosX = UTIL.getRandomInt(0, GAME_WORLD_WIDTH);
-    if (typeof startPosY === 'undefined') startPosY = UTIL.getRandomInt(0, GAME_WORLD_HEIGHT);
+  spawnMonster: function(monsterGroup, monsterPhrInfo, startPos) {
+    if (typeof startPos === 'undefined') startPos = this.getRandomStartedCreaturePosition();
+
     var monsterSpriteName = monsterPhrInfo.spriteName,
       monsterBodyOffset = monsterPhrInfo.bodyOffset,
       monsterBodyWidth = monsterPhrInfo.width,
@@ -262,7 +311,7 @@ Play.prototype = {
       monsterBodyHeightSize = monsterBodyHeight - monsterBodyOffset * 2,
       monsterBodyMass = monsterPhrInfo.bodyMass;
 
-    var monster = monsterGroup.create(startPosX, startPosY, monsterSpriteName);
+    var monster = monsterGroup.create(startPos.x, startPos.y, monsterSpriteName);
     GAME.physics.enable(monster);
     monster.anchor.set(0.5);
     monster.body.setSize(
@@ -366,7 +415,7 @@ Play.prototype = {
    * @param {[type]} creature
    */
   respawnCreature: function(creature) {
-    var newPosition = this.getRandomCreaturePosition();
+    var newPosition = this.getRandomStartedCreaturePosition();
 
     creature.blr.info.init();
     creature.reset(newPosition.x, newPosition.y);
@@ -672,26 +721,26 @@ Play.prototype = {
     }
 
     // player
-    var startPosX = 300;
-    var startPosY = 90;
-    var playerOffset = 8;
-    var playerBodySize = 46 - playerOffset * 2;
+    var startPos = this.getRandomStartedCreaturePosition(),
+      playerOffset = 8,
+      playerBodySize = 46 - playerOffset * 2;
+    
     this.player = {};
 
     // player - shadow
-    var shadowTmp = GAME.add.sprite(startPosX, startPosY, 'shadow');
+    var shadowTmp = GAME.add.sprite(startPos.x, startPos.y, 'shadow');
     shadowTmp.anchor.set(0.1);
     shadowTmp.scale.setTo(0.7, 0.7);
     shadowTmp.alpha = .3;
 
     // player - weapon
-    var weaponTmp = GAME.add.sprite(startPosX, startPosY, 'bowWeapon');
+    var weaponTmp = GAME.add.sprite(startPos.x, startPos.y, 'bowWeapon');
     weaponTmp.animations.add('attack', [0, 1, 2, 3, 4, 5, 0]);
     weaponTmp.anchor.set(0.3, 0.5);
     weaponTmp.scale.setTo(0.5);
 
     // player - body
-    this.player = GAME.add.sprite(startPosX, startPosY, 'hero');
+    this.player = GAME.add.sprite(startPos.x, startPos.y, 'hero');
     this.player.blr = new Hero();
     this.updateCreatureLastPosition(this.player);
     this.player.animations.add('blink', [0, 1, 0]);
