@@ -245,7 +245,8 @@ Play.prototype = {
     bulletGroup.setAll('anchor.y', 0.5);
     bulletGroup.setAll('outOfBoundsKill', true);
     bulletGroup.setAll('checkWorldBounds', true);
-    monster.bulletGroup = bulletGroup;
+    monster.blr.bullet = bulletGroup;
+    this.machineLaserGroup.add(monster.blr.bullet);
 
     // optional
 
@@ -855,6 +856,10 @@ Play.prototype = {
 
   onMachineLaserOverlapPlayer: function(laser, player) {
     // console.log('onMachineLaserOverlapPlayer')
+
+    this.playDamageParticle(player);
+    laser.kill();
+    this.onCreatureIsDamaged(player, 'laser');
   },
 
   onPlayerArrowOverlapStoneGroup: function(arrow, stone) {
@@ -914,6 +919,9 @@ Play.prototype = {
     GAME.physics.arcade.overlap(this.playerArrowGroup, this.machineGroup, this.onPlayerArrowOverlapMonster, null, this);
     GAME.physics.arcade.overlap(this.playerArrowGroup, this.batGroup, this.onPlayerArrowOverlapMonster, null, this);
 
+    // overlap - machine laser overlap player
+    GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
+
     // player
     if (this.player.alive) {
 
@@ -956,22 +964,20 @@ Play.prototype = {
     }, this);
 
     // monster - machine
-    /*
     this.machineGroup.forEachAlive(function(monster) {
       if (GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
         var ts = UTIL.getCurrentUtcTimestamp();
 
-        if (ts > monster.nextFireTimestamp &&
-          monster.bulletGroup.countDead() > 0) {
+        if (ts > monster.blr.misc.nextFireTimestamp &&
+          monster.blr.bullet.countDead() > 0) {
+          monster.blr.misc.nextFireTimestamp = UTIL.getCurrentUtcTimestamp() + monster.blr.misc.fireRate; 
 
-          monster.nextFireTimestamp = UTIL.getCurrentUtcTimestamp() + monster.fireRate; 
           var bullet = monster.blr.bullet.getFirstDead();
           bullet.reset(monster.blr.weapon.x, monster.blr.weapon.y);
-          bullet.rotation = GAME.physics.arcade.moveToObject(bullet, this.player, monster.bulletSpeed);
+          bullet.rotation = GAME.physics.arcade.moveToObject(bullet, this.player, monster.blr.misc.bulletSpeed);
         }
       }
     }, this);
-    */
 
     // monster - bat
     this.batGroup.forEachAlive(function(monster) {
