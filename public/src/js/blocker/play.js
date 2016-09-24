@@ -15,8 +15,12 @@ Play = function(GAME) {
   this.nMachines = 8;
   this.nBats = 8;
 
+  /** @type {Array.number} map that can tell which point is walkable */
+  this.VTMap = {};
+
   // floor
   this.floorGroup;
+  this.vtmapDebugGroup;
   this.stoneShadowGroup;
   this.stoneGroup;
 
@@ -465,6 +469,7 @@ Play.prototype = {
     this.floorGroup = GAME.add.group();
     this.stoneShadowGroup = GAME.add.group();
     this.stoneGroup = GAME.add.group();
+    this.vtmapDebugGroup = GAME.add.group();
 
     // item
     this.potionGroup = GAME.add.group(); // unused
@@ -510,6 +515,69 @@ Play.prototype = {
     });
   },
 
+  debugMap: function() {
+    var i = 0, // column
+      j = 0, // row
+      renderPadding = 4;
+      mapData = this.VTMap.data,
+      mapTileWidth = this.VTMap.mapTileWidth,
+      mapTileHeight = this.VTMap.mapTileHeight,
+      nTileWidth = this.VTMap.nTileWidth,
+      nTileHeight = this.VTMap.nTileHeight;
+    
+    console.log(mapData);
+  
+    var bmdWidth = mapTileWidth - renderPadding * 2,
+      bmdHeight = mapTileHeight - renderPadding * 2;
+
+    var bmd = GAME.add.bitmapData(bmdWidth, bmdHeight);
+    bmd.ctx.beginPath();
+    bmd.ctx.rect(0, 0, bmdWidth, bmdHeight);
+    bmd.ctx.fillStyle = 'rgba(240, 240, 100, .6)';
+    bmd.ctx.fill();
+
+    for (i = 0; i < nTileHeight; i++) {
+      for (j = 0; j < nTileWidth; j++) {
+        var mapPoint = mapData[i][j];
+
+        // walkable
+        if (mapPoint !== 0) {
+          var x = (j * mapTileHeight) + renderPadding;
+            y = (i * mapTileWidth) + renderPadding,
+            drawnObject = GAME.add.sprite(x, y, bmd);
+
+          this.vtmapDebugGroup.add(drawnObject);
+        }
+      }
+    }
+  },
+
+  /**
+   * Creature 2D array
+   * 
+   * @see http://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript
+   * 
+   * @param {number} nRows
+   * @param {number} nCols
+   * @param {any} defaultValue
+   */
+  creature2DArray: function(nRows, nCols, defaultValue) {
+    var arr = [],
+      i = 0,
+      j = 0;
+
+    for (i = 0; i < nRows; i++) {
+      arr.push([]);
+      arr[i].push(new Array(nCols));
+
+      for (j = 0; j < nCols; j++) {
+        arr[i][j] = defaultValue;
+      }
+    }
+
+    return arr;
+  },
+
   create: function() {
     // ping the server that game already setted
     //
@@ -540,10 +608,28 @@ Play.prototype = {
     var map = GAME.add.tilemap('mapTile');
     map.addTilesetImage('map');
     
+    // VTMap
+    this.VTMap.mapTileWidth = map.tileWidth;
+    this.VTMap.mapTileHeight = map.tileHeight;
+    this.VTMap.nTileWidth = map.width;
+    this.VTMap.nTileHeight = map.height;
+    this.VTMap.data = this.creature2DArray(
+      this.VTMap.nTileWidth,
+      this.VTMap.nTileHeight,
+      0
+    );
+
     this.floorGroup = map.createLayer(0);
     this.floorGroup.resizeWorld();
     map.setTileIndexCallback(5, this.onCreatureOverlapWell, this, this.floorGroup);
     map.setTileIndexCallback(6, this.onCreatureOverlapFire, this, this.floorGroup);
+    map.forEach(function(tile) {
+      if (tile.index === 5 || tile.index === 6) {
+
+        // update VTMap
+        this.VTMap.data[tile.y][tile.x] = tile.index;
+      }
+    }, this, 0, 0, 50, 50, this.floorGroup);
 
     // map - stone (rock, bush)
     this.stoneGroup = map.createLayer(1);
@@ -554,9 +640,17 @@ Play.prototype = {
         stoneShadow.scale.setTo(0.7, 0.7);
         stoneShadow.alpha = .3;
         this.stoneShadowGroup.add(stoneShadow);
-      }
-    }, this, 0, 0, 46, 46, this.stoneGroup);
 
+        // update VTMap
+        this.VTMap.data[tile.y][tile.x] = tile.index;
+      }
+    }, this, 0, 0, 50, 50, this.stoneGroup);
+
+    // draw VTMap to game
+    if (IS_DEBUG) {
+      this.debugMap();
+    }
+    
     // emitter
     this.setDashEmitter();
     this.setRecoverEmitter();
@@ -645,6 +739,7 @@ Play.prototype = {
     GAME.world.bringToTop(this.floorGroup);
     GAME.world.bringToTop(this.stoneShadowGroup);
     GAME.world.bringToTop(this.stoneGroup);
+    GAME.world.bringToTop(this.vtmapDebugGroup);
 
     GAME.world.bringToTop(this.dashEmitterGroup);
     GAME.world.bringToTop(this.recoverEmitterGroup);
