@@ -956,34 +956,51 @@ Play.prototype = {
 
   render: function() {
     if (IS_DEBUG) {
-      var startedPosX = 32,
-        startedPosY = 100,
-        yStep = 20;
+      var creatureBodyDebugColor = 'rgba(0,255, 0, 0.4)',
+        weaponBodyDebugColor = 'rgba(215, 125, 125, 0.4)';
 
-      GAME.debug.text('zombieGroup living ' + this.zombieGroup.countLiving(), startedPosX, startedPosY += yStep);
-      GAME.debug.text('zombieGroup dead ' + this.zombieGroup.countDead(), startedPosX, startedPosY += yStep);
+      // top
+      GAME.debug.bodyInfo(this.player, 32, 32);
+      GAME.debug.spriteInfo(this.player, 32, 164);
 
-      GAME.debug.text('machineGroup living ' + this.machineGroup.countLiving(), startedPosX, startedPosY += yStep);
-      GAME.debug.text('machineGroup dead ' + this.machineGroup.countDead(), startedPosX, startedPosY += yStep);
+      // middle
+      GAME.debug.start(32, 260);
+      GAME.debug.line('zombieGroup living ' + this.zombieGroup.countLiving());
+      GAME.debug.line('zombieGroup dead ' + this.zombieGroup.countDead());
+      GAME.debug.line('machineGroup living ' + this.machineGroup.countLiving());
+      GAME.debug.line('machineGroup dead ' + this.machineGroup.countDead());
+      GAME.debug.line('batGroup living ' + this.batGroup.countLiving());
+      GAME.debug.line('batGroup dead ' + this.batGroup.countDead());
+      GAME.debug.stop();
 
-      GAME.debug.text('batGroup living ' + this.batGroup.countLiving(), startedPosX, startedPosY += yStep);
-      GAME.debug.text('batGroup dead ' + this.batGroup.countDead(), startedPosX, startedPosY += yStep);
+      // weapon body
+      GAME.debug.body(this.player.blr.weapon, creatureBodyDebugColor);
 
-      // GAME.debug.bodyInfo(this.player, 32, 32);
-      // GAME.debug.spriteInfo(this.player, 32, 164);
+      this.zombieWeaponGroup.forEachAlive(function(weapon) {
+        GAME.debug.body(weapon, weaponBodyDebugColor);
+      }, this);
 
-      GAME.debug.body(this.player);
+      this.machineWeaponGroup.forEachAlive(function(weapon) {
+        GAME.debug.body(weapon, weaponBodyDebugColor);
+      }, this);
+
+      this.batWeaponGroup.forEachAlive(function(weapon) {
+        GAME.debug.body(weapon, weaponBodyDebugColor);
+      }, this);
+
+      // creature body
+      GAME.debug.body(this.player, creatureBodyDebugColor);
 
       this.zombieGroup.forEachAlive(function(monster) {
-        GAME.debug.body(monster);
+        GAME.debug.body(monster, creatureBodyDebugColor);
       }, this);
 
       this.machineGroup.forEachAlive(function(monster) {
-        GAME.debug.body(monster);
+        GAME.debug.body(monster, creatureBodyDebugColor);
       }, this);
 
       this.batGroup.forEachAlive(function(monster) {
-        GAME.debug.body(monster);
+        GAME.debug.body(monster, creatureBodyDebugColor);
       }, this);
     }
   }
