@@ -147,7 +147,7 @@ Play.prototype = {
   },
 
   updateCreatureLabelText: function(creature) {
-    var labeltext = creature.blr.info.id + ' ' + creature.blr.info.life;
+    var labeltext = creature.blr.info.id + ' ' + creature.blr.info.life + '/' + creature.blr.info.maxLife;
     creature.blr.label.setText(labeltext);
   },
 
@@ -836,19 +836,19 @@ Play.prototype = {
   onPlayerOverlapZombieWeapon: function(player, monsterWeapon) {
     // console.log('onPlayerOverlapZombieWeapon');
 
-    this.onCreatureIsDamaged(player, 'zombie');
+    this.onCreatureIsDamaged(player, 'zombie hands');
   },
 
   onPlayerOverlapMachineWeapon: function(player, monsterWeapon) {
     // console.log('onPlayerOverlapMachineWeapon');
 
-    this.onCreatureIsDamaged(player, 'machine');
+    this.onCreatureIsDamaged(player, 'machine\'s turret');
   },
 
   onPlayerOverlapBatWeapon: function(player, monsterWeapon) {
     // console.log('onPlayerOverlapBatWeapon');
 
-    this.onCreatureIsDamaged(player, 'bat');
+    this.onCreatureIsDamaged(player, 'bat wings');
   },
 
   onMachineLaserOverlapPlayer: function(laser, player) {
