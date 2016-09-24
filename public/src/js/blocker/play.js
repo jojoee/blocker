@@ -68,9 +68,9 @@ Play = function(GAME) {
 Play.prototype = {
 
   /**
-   * Get started creature position
+   * Get random started creature position
    * not allow to birth at
-   * - fire 
+   * - fire
    * - bush
    * - stone
    * 
@@ -107,6 +107,44 @@ Play.prototype = {
       midelPos = new Position(zeroPos.x + tileWidth / 2, zeroPos.y + tileHeight / 2);
     
     return midelPos;
+  },
+
+  /**
+   * Get random walkable creature position
+   * using getRandomStartedCreaturePosition function (for now)
+   * 
+   * @returns {Position} return walkable position
+   */
+  getRandomWalkablePosition: function() {
+    return this.getRandomStartedCreaturePosition();
+  },
+
+  /**
+   * Get random auto move monster position
+   * 
+   * @param {Object} monster - monster object
+   * @returns {Position} return walkable position
+   */
+  getRandomAutoMovePosition: function(monster) {
+    var targetPos,
+      isTooClose = true;
+
+    while (isTooClose) {
+      targetPos = this.getRandomStartedCreaturePosition();
+
+      var distance = GAME.physics.arcade.distanceToXY(
+        monster,
+        targetPos.x,
+        targetPos.y
+      );
+      
+      // if more than minimum distance
+      if (distance > 600) {
+        isTooClose = false;
+      } 
+    }
+     
+    return targetPos; 
   },
 
   /**
@@ -207,6 +245,7 @@ Play.prototype = {
 
     // misc
     this.logCreatureRespawning(monster);
+    monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
   },
 
   spawnMachine: function() {
@@ -252,6 +291,7 @@ Play.prototype = {
 
     // misc
     this.logCreatureRespawning(monster);
+    monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
   },
 
   /**
@@ -290,6 +330,7 @@ Play.prototype = {
 
     // misc
     this.logCreatureRespawning(monster);
+    monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
   },
 
   /**
@@ -874,8 +915,10 @@ Play.prototype = {
     this.onCreatureIsDamaged(monster, 'arrow');
   },
 
-  onMonsterCollideStoneGroup: function() {
+  onMonsterCollideStoneGroup: function(monster, stone) {
     // console.log('onMonsterCollideStoneGroup');
+
+    this.forceRestartAutomove(monster);
   },
 
   onPlayerCollideStoneGroup: function() {
@@ -884,6 +927,63 @@ Play.prototype = {
 
   onPlayerCollideMonster: function() {
     // console.log('onPlayerCollideMonster');
+  },
+
+  forceRestartAutomove: function(monster) {
+    var ts = UTIL.getCurrentUtcTimestamp();
+
+    // hacky
+    monster.blr.misc.autoMoveTimestamp = ts - 7000;
+    this.monsterAutoMove(monster);
+  },
+
+  /**
+   * Start automove mode
+   * used by monster only
+   * 
+   * @param {Object} monster - monster object
+   */
+  monsterAutoMove: function(monster) {
+    monster.body.velocity.x = 0;
+    monster.body.velocity.y = 0;
+
+    if (GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
+      monster.blr.misc.isAutomove = false; // unused
+      monster.rotation = GAME.physics.arcade.moveToObject(
+        monster,
+        this.player,
+        monster.blr.phrInfo.velocitySpeed
+      );
+
+    } else {
+      var ts = UTIL.getCurrentUtcTimestamp(),
+        distance = GAME.physics.arcade.distanceToXY(
+          monster,
+          monster.blr.misc.autoMoveTargetPos.x,
+          monster.blr.misc.autoMoveTargetPos.y
+        );
+
+      // first time, auto move mode
+      // if monster
+      // 1. start (or keep) autoMove less than 6sec or
+      // 2. the monster is to close with the target (prevent monster is spinning around the targetPos)
+      if ((ts - monster.blr.misc.autoMoveTimestamp > 6000) ||
+        distance < 200) {
+        var targetPos = this.getRandomAutoMovePosition(monster);
+        
+        monster.blr.misc.isAutomove = true; // unused
+        monster.blr.misc.autoMoveTargetPos = targetPos;
+        monster.blr.misc.autoMoveTimestamp = UTIL.getCurrentUtcTimestamp();
+      }
+
+      // keep moving to the existing target position
+      monster.rotation = GAME.physics.arcade.moveToXY(
+        monster,
+        monster.blr.misc.autoMoveTargetPos.x,
+        monster.blr.misc.autoMoveTargetPos.y,
+        monster.blr.phrInfo.velocitySpeed
+      );
+    }
   },
 
   update: function() {
@@ -934,8 +1034,7 @@ Play.prototype = {
       if (GAME.input.activePointer.leftButton.isDown) {
         // move
 
-        var playerSpeed = 200;
-        GAME.physics.arcade.moveToPointer(this.player, playerSpeed);
+        GAME.physics.arcade.moveToPointer(this.player, this.player.blr.phrInfo.velocitySpeed);
 
         //  if it's overlapping the mouse, don't move any more
         if (Phaser.Rectangle.contains(this.player.body, GAME.input.x, GAME.input.y)) {
@@ -960,28 +1059,39 @@ Play.prototype = {
 
     // monster - zombie
     this.zombieGroup.forEachAlive(function(monster) {
-      this.updateCreatureLabelText(monster);
+      if (monster.alive) {
+        this.updateCreatureLabelText(monster);
+        this.monsterAutoMove(monster);
+      }
     }, this);
 
     // monster - machine
     this.machineGroup.forEachAlive(function(monster) {
-      if (GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
-        var ts = UTIL.getCurrentUtcTimestamp();
+      if (monster.alive) {
+        this.updateCreatureLabelText(monster);
 
-        if (ts > monster.blr.misc.nextFireTimestamp &&
-          monster.blr.bullet.countDead() > 0) {
-          monster.blr.misc.nextFireTimestamp = UTIL.getCurrentUtcTimestamp() + monster.blr.misc.fireRate; 
+        // shoot laser
+        if (GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
+          var ts = UTIL.getCurrentUtcTimestamp();
 
-          var bullet = monster.blr.bullet.getFirstDead();
-          bullet.reset(monster.blr.weapon.x, monster.blr.weapon.y);
-          bullet.rotation = GAME.physics.arcade.moveToObject(bullet, this.player, monster.blr.misc.bulletSpeed);
+          if (ts > monster.blr.misc.nextFireTimestamp &&
+            monster.blr.bullet.countDead() > 0) {
+            monster.blr.misc.nextFireTimestamp = UTIL.getCurrentUtcTimestamp() + monster.blr.misc.fireRate; 
+
+            var bullet = monster.blr.bullet.getFirstDead();
+            bullet.reset(monster.blr.weapon.x, monster.blr.weapon.y);
+            bullet.rotation = GAME.physics.arcade.moveToObject(bullet, this.player, monster.blr.misc.bulletSpeed);
+          }
         }
       }
     }, this);
 
     // monster - bat
     this.batGroup.forEachAlive(function(monster) {
-      this.updateCreatureLabelText(monster);
+      if (monster.alive) {
+        this.updateCreatureLabelText(monster);
+        this.monsterAutoMove(monster);
+      }
     }, this);
   },
 

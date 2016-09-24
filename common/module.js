@@ -284,17 +284,26 @@ var Creature = function(info, phrInfo, misc) {
 var Hero = function() {
   var info = new CreatureInfo(10),
     phrInfo = {
-      speed: 200, // unsed
-      angleSpeed: 200, // unused
+      spriteName: '',
+      width: 0,
+      height: 0,
+      bodyOffset: 0,
+      bodyMass: 0,
+      velocitySpeed: 200,
     },
     misc = {
       creatureType: 'hero',
-      visibleRange: 300, // unused
+      isImmortal: false,
+      visibleRange: 300,
+
       fireRate: 500, // 2 fire/sec 
       nextFireTimestamp: 0,
       nBullets: 40,
       bulletSpeed: 500,
-      isImmortal: false,
+      
+      isAutomove: false,
+      autoMoveTargetPos: null,
+      autoMoveTimestamp: 0,
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -309,12 +318,17 @@ var Zombie = function() {
       width: 46,
       height: 46,
       bodyOffset: 6,
-      bodyMass: -100,
+      bodyMass: 500,
+      velocitySpeed: 120,
     },
     misc = {
       creatureType: 'zombie',
-      visibleRange: 300,
       isImmortal: false,
+      visibleRange: 200,
+
+      isAutomove: false,
+      autoMoveTargetPos: null,
+      autoMoveTimestamp: 0,
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -329,16 +343,22 @@ var Machine = function() {
       width: 46,
       height: 46,
       bodyOffset: 6,
-      bodyMass: -100,
+      bodyMass: 1000,
+      velocitySpeed: 20,
     },
     misc = {
       creatureType: 'machine',
+      isImmortal: false,
       visibleRange: 300,
+
       fireRate: 1000, // 1 fire/sec
       nextFireTimestamp: 0,
       nBullets: 40,
       bulletSpeed: 500,
-      isImmortal: false,
+      
+      isAutomove: false,
+      autoMoveTargetPos: null,
+      autoMoveTimestamp: 0,
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -354,10 +374,16 @@ var Bat = function() {
       height: 46,
       bodyOffset: 8,
       bodyMass: 0,
+      velocitySpeed: 160,
     },
     misc = {
       creatureType: 'bat',
       isImmortal: false,
+      visibleRange: 240,
+      
+      isAutomove: false,
+      autoMoveTargetPos: null,
+      autoMoveTimestamp: 0,
     };
   
   Creature.call(this, info, phrInfo, misc);
