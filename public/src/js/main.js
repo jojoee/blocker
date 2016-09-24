@@ -37,6 +37,14 @@ if (IS_DUMMY) {
   UI.dummyLogList(60);
 }
 
+if (IS_DEBUG) {
+  console.log('IS_PROD', IS_PROD);
+  console.log('IS_ONLINE', IS_ONLINE);
+  console.log('IS_DEBUG', IS_DEBUG);
+  console.log('IS_DUMMY', IS_DUMMY);
+  console.log('IS_IMMORTAL', IS_IMMORTAL);
+}
+
 GAME.state.add('Boot', blocker.Boot);
 GAME.state.add('Load', blocker.Load);
 GAME.state.add('Play', blocker.Play);

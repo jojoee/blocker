@@ -10,14 +10,12 @@ var eventPlayerPrefix = 'player.',
   eventServerPrefix = 'server.';
 
 var commonConfig = {
-  // prod should be true
+  // prod
   isOnline: false,
   isProd: false,
 
-  // dev should be true
+  // dev
   isDebug: true,
-
-  // dummy
   isImmortal: false,
   isDummy: true,
 

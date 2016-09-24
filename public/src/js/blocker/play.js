@@ -566,16 +566,14 @@ Play.prototype = {
   },
 
   debugMap: function() {
-    var i = 0, // column
-      j = 0, // row
+    var i = 0, // row
+      j = 0, // column
       renderPadding = 4;
       mapData = this.VTMap.data,
       mapTileWidth = this.VTMap.mapTileWidth,
       mapTileHeight = this.VTMap.mapTileHeight,
       nTileWidth = this.VTMap.nTileWidth,
       nTileHeight = this.VTMap.nTileHeight;
-    
-    console.log(mapData);
   
     var bmdWidth = mapTileWidth - renderPadding * 2,
       bmdHeight = mapTileHeight - renderPadding * 2;
@@ -586,8 +584,8 @@ Play.prototype = {
     bmd.ctx.fillStyle = 'rgba(240, 240, 100, .6)';
     bmd.ctx.fill();
 
-    for (i = 0; i < nTileHeight; i++) {
-      for (j = 0; j < nTileWidth; j++) {
+    for (i = 0; i < nTileWidth; i++) {
+      for (j = 0; j < nTileHeight; j++) {
         var mapPoint = mapData[i][j];
 
         // walkable
@@ -871,6 +869,18 @@ Play.prototype = {
     this.onCreatureIsDamaged(monster, 'arrow');
   },
 
+  onMonsterCollideStoneGroup: function() {
+    // console.log('onMonsterCollideStoneGroup');
+  },
+
+  onPlayerCollideStoneGroup: function() {
+    // console.log('onCreatureCollideStoneGroup');
+  },
+
+  onPlayerCollideMonster: function() {
+    // console.log('onPlayerCollideMonster');
+  },
+
   update: function() {
     // collide - creature with floorGroup
     GAME.physics.arcade.collide(this.zombieGroup, this.floorGroup);
@@ -879,15 +889,15 @@ Play.prototype = {
     GAME.physics.arcade.collide(this.playerGroup, this.floorGroup);
 
     // collide - creature with stoneGroup
-    GAME.physics.arcade.collide(this.zombieGroup, this.stoneGroup);
-    GAME.physics.arcade.collide(this.machineGroup, this.stoneGroup);
-    GAME.physics.arcade.collide(this.batGroup, this.stoneGroup);
-    GAME.physics.arcade.collide(this.playerGroup, this.stoneGroup);
+    GAME.physics.arcade.collide(this.zombieGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
+    GAME.physics.arcade.collide(this.machineGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
+    GAME.physics.arcade.collide(this.batGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
+    GAME.physics.arcade.collide(this.playerGroup, this.stoneGroup, this.onPlayerCollideStoneGroup, null, this);
 
     // collide - player with monster
-    GAME.physics.arcade.collide(this.playerGroup, this.zombieGroup);
-    GAME.physics.arcade.collide(this.playerGroup, this.machineGroup);
-    GAME.physics.arcade.collide(this.playerGroup, this.batGroup);
+    GAME.physics.arcade.collide(this.playerGroup, this.zombieGroup, this.onPlayerCollideMonster, null, this);
+    GAME.physics.arcade.collide(this.playerGroup, this.machineGroup, this.onPlayerCollideMonster, null, this);
+    GAME.physics.arcade.collide(this.playerGroup, this.batGroup, this.onPlayerCollideMonster, null, this);
 
     // overlap - player with monster
     GAME.physics.arcade.overlap(this.playerGroup, this.zombieGroup, this.onPlayerOverlapZombie, null, this);
@@ -1107,6 +1117,7 @@ Play.prototype = {
       var creatureBodyDebugColor = 'rgba(0,255, 0, 0.4)',
         weaponBodyDebugColor = 'rgba(215, 125, 125, 0.4)';
 
+      /*
       // top
       GAME.debug.bodyInfo(this.player, 32, 32);
       GAME.debug.spriteInfo(this.player, 32, 164);
@@ -1120,6 +1131,7 @@ Play.prototype = {
       GAME.debug.line('batGroup living ' + this.batGroup.countLiving());
       GAME.debug.line('batGroup dead ' + this.batGroup.countDead());
       GAME.debug.stop();
+      */
 
       // weapon body
       GAME.debug.body(this.player.blr.weapon, creatureBodyDebugColor);
