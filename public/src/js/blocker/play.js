@@ -147,6 +147,7 @@ Play.prototype = {
     weapon.anchor.set(0.5);
     weapon.animations.add('attack', [0, 1, 2, 3, 4]);
     weapon.animations.play('attack', 10, true, false);
+    GAME.physics.enable(weapon);
     monster.blr.weapon = weapon;
     this.zombieWeaponGroup.add(monster.blr.weapon);
 
@@ -179,6 +180,7 @@ Play.prototype = {
     weapon.anchor.set(0.5);
     weapon.animations.add('attack', [0, 1, 2]);
     weapon.animations.play('attack', 10, true, false);
+    GAME.physics.enable(weapon);
     monster.blr.weapon = weapon;
     this.machineWeaponGroup.add(monster.blr.weapon);
 
@@ -225,6 +227,7 @@ Play.prototype = {
     weapon.anchor.set(0.5);
     weapon.animations.add('attack', [0, 1, 2, 3]);
     weapon.animations.play('attack', 10, true, false);
+    GAME.physics.enable(weapon);
     monster.blr.weapon = weapon;
     this.batWeaponGroup.add(monster.blr.weapon);
 
@@ -313,7 +316,9 @@ Play.prototype = {
   },
 
   /**
-   * @param {[type]} creature
+   * When creature is damaged
+   * 
+   * @param {Object} creature - creature object
    * @param {string} damageFrom - where is the damage come frome
    */
   onCreatureIsDamaged: function(creature, damageFrom) {
@@ -684,6 +689,24 @@ Play.prototype = {
     // console.log('onPlayerOverlapBat');
   },
 
+  onPlayerOverlapZombieWeapon: function(player, monsterWeapon) {
+    // console.log('onPlayerOverlapZombieWeapon');
+
+    this.onCreatureIsDamaged(player, 'zombie');
+  },
+
+  onPlayerOverlapMachineWeapon: function(player, monsterWeapon) {
+    // console.log('onPlayerOverlapMachineWeapon');
+
+    this.onCreatureIsDamaged(player, 'machine');
+  },
+
+  onPlayerOverlapBatWeapon: function(player, monsterWeapon) {
+    // console.log('onPlayerOverlapBatWeapon');
+
+    this.onCreatureIsDamaged(player, 'bat');
+  },
+
   onMachineLaserOverlapPlayer: function(laser, player) {
     // console.log('onMachineLaserOverlapPlayer')
   },
@@ -722,6 +745,11 @@ Play.prototype = {
     GAME.physics.arcade.overlap(this.playerGroup, this.zombieGroup, this.onPlayerOverlapZombie, null, this);
     GAME.physics.arcade.overlap(this.playerGroup, this.machineGroup, this.onPlayerOverlapMachine, null, this);
     GAME.physics.arcade.overlap(this.playerGroup, this.batGroup, this.onPlayerOverlapBat, null, this);
+
+    // overlap - player with monster weapon
+    GAME.physics.arcade.overlap(this.playerGroup, this.zombieWeaponGroup, this.onPlayerOverlapZombieWeapon, null, this);
+    GAME.physics.arcade.overlap(this.playerGroup, this.machineWeaponGroup, this.onPlayerOverlapMachineWeapon, null, this);
+    GAME.physics.arcade.overlap(this.playerGroup, this.batWeaponGroup, this.onPlayerOverlapBatWeapon, null, this);
 
     // overlap - player arrow with monster
     GAME.physics.arcade.overlap(this.playerArrowGroup, this.zombieGroup, this.onPlayerArrowOverlapMonster, null, this);
