@@ -6,64 +6,6 @@ var UTIL = require('./util'),
   COMMON_CONFIG = require('./config');
 
 /**
- * Game utilities
- */
-var GameUtil = {
-
-  /**
-   * Get random hero position
-   * 
-   * @returns {Position}
-   */
-  getRandomHeroPosition: function() {
-    var pos = this.getRandomCreaturePosition(
-      COMMON_CONFIG.hero.width,
-      COMMON_CONFIG.hero.height
-    );
-
-    return pos;
-  },
-
-  /**
-   * Get random monster position
-   * (unused)
-   * 
-   * @returns {Position}
-   */
-  getRandomMonsterPosition: function() {
-    var pos = this.getRandomCreaturePosition(
-      COMMON_CONFIG.monster.width,
-      COMMON_CONFIG.monster.height
-    );
-
-    return pos;
-  },
-
-  /**
-   * Get random creature position
-   * - Hero
-   * - Monster
-   * 
-   * @param {number} creatureWidth
-   * @param {number} creatureHeight
-   * @returns {Position}
-   */
-  getRandomCreaturePosition: function(creatureWidth, creatureHeight) {
-    var minWidth = creatureWidth / 2,
-      maxWidth = (COMMON_CONFIG.game.worldWidth - creatureWidth) / 2,
-      minHeight = creatureHeight / 2,
-      maxHeight = (COMMON_CONFIG.game.worldHeight - creatureHeight) / 2;
-
-    var x = UTIL.getRandomInt(minWidth, maxWidth),
-      y = UTIL.getRandomInt(minHeight, maxHeight),
-      angle = UTIL.getRandomInt(0, 360),
-      pos = new Position(x, y, angle);
-
-    return pos;
-  },
-};
-
-/**
  * Position class
  * 
  * @param {number} x
@@ -78,6 +20,7 @@ var Position = function(x, y) {
 
 /**
  * Vector class
+ * extend Position class
  * 
  * @param {number} x
  * @param {number} y
@@ -87,10 +30,13 @@ var Position = function(x, y) {
  */
 var Vector = function(x, y, rotation) {
   if (typeof rotation === 'undefined') rotation = 0;
-  this.x = x;
-  this.y = x;
+  Position.call(this, x, y);
+
   this.rotation = rotation;
 };
+
+Vector.prototype = Object.create(Position.prototype);
+Vector.prototype.constructor = Vector;
 
 Vector.prototype.toJson = function() {
   var result = {
@@ -115,105 +61,21 @@ Vector.prototype.updateByJson = function(obj) {
 };
 
 /**
- * Creature object
- * (unused)
- */
-var Creature = function(id) {
-  this.id = id;
-};
-
-/**
- * Player object
- * (unused)
- * TODO: refactor
- * 
- * type
- * - player
- * - bot
- * 
- * @param {number} id - object id
- * @param {string} [type=player] - player type
- */
-var Player = function(id, type) {
-  if (typeof type === 'undefined') type = 'player';
-
-  /** @type {string} */
-  this.id = id;
-
-  /** @type {string} */
-  this.type = type;
-
-  /** @type {Position} */
-  this.pos = GameUtil.getRandomHeroPosition();
-
-  /** @type {string} */
-  this.message = '';
-
-  /** @type {number} timestamp */
-  this.latestTyping = UTIL.getCurrentUtcTimestamp();
-
-  /** @type {number} timestamp */
-  this.latestUpdate = UTIL.getCurrentUtcTimestamp(); // ignore typing
-
-  /**
-   * Get latest update timestamp
-   * 
-   * @returns {number}
-   */
-  this.getLatestUpdate = function() {
-    return this.LatestUpdate;
-  }
-
-  /**
-   * Update latest update timestamp
-   */
-  this.updateLatestUpdate = function() {
-    this.latestUpdate = UTIL.getCurrentUtcTimestamp();
-  }
-
-  /**
-   * Update latest typing timestamp
-   */
-  this.updateLatestTyping = function() {
-    this.latestTyping = UTIL.getCurrentUtcTimestamp();
-  }
-
-  /**
-   * Export Player object to json format
-   * TODO: refactor
-   * 
-   * @returns {Object} Player object property in JSON format
-   */
-  this.toJson = function() {
-    return {
-      id: this.id,
-      type: this.type,
-      pos: this.pos.toJson(),
-      message: this.message,
-      latestTyping: this.updateLatestTyping,
-      latestUpdate: this.updateLatestUpdate,
-    };
-  }
-};
-
-/**
- * Message object format
+ * Message object
  * 
  * @param {string} playerId
  * @param {string} text
  * @param {number} utcTimestamp
  */
 var Message = function(playerId, text, utcTimestamp) {
-
-  return {
-    id: playerId,
-    text: text,
-    utcTimestamp: utcTimestamp,
-  }
+  this.id = playerId;
+  this.text = text
+  this.utcTimestamp = utcTimestamp;
 };
 
 /**
  * CreatureInfo
+ * internal class
  * 
  * @param {number} life
  * @param {number} [maxLife]
@@ -261,7 +123,7 @@ CreatureInfo.prototype.init = function() {
 
 /**
  * Creature
- * TODO: fix DI
+ * internal class
  */
 var Creature = function(info, phrInfo, misc) {
   this.info = info;
@@ -271,14 +133,27 @@ var Creature = function(info, phrInfo, misc) {
   this.lastPos = {};
   this.label = {};
 
-  /** @type {Sprite} Phaser sprite object (shadow sprite) */
+  /** @type {Sprite} Phaser sprite object (shadow) */
   this.shadow = {};
 
-  /** @type {Sprite} Phaser sprite object */
+  /** @type {Sprite} Phaser sprite object (weapon) */
   this.weapon = {};
+
+  /** @type {Sprite} Phaser sprite object (bubble) */
+  this.bubble = {};
 
   /** @type {Group} Phaser group object */
   this.bullet = {};
+};
+
+Creature.prototype.updateLastEnterTimestamp = function(ts) {
+  if (typeof ts === 'undefined') ts = UTIL.getCurrentUtcTimestamp();
+  this.misc.lastEnterTimestamp = ts;
+};
+
+Creature.prototype.updateLastMessageTimestamp = function(ts) {
+  if (typeof ts === 'undefined') ts = UTIL.getCurrentUtcTimestamp(); 
+  this.misc.lastMessageTimestamp = ts;
 };
 
 var Hero = function() {
@@ -296,14 +171,21 @@ var Hero = function() {
       isImmortal: false,
       visibleRange: 300,
 
+      // bullet
       fireRate: 500, // 2 fire/sec 
       nextFireTimestamp: 0,
       nBullets: 40,
       bulletSpeed: 500,
       
+      // automove
       isAutomove: false,
       autoMoveTargetPos: null,
       autoMoveTimestamp: 0,
+
+      // bubble
+      isTyping: false,
+      lastEnterTimestamp: 0,
+      lastMessageTimestamp: 0,
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -318,17 +200,23 @@ var Zombie = function() {
       width: 46,
       height: 46,
       bodyOffset: 6,
-      bodyMass: 500,
-      velocitySpeed: 120,
+      bodyMass: 0,
+      velocitySpeed: 100,
     },
     misc = {
       creatureType: 'zombie',
       isImmortal: false,
       visibleRange: 200,
 
+      // automove
       isAutomove: false,
       autoMoveTargetPos: null,
       autoMoveTimestamp: 0,
+
+      // bubble
+      isTyping: false,
+      lastEnterTimestamp: 0,
+      lastMessageTimestamp: 0,
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -343,22 +231,29 @@ var Machine = function() {
       width: 46,
       height: 46,
       bodyOffset: 6,
-      bodyMass: 1000,
-      velocitySpeed: 20,
+      bodyMass: 20,
+      velocitySpeed: 120,
     },
     misc = {
       creatureType: 'machine',
       isImmortal: false,
       visibleRange: 300,
 
+      // bullet
       fireRate: 1000, // 1 fire/sec
       nextFireTimestamp: 0,
       nBullets: 40,
       bulletSpeed: 500,
       
+      // automove
       isAutomove: false,
       autoMoveTargetPos: null,
       autoMoveTimestamp: 0,
+
+      // bubble
+      isTyping: false,
+      lastEnterTimestamp: 0,
+      lastMessageTimestamp: 0,
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -374,16 +269,22 @@ var Bat = function() {
       height: 46,
       bodyOffset: 8,
       bodyMass: 0,
-      velocitySpeed: 160,
+      velocitySpeed: 120,
     },
     misc = {
       creatureType: 'bat',
       isImmortal: false,
       visibleRange: 240,
       
+      // automove
       isAutomove: false,
       autoMoveTargetPos: null,
       autoMoveTimestamp: 0,
+
+      // bubble
+      isTyping: false,
+      lastEnterTimestamp: 0,
+      lastMessageTimestamp: 0,
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -392,12 +293,11 @@ Bat.prototype = Object.create(Creature.prototype);
 Bat.prototype.constructor = Bat;
 
 module.exports = {
-  // GameUtil: GameUtil,
   Position: Position,
+  Vector: Vector,
   Message: Message,
-  CreatureInfo: CreatureInfo,
+  // CreatureInfo: CreatureInfo,
   // Creature: Creature,
-  // Player: Player,
   Hero: Hero,
   Zombie: Zombie,
   Machine: Machine,

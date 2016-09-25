@@ -34,7 +34,6 @@ blocker.Util.init();
 
 if (IS_DUMMY) {
   UI.dummyPlayerList(60);
-  UI.dummyLogList(60);
 }
 
 if (IS_DEBUG) {

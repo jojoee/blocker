@@ -1,6 +1,5 @@
 var CONFIG = require('./config'),
   UI = require('./../ui'),
-  DATA = require('./../../../../common/data'),
   MODULE = require('./../../../../common/module'),
   Position = MODULE.Position,
   Vector = MODULE.Vector,
@@ -407,8 +406,6 @@ Play.prototype = {
         creature.blr.info.updateLastRecoverTimestamp();
         this.playRecoverParticle(creature);
         creature.animations.play('recover', 10, false, false);
-
-        this.updateCreatureLabelText(creature);
       }
     }
   },
@@ -461,8 +458,6 @@ Play.prototype = {
         // - random position
         this.respawnCreature(creature);
 
-      } else {
-        this.updateCreatureLabelText(creature);
       }
     }
   },
@@ -1075,7 +1070,12 @@ Play.prototype = {
     // monster - zombie
     this.zombieGroup.forEachAlive(function(monster) {
       if (monster.alive) {
-        this.updateCreatureLabelText(monster);
+        // reset
+        monster.body.velocity.y = 0;
+        monster.body.velocity.x = 0;
+        monster.body.angularVelocity = 0;
+        
+        // automove
         this.monsterAutoMove(monster);
       }
     }, this);
@@ -1083,9 +1083,12 @@ Play.prototype = {
     // monster - machine
     this.machineGroup.forEachAlive(function(monster) {
       if (monster.alive) {
-        this.updateCreatureLabelText(monster);
+        // reset
+        monster.body.velocity.y = 0;
+        monster.body.velocity.x = 0;
+        monster.body.angularVelocity = 0;
 
-        // shoot laser
+        // bullet
         if (GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
           var ts = UTIL.getCurrentUtcTimestamp();
 
@@ -1104,7 +1107,12 @@ Play.prototype = {
     // monster - bat
     this.batGroup.forEachAlive(function(monster) {
       if (monster.alive) {
-        this.updateCreatureLabelText(monster);
+        // reset
+        monster.body.velocity.y = 0;
+        monster.body.velocity.x = 0;
+        monster.body.angularVelocity = 0;
+
+        // automove
         this.monsterAutoMove(monster);
       }
     }, this);
@@ -1193,7 +1201,7 @@ Play.prototype = {
   },
 
   /**
-   * Update creature weapon Vector
+   * Update creature weapon
    * using creature position by default
    * 
    * @param {[type]} creature
@@ -1218,12 +1226,14 @@ Play.prototype = {
 
   preRender: function() {
     // All `sub` (weapon, shadow) should be updated here 
-    // no need to update `child` (label), cause it's automatically updated 
+    // no need to update `child` (label position), cause it's automatically updated 
 
+    this.updateCreatureLabelText(this.player);
     this.updateCreatureWeapon(this.player);
     this.updateCreatureShadow(this.player);
 
     this.zombieGroup.forEachAlive(function(monster) {
+      this.updateCreatureLabelText(monster);
       this.updateCreatureWeapon(monster);
       this.updateCreatureShadow(monster);
     }, this);
@@ -1232,12 +1242,14 @@ Play.prototype = {
       var newX = monster.x,
         newY = monster.y,
         newRotation = GAME.physics.arcade.angleBetween(monster, this.player);
-
+      
+      this.updateCreatureLabelText(monster);
       this.updateCreatureWeapon(monster, newX, newY, newRotation);
       this.updateCreatureShadow(monster);
     }, this);
 
     this.batGroup.forEachAlive(function(monster) {
+      this.updateCreatureLabelText(monster);
       this.updateCreatureWeapon(monster);
       this.updateCreatureShadow(monster);
     }, this);
