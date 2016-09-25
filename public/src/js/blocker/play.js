@@ -302,6 +302,7 @@ Play.prototype = {
     this.machineLaserGroup.add(monster.blr.bullet);
 
     // optional
+    monster.body.moves = false;
 
     // misc
     this.logCreatureRespawning(monster);
