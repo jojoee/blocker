@@ -1152,7 +1152,6 @@ Play.prototype = {
    * Update creature follow the mouse
    * So, this function will update
    * - body rotation
-   * - weapon rotation
    * 
    * @param {[type]} creature
    */
@@ -1162,7 +1161,6 @@ Play.prototype = {
       newRotation = this.getRotationBetweenCreatureAndMouse(creature);
 
     creature.rotation = newRotation;
-    this.updateCreatureWeapon(creature);
   },
 
   isCreatureMove: function(creature) {
@@ -1218,8 +1216,10 @@ Play.prototype = {
   },
 
   preRender: function() {
-    // All shadow will update here
+    // All `sub` (weapon, shadow) should be updated here 
+    // no need to update `child` (label), cause it's automatically updated 
 
+    this.updateCreatureWeapon(this.player);
     this.updateCreatureShadow(this.player);
 
     this.zombieGroup.forEachAlive(function(monster) {
