@@ -65,7 +65,7 @@ Naming
 - [x] Map by [Tiled Map Editor](http://www.mapeditor.org/)
 - [x] Control: Mouse (mouse over keyboard)
 - [ ] Redirect all pages to root (cause we only use root page)
-- [ ] Update bubble/message graphic
+- [ ] Update bubble/message graphic, [1](http://www.html5gamedevs.com/topic/8837-speech-bubble-text-with-rectangle-as-background/)
 - [ ] Add deploy shell script
 - [ ] Day / Night system
 - [ ] Monster path finder, [1](http://jojoee.github.io/phaser-examples/games/paths-face/), [2](http://jojoee.github.io/phaser-examples/games/boids-steering/), [3](http://jojoee.github.io/phaser-examples/games/easystarjs/)
