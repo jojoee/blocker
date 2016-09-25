@@ -20,8 +20,7 @@ for develop the client side, please run - `gulp watch`
 ## Code guideline & Naming we use
 ```
 1. Base javascript style: [Airbnb](https://github.com/airbnb/javascript)
-2. Global variable should be UPPERCASE
-4. Function should return only one type
+2. Function should return only one type
   e.g.
   - getName: string, '' (default)
   - getRandomInt: number, 0 (default)
@@ -31,6 +30,11 @@ for develop the client side, please run - `gulp watch`
   except getIndex
   e.g.
   - getIndexOfPlayer: number, -1 (default)
+
+Naming
+- Function / scope variable: `camelCase`  
+- Global variable: `UPPERCASE`
+- Class: `PascalCase`
 
 *note*
 - Monster
@@ -46,10 +50,10 @@ for develop the client side, please run - `gulp watch`
 ## TODO
 - [x] `spacebar` can fire arrow
 - [x] Respawn monster when it's died
-- [ ] Message icon and message bouble when send the message
-- [ ] Fix birth point of creature 
-- [ ] Machine fire laser
-- [ ] Monster (random walk)
+- [x] Messaging
+- [x] Fix birth point of creature
+- [x] Machine fire laser
+- [x] Monster (random walk)
 - [ ] Phaser server side
 - [ ] Make it online
 - [x] Implement webfont
@@ -61,6 +65,7 @@ for develop the client side, please run - `gulp watch`
 - [x] Map by [Tiled Map Editor](http://www.mapeditor.org/)
 - [x] Control: Mouse (mouse over keyboard)
 - [ ] Redirect all pages to root (cause we only use root page)
+- [ ] Update bubble/message graphic
 - [ ] Add deploy shell script
 - [ ] Day / Night system
 - [ ] Monster path finder, [1](http://jojoee.github.io/phaser-examples/games/paths-face/), [2](http://jojoee.github.io/phaser-examples/games/boids-steering/), [3](http://jojoee.github.io/phaser-examples/games/easystarjs/)
@@ -69,6 +74,7 @@ for develop the client side, please run - `gulp watch`
 - [ ] Minimap
 - [ ] Creature sight feature, [1](http://jojoee.github.io/phaser-examples/games/bresenham-light/), [2](http://www.emanueleferonato.com/wp-content/uploads/2014/10/survival/), [3](http://jojoee.github.io/phaser-examples/games/horror-ray-casting/)
 - [ ] Tutorial for development
+- [ ] Talkable monster
 - [ ] Arorw / Laser is killed when hit stoneGroup
 - [ ] Responsive (support mobile / tablet user)
 - [ ] Support screen when resizing 
@@ -76,10 +82,12 @@ for develop the client side, please run - `gulp watch`
 - [x] Universal / Isomorphic concepts
 - [ ] Plugin: Screen shaker when player's attacked
 - [ ] HUD
+- [ ] Fix - monster can be pushed through stoneGroup
 - [x] Bring `creature label` to the top
 - [x] Player always top
 - [ ] Boss mode
 - [ ] Score system
+- [x] Immortal mode for debugging
 - [ ] Score board (Leader board)
 - [ ] Update Favicon
 - [x] Concat + Minify
