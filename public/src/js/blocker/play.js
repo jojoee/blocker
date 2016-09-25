@@ -69,18 +69,30 @@ Play.prototype = {
 
   /**
    * Get random started creature position
-   * not allow to birth at
+   * not be allowed at
    * - fire
    * - bush
+   * - well
    * - stone
+   * 
+   * @returns {Position} return birth(able) position
+   */
+  getRandomStartedCreaturePosition: function() {
+    return this.getCreaturePositionByExclusion([1, 3, 5, 6]);
+  },
+
+  /**
+   * Get random started creature position (real x, y in map)
+   * by excluding given `arr`
    * 
    * note
    * it's work, if the monster sprite is not over than
    * mapTileWidth and mapTileHeight
    * 
-   * @returns {Position} return birth(able) position
+   * @param {Array.number} arr - Array of tile index that you do not want
+   * @returns {Position} return position (middle of tile)
    */
-  getRandomStartedCreaturePosition: function() {
+  getCreaturePositionByExclusion: function(arr) {
     var nTileWidth = this.VTMap.nTileWidth,
       nTileHeight = this.VTMap.nTileHeight,
       tileWidth = this.VTMap.mapTileWidth,
@@ -94,9 +106,8 @@ Play.prototype = {
       tileIndexX = UTIL.getRandomInt(0, nTileWidth - 1);
       tileIndexY = UTIL.getRandomInt(0, nTileHeight - 1);
 
-      if (this.VTMap.data[tileIndexY][tileIndexX] !== 1 &&
-      this.VTMap.data[tileIndexY][tileIndexX] !== 3 &&
-      this.VTMap.data[tileIndexY][tileIndexX] !== 6) {
+      // if the tile value is not be contained in
+      if (arr.indexOf(this.VTMap.data[tileIndexY][tileIndexX]) === -1) {
         isUnBirthAble = false;
       }
     }
@@ -110,13 +121,16 @@ Play.prototype = {
   },
 
   /**
-   * Get random walkable creature position
-   * using getRandomStartedCreaturePosition function (for now)
+   * Get random started creature position
+   * not be allowed at
+   * - fire
+   * - bush
+   * - stone
    * 
    * @returns {Position} return walkable position
    */
   getRandomWalkablePosition: function() {
-    return this.getRandomStartedCreaturePosition();
+    return this.getCreaturePositionByExclusion([1, 3, 6]);
   },
 
   /**
