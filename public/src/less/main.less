@@ -7,8 +7,46 @@ z-index
 - 3: github ribbon
 */
 
-/*================================================================ General
+/*================================================================ Common
 */
+
+.monospace {
+  font-family: monospace;
+}
+
+.transition {
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  -ms-transition: all 0.2s ease;
+  -o-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+.visibility-visible {
+  visibility: visible;
+}
+
+.visibility-hidden {
+  visibility: hidden;
+}
+
+.main-font {
+  font-family: monospace;
+}
+
+.text-font {
+  font-family: 'Roboto', sans-serif;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+}
 
 * {
   margin: 0;
@@ -27,18 +65,19 @@ body {
   position: relative;
   width: 100%;
   height: 100%;
+  &:extend(.main-font);
+}
+
+button,
+input,
+select {
+  outline: 0;
 }
 
 canvas {
   display: block;
 }
 
-// scrollbar
-// https://css-tricks.com/custom-scrollbars-in-webkit/
-// http://cssdeck.com/labs/css3-webkit-vertical-scrollbars/
-// https://webdesign.tutsplus.com/articles/quick-tip-styling-scrollbars-to-match-your-ui-design--webdesign-9430
-// http://stackoverflow.com/questions/7725652/css-scrollbar-style-cross-browser
-// http://stackoverflow.com/questions/9251354/css-customized-scroll-bar-in-div
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -53,19 +92,20 @@ canvas {
   background: rgba(256, 256, 256, 0.5);
 }
 
-/*================================================================ Common
-*/
-
-.monospace {
-  font-family: monospace;
+::-webkit-input-placeholder {
+  &:extend(.text-font);
 }
 
-.transition {
-  -webkit-transition: all 0.2s ease;
-  -moz-transition: all 0.2s ease;
-  -ms-transition: all 0.2s ease;
-  -o-transition: all 0.2s ease;
-  transition: all 0.2s ease;
+:-moz-placeholder {
+  &:extend(.text-font);
+}
+
+::-moz-placeholder {
+  &:extend(.text-font);
+}
+
+:-ms-input-placeholder {
+  &:extend(.text-font);
 }
 
 /*================================================================ Main
@@ -84,19 +124,15 @@ canvas {
 */
 
 #sidebar {
-  pointer-events: none; // cannot scroll
   position: absolute;
   top: 0;
-  right: -6px; // hide scrollbar
   width: 100px;
   height: 100%;
   z-index: 2;
-  overflow-x: hidden;
-  opacity: .6;
-
-  &:hover {
-    opacity: 1;
-  }
+  right: -6px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 1;
 }
 
 .widget {
@@ -119,12 +155,20 @@ canvas {
   }
 }
 
+.players {
+  
+  li {
+    opacity: .6;
+  }
+}
+
 /*================================================================ Footer
 */
 
 .footer {
   pointer-events: none;
   position: relative;
+  opacity: .8;
 }
 
 #log-wrap {
@@ -133,9 +177,6 @@ canvas {
   overflow-y: scroll;
   position: absolute;
   overflow: hidden;
-
-  // http://stackoverflow.com/questions/16670931/hide-scroll-bar-but-still-being-able-to-scroll
-  // force remove scrollbar
   left: 6px;
   bottom: 6px;
 }
@@ -157,6 +198,29 @@ canvas {
 
 /*================================================================ Others
 */
+
+.message-input {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  width: 200px;
+  text-align: center;
+  margin-left: -100px;
+  padding: 6px 0;
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  color: @white;
+  font-size: 16px;
+  visibility: visible;
+  border-radius: 4px;
+
+  opacity: .4;
+  pointer-events: visible;
+
+  &:focus {
+    outline: 0;
+  }
+}
 
 // http://tholman.com/github-corners/
 @keyframes octocat-wave{

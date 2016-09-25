@@ -8,6 +8,8 @@ var Ui = {
 
   logListEle: document.getElementById('logs'),
   playerListEle: document.getElementById('players'),
+  sidebarEle: document.getElementById('sidebar'),
+  messageInputEle: document.getElementsByClassName('message-input')[0], 
 
   /*================================================================ Dummy
    */
@@ -53,19 +55,6 @@ var Ui = {
     this.logListEle.insertBefore(liEle, this.logListEle.firstChild);
   },
 
-  /*---------------------------------------------------------------- Log - Message
-   */
-
-  /**
-   * Add Message into message list (log list)
-   * TODO: complete it
-   * 
-   * @param {Message}
-   */
-  addPlayerMessageToMessageList: function(message) {
-
-  },
-
   /*================================================================ Player list
    */
 
@@ -89,6 +78,7 @@ var Ui = {
 
   /**
    * Remove player from player list by player id
+   * unused
    * 
    * @param {string} playerId
    */
@@ -98,6 +88,26 @@ var Ui = {
     UTIL.removeElement(liEle);
   },
 
+  /*================================================================ Message
+   */
+
+  getMessageInput: function() {
+    return this.messageInputEle.value;
+  },
+
+  enableMessageInput: function() {
+    this.messageInputEle.style.opacity = 1;
+    this.messageInputEle.style.pointerEvents = 'visible';
+    this.messageInputEle.focus();
+  },
+
+  disableMessageInput: function() {
+    this.messageInputEle.style.opacity = .4;
+    this.messageInputEle.style.pointerEvents = 'none';
+    this.messageInputEle.blur();
+    this.messageInputEle.value = '';
+  },
+
   /*================================================================ Init
    */
 
@@ -105,7 +115,7 @@ var Ui = {
    * Initialize UI
    */
   init: function() {
-    // nothing
+    this.disableMessageInput();
   },
 };
 

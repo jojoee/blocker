@@ -146,14 +146,33 @@ var Creature = function(info, phrInfo, misc) {
   this.bullet = {};
 };
 
+/**
+ * Update lastEnterTimestamp
+ * 
+ * @param {number} [ts] - last enter timestamp 
+ */
 Creature.prototype.updateLastEnterTimestamp = function(ts) {
   if (typeof ts === 'undefined') ts = UTIL.getCurrentUtcTimestamp();
   this.misc.lastEnterTimestamp = ts;
 };
 
+/**
+ * Update lastMessageTimestamp
+ * 
+ * @param {number} [ts] - last message timestamp 
+ */
 Creature.prototype.updateLastMessageTimestamp = function(ts) {
   if (typeof ts === 'undefined') ts = UTIL.getCurrentUtcTimestamp(); 
   this.misc.lastMessageTimestamp = ts;
+};
+
+/**
+ * Update lastMessage
+ * 
+ * @param {string} txt - message text
+ */
+Creature.prototype.updateLastMessage = function(txt) {
+  this.misc.lastMessage = txt;
 };
 
 var Hero = function() {
@@ -186,6 +205,7 @@ var Hero = function() {
       isTyping: false,
       lastEnterTimestamp: 0,
       lastMessageTimestamp: 0,
+      lastMessage: '',
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -217,6 +237,7 @@ var Zombie = function() {
       isTyping: false,
       lastEnterTimestamp: 0,
       lastMessageTimestamp: 0,
+      lastMessage: '',
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -254,6 +275,7 @@ var Machine = function() {
       isTyping: false,
       lastEnterTimestamp: 0,
       lastMessageTimestamp: 0,
+      lastMessage: '',
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -285,6 +307,7 @@ var Bat = function() {
       isTyping: false,
       lastEnterTimestamp: 0,
       lastMessageTimestamp: 0,
+      lastMessage: '',
     };
   
   Creature.call(this, info, phrInfo, misc);

@@ -27,15 +27,6 @@ window.UI = require('./ui');
 window.UTIL = require('./../../../common/util');
 window.GAME = new Phaser.Game(WINDOW_WIDTH, WINDOW_HEIGHT, Phaser.CANVAS, 'game-wrap');
 
-window.IS_IMMORTAL = true;
-
-var blocker = require('./blocker');
-blocker.Util.init();
-
-if (IS_DUMMY) {
-  UI.dummyPlayerList(60);
-}
-
 if (IS_DEBUG) {
   console.log('IS_PROD', IS_PROD);
   console.log('IS_ONLINE', IS_ONLINE);
@@ -43,6 +34,14 @@ if (IS_DEBUG) {
   console.log('IS_DUMMY', IS_DUMMY);
   console.log('IS_IMMORTAL', IS_IMMORTAL);
 }
+
+if (IS_DUMMY) {
+  UI.dummyPlayerList(60);
+}
+
+var blocker = require('./blocker');
+blocker.Util.init();
+UI.init();
 
 GAME.state.add('Boot', blocker.Boot);
 GAME.state.add('Load', blocker.Load);
