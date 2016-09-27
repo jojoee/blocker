@@ -41,9 +41,6 @@ var commonConfig = {
       // player send message
       message: eventPlayerPrefix + 'message',
 
-      // player typing
-      typing: eventPlayerPrefix + 'typing',
-
       // player move
       move: eventPlayerPrefix + 'move',
     },

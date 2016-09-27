@@ -414,18 +414,6 @@ IO.on('connection', function(socket) {
     }
   });
 
-  // typing
-  // (quite duplicate with message)
-  // TODO: complete it
-  socket.on(EVENT_NAME.player.typing, function() {
-    var playerIdx = getPlayerInfoIndexById(playerId);
-
-    if (isExistingPlayer(playerId)) {
-      var data = {};
-      socket.broadcast.emit(EVENT_NAME.player.typing, data);
-    }
-  });
-
   // move
   // TODO: complete it
   socket.on(EVENT_NAME.player.move, function(position) {
