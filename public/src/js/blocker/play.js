@@ -14,9 +14,9 @@ Play = function(GAME) {
   this.bubbleDelay = 3000;
   this.automoveDelay = 1000;
   
-  this.nZombies = 10;
-  this.nMachines = 10;
-  this.nBats = 10;
+  this.nZombies = 8;
+  this.nMachines = 8;
+  this.nBats = 8;
 
   /** @type {Array.number} map that can tell which point is walkable */
   this.VTMap = {};
