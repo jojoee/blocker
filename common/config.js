@@ -17,7 +17,6 @@ var commonConfig = {
   // dev
   isDebug: true,
   isImmortal: false,
-  isDummy: true,
 
   // others
   serverPort: 8001,

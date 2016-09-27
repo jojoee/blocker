@@ -27,8 +27,7 @@ var SERVER_PORT = CONFIG.serverPort,
   MAP_HEIGHT = CONFIG.game.worldHeight,
   CHAT_LOGS = [],
   MAX_CHAT_LOGS = 256,
-  IS_DEBUG = CONFIG.isDebug,
-  IS_DUMMY = CONFIG.isDummy;
+  IS_DEBUG = CONFIG.isDebug;
 
 var PLAYERS = [];
 // [ {Player1}, {Player2}, {Player3} ]
@@ -52,11 +51,6 @@ SERVER.listen(SERVER_PORT, function(err) {
     UTIL.serverLog('Listening on port: ' + SERVER_PORT);
   }
 });
-
-if (IS_DUMMY) {
-  dummyFakeChatLogs();
-  dummyFakePlayers();
-}
 
 /*================================================================ Fake & Debug
  */

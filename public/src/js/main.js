@@ -14,7 +14,6 @@ window.COMMON_MODULE = require('./../../../common/module');
 window.EVENT_NAME = config.eventName;
 window.IS_PROD = config.isProd;
 window.IS_DEBUG = config.isDebug;
-window.IS_DUMMY = config.isDummy;
 window.IS_ONLINE = config.isOnline;
 window.IS_IMMORTAL = config.isImmortal;
 window.GAME_WORLD_WIDTH = config.game.worldWidth;
@@ -31,12 +30,7 @@ if (IS_DEBUG) {
   console.log('IS_PROD', IS_PROD);
   console.log('IS_ONLINE', IS_ONLINE);
   console.log('IS_DEBUG', IS_DEBUG);
-  console.log('IS_DUMMY', IS_DUMMY);
   console.log('IS_IMMORTAL', IS_IMMORTAL);
-}
-
-if (IS_DUMMY) {
-  UI.dummyPlayerList(60);
 }
 
 var blocker = require('./blocker');
