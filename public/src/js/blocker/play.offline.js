@@ -625,65 +625,6 @@ Play.prototype = {
     this.fadeDamageEmitter();
   },
 
-  preload: function() {
-    
-  },
-
-  init: function() {
-
-    // floor
-    this.floorGroup = GAME.add.group();
-    this.stoneShadowGroup = GAME.add.group();
-    this.stoneGroup = GAME.add.group();
-    this.vtmapDebugGroup = GAME.add.group();
-
-    // item
-    this.potionGroup = GAME.add.group(); // unused
-
-    // monster
-    this.zombieShadowGroup = GAME.add.group();
-    this.zombieWeaponGroup = GAME.add.group();
-    this.zombieGroup = GAME.add.group();
-    this.machineShadowGroup = GAME.add.group();
-    this.machineWeaponGroup = GAME.add.group();
-    this.machineGroup = GAME.add.group();
-    this.batShadowGroup = GAME.add.group();
-    this.batWeaponGroup = GAME.add.group();
-    this.batGroup = GAME.add.group();
-
-    // hero
-    this.enemyShadowGroup = GAME.add.group(); // unused
-    this.enemyGroup = GAME.add.group(); // unused
-    this.playerShadowGroup = GAME.add.group();
-    this.playerWeaponGroup = GAME.add.group();
-    this.playerGroup = GAME.add.group();
-
-    // bullet
-    this.playerArrowGroup = GAME.add.group();
-    this.machineLaserGroup = GAME.add.group();
-
-    // sky
-    this.treeGroup = GAME.add.group();
-    this.skyGroup = GAME.add.group();
-    this.nameGroup = GAME.add.group();
-    this.bubbleGroup = GAME.add.group();
-
-    // disable default right-click's behavior on the canvas
-    GAME.canvas.oncontextmenu = function(e) {
-      e.preventDefault()
-    };
-
-    // misc
-    GAME.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    GAME.scale.pageAlignHorizontally = true;
-    GAME.scale.pageAlignVertically = true;
-    GAME.input.mouse.capture = true;
-    GAME.stage.disableVisibilityChange = true;
-    GAME.scale.setResizeCallback(function() {
-      GAME.scale.setGameSize(window.innerWidth, window.innerHeight);
-    });
-  },
-
   debugMap: function() {
     var i = 0, // row
       j = 0, // column
@@ -743,6 +684,291 @@ Play.prototype = {
     }
 
     return arr;
+  },
+
+  onPlayerOverlapZombie: function(player, monster) {
+    
+  },
+
+  onPlayerOverlapMachine: function(player, monster) {
+
+  },
+
+  onPlayerOverlapBat: function(player, monster) {
+
+  },
+
+  onPlayerOverlapZombieWeapon: function(player, monsterWeapon) {
+    this.onCreatureIsDamaged(player, 'zombie hands');
+  },
+
+  onPlayerOverlapMachineWeapon: function(player, monsterWeapon) {
+    this.onCreatureIsDamaged(player, 'machine\'s turret');
+  },
+
+  onPlayerOverlapBatWeapon: function(player, monsterWeapon) {
+    this.onCreatureIsDamaged(player, 'bat wings');
+  },
+
+  onMachineLaserOverlapPlayer: function(laser, player) {
+    this.playDamageParticle(player);
+    laser.kill();
+    this.onCreatureIsDamaged(player, 'laser');
+  },
+
+  onPlayerArrowOverlapStoneGroup: function(arrow, stone) {
+
+  },
+
+  onPlayerArrowOverlapMonster: function(arrow, monster) {
+    this.playDamageParticle(monster);
+    arrow.kill();
+    this.onCreatureIsDamaged(monster, 'arrow');
+  },
+
+  onMonsterCollideStoneGroup: function(monster, stone) {
+    var ts = UTIL.getCurrentUtcTimestamp();
+    monster.blr.updateLastIdleTimestamp(ts);
+    monster.blr.misc.isIdle = true;
+
+    this.forceRestartAutomove(monster);
+  },
+
+  onPlayerCollideStoneGroup: function() {
+
+  },
+
+  onPlayerCollideMonster: function() {
+
+  },
+
+  forceRestartAutomove: function(monster) {
+    var ts = UTIL.getCurrentUtcTimestamp();
+
+    // hacky
+    monster.blr.misc.autoMoveTimestamp = ts - 7000;
+    this.monsterAutoMove(monster);
+  },
+
+  /**
+   * Start autoMove mode
+   * used by monster only
+   * 
+   * @param {Object} monster - monster object
+   */
+  monsterAutoMove: function(monster) {
+    var ts = UTIL.getCurrentUtcTimestamp();
+
+    monster.body.velocity.x = 0;
+    monster.body.velocity.y = 0;
+
+    // if near hero, then  follow the hero
+    // if not, then autoMove
+    if (!IS_INVISIBLE && GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
+      monster.blr.misc.isAutomove = false; // unused
+      monster.rotation = GAME.physics.arcade.moveToObject(
+        monster,
+        this.player,
+        monster.blr.phrInfo.velocitySpeed
+      );
+
+    } else {
+      // update isIdle
+      if (monster.blr.misc.isIdle &&
+        ts - monster.blr.misc.lastIdleTimestamp > this.automoveDelay) {
+        monster.blr.misc.isIdle = false;
+      }
+
+      if (!monster.blr.misc.isIdle) {
+        var distance = GAME.physics.arcade.distanceToXY(
+            monster,
+            monster.blr.misc.autoMoveTargetPos.x,
+            monster.blr.misc.autoMoveTargetPos.y
+          );
+
+        // first time, auto move mode
+        // if monster
+        // 1. start autoMove or keep autoMove if it autoMove less than 6sec or
+        // 2. the monster is to close with the target (prevent monster is spinning around the targetPos)
+        if ((ts - monster.blr.misc.autoMoveTimestamp > 6000) ||
+          distance < 200) {
+          var targetPos = this.getRandomAutoMovePosition(monster);
+          
+          monster.blr.misc.isAutomove = true; // unused
+          monster.blr.misc.autoMoveTargetPos = targetPos;
+          monster.blr.misc.autoMoveTimestamp = UTIL.getCurrentUtcTimestamp();
+        }
+
+        // keep moving to the existing target position
+        monster.rotation = GAME.physics.arcade.moveToXY(
+          monster,
+          monster.blr.misc.autoMoveTargetPos.x,
+          monster.blr.misc.autoMoveTargetPos.y,
+          monster.blr.phrInfo.velocitySpeed
+        );
+      }
+    }
+  },
+
+  heroFireArrow: function(hero) {
+    var ts = UTIL.getCurrentUtcTimestamp();
+
+    if (ts > hero.blr.misc.nextFireTimestamp &&
+      hero.blr.bullet.countDead() > 0) {
+
+      // update player + weapon rotation
+      this.updateCreatureRotationByFollowingMouse(hero);
+
+      // update bullet
+      // 2 bullet/sec (cause we have 7 frame per animation)
+      hero.blr.weapon.animations.play('attack', 14, false, false);
+      hero.blr.misc.nextFireTimestamp = ts + hero.blr.misc.fireRate;
+
+      var bullet = hero.blr.bullet.getFirstExists(false);
+      bullet.reset(hero.blr.weapon.x, hero.blr.weapon.y);
+      bullet.rotation = GAME.physics.arcade.moveToPointer(
+        bullet,
+        hero.blr.misc.bulletSpeed,
+        GAME.input.activePointer
+      );
+    }
+  },
+
+  /**
+   * get rotation between creature and mouse
+   * 
+   * @param {[type]} creature
+   * @returns {number} rotation
+   */
+  getRotationBetweenCreatureAndMouse: function(creature) {
+    var result = Math.atan2(
+      GAME.input.y - (creature.position.y - GAME.camera.y),
+      GAME.input.x - (creature.position.x - GAME.camera.x)
+    );
+
+    return result;
+  },
+
+  /**
+   * Update creature follow the mouse
+   * So, this function will update
+   * - body rotation
+   * 
+   * @param {[type]} creature
+   */
+  updateCreatureRotationByFollowingMouse: function(creature) {
+    var newX = creature.x,
+      newY = creature.y,
+      newRotation = this.getRotationBetweenCreatureAndMouse(creature);
+
+    creature.rotation = newRotation;
+  },
+
+  isCreatureMove: function(creature) {
+    return (creature.x !== creature.blr.lastPos.x || creature.y !== creature.blr.lastPos.y);
+  },
+
+  isCreatureRotate: function(creature) {
+    return (creature.rotation !== creature.blr.lastPos.rotation);
+  },
+
+  /**
+   * Update creature shadow
+   * using creature position by default
+   * 
+   * @param {[type]} creature
+   * @param {number} [newX]
+   * @param {number} [newY]
+   */
+  updateCreatureShadow: function(creature, newX, newY) {
+    if (typeof newX === 'undefined') newX = creature.x;
+    if (typeof newY === 'undefined') newY = creature.y;
+
+    if (this.isCreatureMove(creature)) {
+      creature.blr.shadow.x = newX;
+      creature.blr.shadow.y = newY;
+    }
+  },
+
+  /**
+   * Update creature weapon
+   * using creature position by default
+   * 
+   * @param {[type]} creature
+   * @param {number} [newX]
+   * @param {number} [newY]
+   * @param {number} [newRotation]
+   */
+  updateCreatureWeapon: function(creature, newX, newY, newRotation) {
+    if (typeof newX === 'undefined') newX = creature.x;
+    if (typeof newY === 'undefined') newY = creature.y;
+    if (typeof newRotation === 'undefined') newRotation = creature.rotation;
+    
+    if (this.isCreatureMove(creature)) {
+      creature.blr.weapon.x = newX;
+      creature.blr.weapon.y = newY;
+    }
+
+    creature.blr.weapon.rotation = newRotation;
+  },
+
+  preload: function() {
+    
+  },
+
+  init: function() {
+
+    // floor
+    this.floorGroup = GAME.add.group();
+    this.stoneShadowGroup = GAME.add.group();
+    this.stoneGroup = GAME.add.group();
+    this.vtmapDebugGroup = GAME.add.group();
+
+    // item
+    this.potionGroup = GAME.add.group(); // unused
+
+    // monster
+    this.zombieShadowGroup = GAME.add.group();
+    this.zombieWeaponGroup = GAME.add.group();
+    this.zombieGroup = GAME.add.group();
+    this.machineShadowGroup = GAME.add.group();
+    this.machineWeaponGroup = GAME.add.group();
+    this.machineGroup = GAME.add.group();
+    this.batShadowGroup = GAME.add.group();
+    this.batWeaponGroup = GAME.add.group();
+    this.batGroup = GAME.add.group();
+
+    // hero
+    this.enemyShadowGroup = GAME.add.group(); // unused
+    this.enemyGroup = GAME.add.group(); // unused
+    this.playerShadowGroup = GAME.add.group();
+    this.playerWeaponGroup = GAME.add.group();
+    this.playerGroup = GAME.add.group();
+
+    // bullet
+    this.playerArrowGroup = GAME.add.group();
+    this.machineLaserGroup = GAME.add.group();
+
+    // sky
+    this.treeGroup = GAME.add.group();
+    this.skyGroup = GAME.add.group();
+    this.nameGroup = GAME.add.group();
+    this.bubbleGroup = GAME.add.group();
+
+    // disable default right-click's behavior on the canvas
+    GAME.canvas.oncontextmenu = function(e) {
+      e.preventDefault()
+    };
+
+    // misc
+    GAME.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    GAME.scale.pageAlignHorizontally = true;
+    GAME.scale.pageAlignVertically = true;
+    GAME.input.mouse.capture = true;
+    GAME.stage.disableVisibilityChange = true;
+    GAME.scale.setResizeCallback(function() {
+      GAME.scale.setGameSize(window.innerWidth, window.innerHeight);
+    });
   },
 
   create: function() {
@@ -948,130 +1174,6 @@ Play.prototype = {
     GAME.world.bringToTop(this.bubbleGroup);
   },
 
-  onPlayerOverlapZombie: function(player, monster) {
-    
-  },
-
-  onPlayerOverlapMachine: function(player, monster) {
-
-  },
-
-  onPlayerOverlapBat: function(player, monster) {
-
-  },
-
-  onPlayerOverlapZombieWeapon: function(player, monsterWeapon) {
-    this.onCreatureIsDamaged(player, 'zombie hands');
-  },
-
-  onPlayerOverlapMachineWeapon: function(player, monsterWeapon) {
-    this.onCreatureIsDamaged(player, 'machine\'s turret');
-  },
-
-  onPlayerOverlapBatWeapon: function(player, monsterWeapon) {
-    this.onCreatureIsDamaged(player, 'bat wings');
-  },
-
-  onMachineLaserOverlapPlayer: function(laser, player) {
-    this.playDamageParticle(player);
-    laser.kill();
-    this.onCreatureIsDamaged(player, 'laser');
-  },
-
-  onPlayerArrowOverlapStoneGroup: function(arrow, stone) {
-
-  },
-
-  onPlayerArrowOverlapMonster: function(arrow, monster) {
-    this.playDamageParticle(monster);
-    arrow.kill();
-    this.onCreatureIsDamaged(monster, 'arrow');
-  },
-
-  onMonsterCollideStoneGroup: function(monster, stone) {
-    var ts = UTIL.getCurrentUtcTimestamp();
-    monster.blr.updateLastIdleTimestamp(ts);
-    monster.blr.misc.isIdle = true;
-
-    this.forceRestartAutomove(monster);
-  },
-
-  onPlayerCollideStoneGroup: function() {
-
-  },
-
-  onPlayerCollideMonster: function() {
-
-  },
-
-  forceRestartAutomove: function(monster) {
-    var ts = UTIL.getCurrentUtcTimestamp();
-
-    // hacky
-    monster.blr.misc.autoMoveTimestamp = ts - 7000;
-    this.monsterAutoMove(monster);
-  },
-
-  /**
-   * Start autoMove mode
-   * used by monster only
-   * 
-   * @param {Object} monster - monster object
-   */
-  monsterAutoMove: function(monster) {
-    var ts = UTIL.getCurrentUtcTimestamp();
-
-    monster.body.velocity.x = 0;
-    monster.body.velocity.y = 0;
-
-    // if near hero, then  follow the hero
-    // if not, then autoMove
-    if (!IS_INVISIBLE && GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
-      monster.blr.misc.isAutomove = false; // unused
-      monster.rotation = GAME.physics.arcade.moveToObject(
-        monster,
-        this.player,
-        monster.blr.phrInfo.velocitySpeed
-      );
-
-    } else {
-      // update isIdle
-      if (monster.blr.misc.isIdle &&
-        ts - monster.blr.misc.lastIdleTimestamp > this.automoveDelay) {
-        monster.blr.misc.isIdle = false;
-      }
-
-      if (!monster.blr.misc.isIdle) {
-        var distance = GAME.physics.arcade.distanceToXY(
-            monster,
-            monster.blr.misc.autoMoveTargetPos.x,
-            monster.blr.misc.autoMoveTargetPos.y
-          );
-
-        // first time, auto move mode
-        // if monster
-        // 1. start autoMove or keep autoMove if it autoMove less than 6sec or
-        // 2. the monster is to close with the target (prevent monster is spinning around the targetPos)
-        if ((ts - monster.blr.misc.autoMoveTimestamp > 6000) ||
-          distance < 200) {
-          var targetPos = this.getRandomAutoMovePosition(monster);
-          
-          monster.blr.misc.isAutomove = true; // unused
-          monster.blr.misc.autoMoveTargetPos = targetPos;
-          monster.blr.misc.autoMoveTimestamp = UTIL.getCurrentUtcTimestamp();
-        }
-
-        // keep moving to the existing target position
-        monster.rotation = GAME.physics.arcade.moveToXY(
-          monster,
-          monster.blr.misc.autoMoveTargetPos.x,
-          monster.blr.misc.autoMoveTargetPos.y,
-          monster.blr.phrInfo.velocitySpeed
-        );
-      }
-    }
-  },
-
   update: function() {
     var ts = UTIL.getCurrentUtcTimestamp();
 
@@ -1226,108 +1328,6 @@ Play.prototype = {
         this.monsterAutoMove(monster);
       }
     }, this);
-  },
-
-  heroFireArrow: function(hero) {
-    var ts = UTIL.getCurrentUtcTimestamp();
-
-    if (ts > hero.blr.misc.nextFireTimestamp &&
-      hero.blr.bullet.countDead() > 0) {
-
-      // update player + weapon rotation
-      this.updateCreatureRotationByFollowingMouse(hero);
-
-      // update bullet
-      // 2 bullet/sec (cause we have 7 frame per animation)
-      hero.blr.weapon.animations.play('attack', 14, false, false);
-      hero.blr.misc.nextFireTimestamp = ts + hero.blr.misc.fireRate;
-
-      var bullet = hero.blr.bullet.getFirstExists(false);
-      bullet.reset(hero.blr.weapon.x, hero.blr.weapon.y);
-      bullet.rotation = GAME.physics.arcade.moveToPointer(
-        bullet,
-        hero.blr.misc.bulletSpeed,
-        GAME.input.activePointer
-      );
-    }
-  },
-
-  /**
-   * get rotation between creature and mouse
-   * 
-   * @param {[type]} creature
-   * @returns {number} rotation
-   */
-  getRotationBetweenCreatureAndMouse: function(creature) {
-    var result = Math.atan2(
-      GAME.input.y - (creature.position.y - GAME.camera.y),
-      GAME.input.x - (creature.position.x - GAME.camera.x)
-    );
-
-    return result;
-  },
-
-  /**
-   * Update creature follow the mouse
-   * So, this function will update
-   * - body rotation
-   * 
-   * @param {[type]} creature
-   */
-  updateCreatureRotationByFollowingMouse: function(creature) {
-    var newX = creature.x,
-      newY = creature.y,
-      newRotation = this.getRotationBetweenCreatureAndMouse(creature);
-
-    creature.rotation = newRotation;
-  },
-
-  isCreatureMove: function(creature) {
-    return (creature.x !== creature.blr.lastPos.x || creature.y !== creature.blr.lastPos.y);
-  },
-
-  isCreatureRotate: function(creature) {
-    return (creature.rotation !== creature.blr.lastPos.rotation);
-  },
-
-  /**
-   * Update creature shadow
-   * using creature position by default
-   * 
-   * @param {[type]} creature
-   * @param {number} [newX]
-   * @param {number} [newY]
-   */
-  updateCreatureShadow: function(creature, newX, newY) {
-    if (typeof newX === 'undefined') newX = creature.x;
-    if (typeof newY === 'undefined') newY = creature.y;
-
-    if (this.isCreatureMove(creature)) {
-      creature.blr.shadow.x = newX;
-      creature.blr.shadow.y = newY;
-    }
-  },
-
-  /**
-   * Update creature weapon
-   * using creature position by default
-   * 
-   * @param {[type]} creature
-   * @param {number} [newX]
-   * @param {number} [newY]
-   * @param {number} [newRotation]
-   */
-  updateCreatureWeapon: function(creature, newX, newY, newRotation) {
-    if (typeof newX === 'undefined') newX = creature.x;
-    if (typeof newY === 'undefined') newY = creature.y;
-    if (typeof newRotation === 'undefined') newRotation = creature.rotation;
-    
-    if (this.isCreatureMove(creature)) {
-      creature.blr.weapon.x = newX;
-      creature.blr.weapon.y = newY;
-    }
-
-    creature.blr.weapon.rotation = newRotation;
   },
 
   preRender: function() {

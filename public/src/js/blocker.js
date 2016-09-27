@@ -2,10 +2,17 @@
  * Blocker game
  */
 
-var Blocker = {};
-Blocker.Util = require('./blocker/util');
-Blocker.Boot = require('./blocker/boot');
-Blocker.Load = require('./blocker/load');
-Blocker.Play = require('./blocker/play');
+var config = require('./../../../common/config'),
+  util = require('./blocker/util'),
+  boot = require('./blocker/boot'),
+  load = require('./blocker/load'),
+  play = (config.isOnline)
+    ? require('./blocker/play.online')
+    : require('./blocker/play.offline');
 
-module.exports = Blocker;
+module.exports = {
+  Util: util,
+  Boot: boot,
+  Load: load,
+  Play: play,
+};

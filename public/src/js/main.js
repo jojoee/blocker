@@ -7,10 +7,13 @@ console.log('Blocker - The Hunter is welcome!');
 var config = require('./../../../common/config'),
   clientConfig = require('./config'),
   clientModule = require('./module'),
+  blocker = require('./blocker'),
   socketUrl = location.protocol + '//' + location.hostname + ':' + config.serverPort;
 
 window.FAKER = require('faker');
 window.COMMON_MODULE = require('./../../../common/module');
+window.UI = require('./ui');
+window.UTIL = require('./../../../common/util');
 window.EVENT_NAME = config.eventName;
 window.IS_PROD = config.isProd;
 window.IS_DEBUG = config.isDebug;
@@ -23,8 +26,6 @@ window.SOCKET = io(socketUrl);
 window.WINDOW_WIDTH = window.innerWidth;
 window.WINDOW_HEIGHT = window.innerHeight;
 window.CLIENT_HEARTHBEAT = 1000;
-window.UI = require('./ui');
-window.UTIL = require('./../../../common/util');
 window.GAME = new Phaser.Game(WINDOW_WIDTH, WINDOW_HEIGHT, Phaser.CANVAS, 'game-wrap');
 
 if (IS_DEBUG) {
@@ -34,7 +35,6 @@ if (IS_DEBUG) {
   console.log('IS_IMMORTAL', IS_IMMORTAL);
 }
 
-var blocker = require('./blocker');
 blocker.Util.init();
 UI.init();
 
