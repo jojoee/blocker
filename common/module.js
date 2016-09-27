@@ -178,6 +178,16 @@ Creature.prototype.updateLastMessage = function(txt) {
   this.misc.lastMessage = txt;
 };
 
+/**
+ * Update lastIdleTimestamp
+ * 
+ * @param {number} [ts] - last idle timestamp
+ */
+Creature.prototype.updateLastIdleTimestamp = function(ts) {
+  if (typeof ts === 'undefined') ts = UTIL.getCurrentUtcTimestamp(); 
+  this.misc.lastIdleTimestamp = ts;
+};
+
 var Hero = function() {
   var info = new CreatureInfo(10),
     phrInfo = {
@@ -203,6 +213,8 @@ var Hero = function() {
       isAutomove: false,
       autoMoveTargetPos: null,
       autoMoveTimestamp: 0,
+      isIdle: false,
+      lastIdleTimestamp: 0,
 
       // bubble
       isTyping: false,
@@ -235,6 +247,8 @@ var Zombie = function() {
       isAutomove: false,
       autoMoveTargetPos: null,
       autoMoveTimestamp: 0,
+      isIdle: false,
+      lastIdleTimestamp: 0,
 
       // bubble
       isTyping: false,
@@ -273,6 +287,8 @@ var Machine = function() {
       isAutomove: false,
       autoMoveTargetPos: null,
       autoMoveTimestamp: 0,
+      isIdle: false,
+      lastIdleTimestamp: 0,
 
       // bubble
       isTyping: false,
@@ -305,6 +321,8 @@ var Bat = function() {
       isAutomove: false,
       autoMoveTargetPos: null,
       autoMoveTimestamp: 0,
+      isIdle: false,
+      lastIdleTimestamp: 0,
 
       // bubble
       isTyping: false,

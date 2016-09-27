@@ -12,6 +12,7 @@ Play = function(GAME) {
 
   this.enterKeyDelay = 200;
   this.bubbleDelay = 3000;
+  this.automoveDelay = 1000;
   
   this.nZombies = 10;
   this.nMachines = 10;
@@ -944,67 +945,59 @@ Play.prototype = {
   },
 
   onPlayerOverlapZombie: function(player, monster) {
-    // console.log('onPlayerOverlapZombie');
+    
   },
 
   onPlayerOverlapMachine: function(player, monster) {
-    // console.log('onPlayerOverlapMachine');
+
   },
 
   onPlayerOverlapBat: function(player, monster) {
-    // console.log('onPlayerOverlapBat');
+
   },
 
   onPlayerOverlapZombieWeapon: function(player, monsterWeapon) {
-    // console.log('onPlayerOverlapZombieWeapon');
-
     this.onCreatureIsDamaged(player, 'zombie hands');
   },
 
   onPlayerOverlapMachineWeapon: function(player, monsterWeapon) {
-    // console.log('onPlayerOverlapMachineWeapon');
-
     this.onCreatureIsDamaged(player, 'machine\'s turret');
   },
 
   onPlayerOverlapBatWeapon: function(player, monsterWeapon) {
-    // console.log('onPlayerOverlapBatWeapon');
-
     this.onCreatureIsDamaged(player, 'bat wings');
   },
 
   onMachineLaserOverlapPlayer: function(laser, player) {
-    // console.log('onMachineLaserOverlapPlayer')
-
     this.playDamageParticle(player);
     laser.kill();
     this.onCreatureIsDamaged(player, 'laser');
   },
 
   onPlayerArrowOverlapStoneGroup: function(arrow, stone) {
-    // console.log('onPlayerArrowOverlapStoneGroup');
+
   },
 
   onPlayerArrowOverlapMonster: function(arrow, monster) {
-    // console.log('onPlayerArrowOverlapMonster');
-
     this.playDamageParticle(monster);
     arrow.kill();
     this.onCreatureIsDamaged(monster, 'arrow');
   },
 
   onMonsterCollideStoneGroup: function(monster, stone) {
-    // console.log('onMonsterCollideStoneGroup');
+    var ts = UTIL.getCurrentUtcTimestamp();
+    monster.blr.updateLastIdleTimestamp(ts);
+    monster.blr.misc.isIdle = true;
 
     this.forceRestartAutomove(monster);
   },
 
   onPlayerCollideStoneGroup: function() {
-    // console.log('onCreatureCollideStoneGroup');
+
   },
 
   onPlayerCollideMonster: function() {
-    // console.log('onPlayerCollideMonster');
+
   },
 
   forceRestartAutomove: function(monster) {
@@ -1016,15 +1009,19 @@ Play.prototype = {
   },
 
   /**
-   * Start automove mode
+   * Start autoMove mode
    * used by monster only
    * 
    * @param {Object} monster - monster object
    */
   monsterAutoMove: function(monster) {
+    var ts = UTIL.getCurrentUtcTimestamp();
+
     monster.body.velocity.x = 0;
     monster.body.velocity.y = 0;
 
+    // if near hero, then  follow the hero
+    // if not, then autoMove
     if (!IS_INVISIBLE && GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
       monster.blr.misc.isAutomove = false; // unused
       monster.rotation = GAME.physics.arcade.moveToObject(
@@ -1034,33 +1031,40 @@ Play.prototype = {
       );
 
     } else {
-      var ts = UTIL.getCurrentUtcTimestamp(),
-        distance = GAME.physics.arcade.distanceToXY(
-          monster,
-          monster.blr.misc.autoMoveTargetPos.x,
-          monster.blr.misc.autoMoveTargetPos.y
-        );
-
-      // first time, auto move mode
-      // if monster
-      // 1. start autoMove or keep autoMove if it autoMove less than 6sec or
-      // 2. the monster is to close with the target (prevent monster is spinning around the targetPos)
-      if ((ts - monster.blr.misc.autoMoveTimestamp > 6000) ||
-        distance < 200) {
-        var targetPos = this.getRandomAutoMovePosition(monster);
-        
-        monster.blr.misc.isAutomove = true; // unused
-        monster.blr.misc.autoMoveTargetPos = targetPos;
-        monster.blr.misc.autoMoveTimestamp = UTIL.getCurrentUtcTimestamp();
+      // update isIdle
+      if (monster.blr.misc.isIdle &&
+        ts - monster.blr.misc.lastIdleTimestamp > this.automoveDelay) {
+        monster.blr.misc.isIdle = false;
       }
 
-      // keep moving to the existing target position
-      monster.rotation = GAME.physics.arcade.moveToXY(
-        monster,
-        monster.blr.misc.autoMoveTargetPos.x,
-        monster.blr.misc.autoMoveTargetPos.y,
-        monster.blr.phrInfo.velocitySpeed
-      );
+      if (!monster.blr.misc.isIdle) {
+        var distance = GAME.physics.arcade.distanceToXY(
+            monster,
+            monster.blr.misc.autoMoveTargetPos.x,
+            monster.blr.misc.autoMoveTargetPos.y
+          );
+
+        // first time, auto move mode
+        // if monster
+        // 1. start autoMove or keep autoMove if it autoMove less than 6sec or
+        // 2. the monster is to close with the target (prevent monster is spinning around the targetPos)
+        if ((ts - monster.blr.misc.autoMoveTimestamp > 6000) ||
+          distance < 200) {
+          var targetPos = this.getRandomAutoMovePosition(monster);
+          
+          monster.blr.misc.isAutomove = true; // unused
+          monster.blr.misc.autoMoveTargetPos = targetPos;
+          monster.blr.misc.autoMoveTimestamp = UTIL.getCurrentUtcTimestamp();
+        }
+
+        // keep moving to the existing target position
+        monster.rotation = GAME.physics.arcade.moveToXY(
+          monster,
+          monster.blr.misc.autoMoveTargetPos.x,
+          monster.blr.misc.autoMoveTargetPos.y,
+          monster.blr.phrInfo.velocitySpeed
+        );
+      }
     }
   },
 
@@ -1179,7 +1183,7 @@ Play.prototype = {
         monster.body.velocity.x = 0;
         monster.body.angularVelocity = 0;
         
-        // automove
+        // autoMove
         this.monsterAutoMove(monster);
       }
     }, this);
@@ -1214,7 +1218,7 @@ Play.prototype = {
         monster.body.velocity.x = 0;
         monster.body.angularVelocity = 0;
 
-        // automove
+        // autoMove
         this.monsterAutoMove(monster);
       }
     }, this);
