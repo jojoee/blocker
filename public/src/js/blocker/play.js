@@ -1025,7 +1025,7 @@ Play.prototype = {
     monster.body.velocity.x = 0;
     monster.body.velocity.y = 0;
 
-    if (GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
+    if (!IS_INVISIBLE && GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
       monster.blr.misc.isAutomove = false; // unused
       monster.rotation = GAME.physics.arcade.moveToObject(
         monster,
@@ -1193,7 +1193,7 @@ Play.prototype = {
         monster.body.angularVelocity = 0;
 
         // bullet
-        if (GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
+        if (!IS_INVISIBLE && GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
           if (ts > monster.blr.misc.nextFireTimestamp &&
             monster.blr.bullet.countDead() > 0) {
             monster.blr.misc.nextFireTimestamp = UTIL.getCurrentUtcTimestamp() + monster.blr.misc.fireRate; 

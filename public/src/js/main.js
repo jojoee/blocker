@@ -16,6 +16,7 @@ window.IS_PROD = config.isProd;
 window.IS_DEBUG = config.isDebug;
 window.IS_ONLINE = config.isOnline;
 window.IS_IMMORTAL = config.isImmortal;
+window.IS_INVISIBLE = config.isInvisible;
 window.GAME_WORLD_WIDTH = config.game.worldWidth;
 window.GAME_WORLD_HEIGHT = config.game.worldHeight;
 window.SOCKET = io(socketUrl);
