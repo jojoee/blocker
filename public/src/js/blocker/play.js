@@ -316,6 +316,7 @@ Play.prototype = {
     // optional
 
     // misc
+    monster.blr.info.reset();
     this.logCreatureRespawning(monster);
     monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
     UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
@@ -364,6 +365,7 @@ Play.prototype = {
     monster.body.moves = false;
 
     // misc
+    monster.blr.info.reset();
     this.logCreatureRespawning(monster);
     monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
     UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
@@ -404,6 +406,7 @@ Play.prototype = {
     monster.blr.weapon.scale.setTo(0.7, 0.7);
 
     // misc
+    monster.blr.info.reset();
     this.logCreatureRespawning(monster);
     monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
     UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
@@ -882,6 +885,7 @@ Play.prototype = {
     this.setCreatureBubble(this.player);
 
     // player
+    this.player.blr.info.reset();
     this.playerGroup.add(this.player);
     this.setCreatureLabel(this.player);
     this.player.blr.shadow = shadowTmp;
