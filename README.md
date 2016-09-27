@@ -50,6 +50,7 @@ Naming
 ## TODO
 - [x] `spacebar` can fire arrow
 - [x] Respawn monster when it's died
+- [ ] Respawn delay
 - [x] Messaging
 - [x] Fix birth point of creature
 - [x] Machine fire laser
@@ -71,7 +72,9 @@ Naming
 - [ ] Monster path finder, [1](http://jojoee.github.io/phaser-examples/games/paths-face/), [2](http://jojoee.github.io/phaser-examples/games/boids-steering/), [3](http://jojoee.github.io/phaser-examples/games/easystarjs/)
 - [ ] Player / Enemy can collect item in the floor
 - [ ] Implement [Shields.io](https://shields.io/)
-- [ ] Minimap
+- [ ] Server minimap
+- [ ] Client minimap
+- [x] Invisible mode
 - [ ] Creature sight feature, [1](http://jojoee.github.io/phaser-examples/games/bresenham-light/), [2](http://www.emanueleferonato.com/wp-content/uploads/2014/10/survival/), [3](http://jojoee.github.io/phaser-examples/games/horror-ray-casting/)
 - [ ] Tutorial for development
 - [ ] Talkable monster
@@ -82,7 +85,7 @@ Naming
 - [x] Universal / Isomorphic concepts
 - [ ] Plugin: Screen shaker when player's attacked
 - [ ] HUD
-- [ ] Fix - monster can be pushed through stoneGroup
+- [ ] Fix - creature can be pushed through stoneGroup
 - [x] Bring `creature label` to the top
 - [x] Player always top
 - [ ] Boss mode

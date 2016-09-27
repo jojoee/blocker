@@ -1363,7 +1363,6 @@ Play.prototype = {
       var creatureBodyDebugColor = 'rgba(0,255, 0, 0.4)',
         weaponBodyDebugColor = 'rgba(215, 125, 125, 0.4)';
 
-      /*
       // top
       GAME.debug.bodyInfo(this.player, 32, 32);
       GAME.debug.spriteInfo(this.player, 32, 164);
@@ -1377,7 +1376,6 @@ Play.prototype = {
       GAME.debug.line('batGroup living ' + this.batGroup.countLiving());
       GAME.debug.line('batGroup dead ' + this.batGroup.countDead());
       GAME.debug.stop();
-      */
 
       // weapon body
       GAME.debug.body(this.player.blr.weapon, creatureBodyDebugColor);
