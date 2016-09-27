@@ -7,36 +7,9 @@ var UTIL = require('./../../../common/util');
 var Ui = {
 
   logListEle: document.getElementById('logs'),
-  playerListEle: document.getElementById('players'),
+  creatureListEle: document.getElementById('creatures'),
   sidebarEle: document.getElementById('sidebar'),
-  messageInputEle: document.getElementsByClassName('message-input')[0], 
-
-  /*================================================================ Dummy
-   */
-
-  /**
-   * Dummy player list widget
-   * 
-   * @param {number} n
-   */
-  dummyPlayerList: function(n) {
-    for (var i = 0; i < n; i++) {
-      var playerId = UTIL.getRandomId();
-      this.addPlayerIdToPlayerList(playerId);
-    }
-  },
-
-  /**
-   * Dummy log list
-   * 
-   * @param {number} n
-   */
-  dummyLogList: function(n) {
-    for (var i = 0; i < n; i++) {
-      var text = FAKER.lorem.sentence();
-      this.addTextToLogList(text);
-    }
-  },
+  messageInputEle: document.getElementsByClassName('message-input')[0],
 
   /*================================================================ Log
    */
@@ -51,39 +24,40 @@ var Ui = {
       t = document.createTextNode(text);
     liEle.appendChild(t);
 
-    // this.logListEle.appendChild(liEle);
     this.logListEle.insertBefore(liEle, this.logListEle.firstChild);
   },
 
-  /*================================================================ Player list
+  /*================================================================ Creature list
    */
 
   /**
-   * Add player to player list by player id
+   * Add creature info to creature list
    * 
-   * @param {string} playerId
+   * @param {CreatureInfo} creatureInfo
    * @param {string} [customClass=]
    */
-  addPlayerIdToPlayerList: function(playerId, customClass) {
-    if (typeof customClass === 'undefined') customClass = 'enemy';
-    var liEle = document.createElement('li'),
-      t = document.createTextNode(playerId);
+  addCreatureInfoToCreatureList: function(creatureInfo, customClass) {
+    if (typeof customClass === 'undefined') customClass = 'creature';
+    var creatureId = creatureInfo.id,
+      liEle = document.createElement('li'),
+      t = document.createTextNode(creatureId);
 
     liEle.appendChild(t);
-    liEle.setAttribute('data-player-id', playerId);
+    liEle.setAttribute('data-creature-id', creatureId);
     liEle.classList.add(customClass);
 
-    this.playerListEle.appendChild(liEle);
+    this.creatureListEle.appendChild(liEle);
   },
 
   /**
-   * Remove player from player list by player id
+   * Remove creature from creature list
    * unused
    * 
-   * @param {string} playerId
+   * @param {CreatureInfo} creatureInfo
    */
-  removePlayerFromPlayerList: function(playerId) {
-    var liEle = document.querySelectorAll('[data-player-id="' + playerId + '"]')[0];
+  removeCreatureFromCreatureList: function(creatureInfo) {
+    var creatureId = creatureInfo.id,
+      liEle = document.querySelectorAll('[data-creature-id="' + creatureId + '"]')[0];
 
     UTIL.removeElement(liEle);
   },

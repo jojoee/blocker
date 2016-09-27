@@ -118,6 +118,9 @@ CreatureInfo.prototype.updateLastRecoverTimestamp = function() {
 
 CreatureInfo.prototype.init = function() {
   this.id = UTIL.getRandomId();
+};
+
+CreatureInfo.prototype.reset = function() {
   this.life = this.initialLife;
 };
 

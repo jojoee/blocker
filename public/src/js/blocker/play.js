@@ -317,6 +317,7 @@ Play.prototype = {
     // misc
     this.logCreatureRespawning(monster);
     monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
+    UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
   },
 
   spawnMachine: function() {
@@ -364,6 +365,7 @@ Play.prototype = {
     // misc
     this.logCreatureRespawning(monster);
     monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
+    UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
   },
 
   /**
@@ -403,6 +405,7 @@ Play.prototype = {
     // misc
     this.logCreatureRespawning(monster);
     monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
+    UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
   },
 
   /**
@@ -522,12 +525,12 @@ Play.prototype = {
   /**
    * Respawn creature
    * 
-   * @param {[type]} creature
+   * @param {Creature} creature
    */
   respawnCreature: function(creature) {
     var newPosition = this.getRandomStartedCreaturePosition();
 
-    creature.blr.info.init();
+    creature.blr.info.reset();
     creature.reset(newPosition.x, newPosition.y);
     this.updateCreatureLabelText(creature);
     this.updateCreatureWeapon(creature);
@@ -886,6 +889,7 @@ Play.prototype = {
     this.playerWeaponGroup.add(this.player.blr.weapon);
     this.player.blr.bullet = bulletGroup;
     this.playerArrowGroup.add(this.player.blr.bullet);
+    UI.addCreatureInfoToCreatureList(this.player.blr.info, 'player');
     if (IS_IMMORTAL) {
       this.player.blr.misc.isImmortal = true;
     }
