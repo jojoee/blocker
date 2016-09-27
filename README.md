@@ -148,7 +148,6 @@ Naming
 - [ ] Optimize player list (e.g. using `Angular`, etc.)
 - [x] CSS preprocessor
 - [ ] Create own `screen-shake` plugin
-- [ ] Using [hashids](http://hashids.org/) to generate id instead
 
 ## Reference & Tutorial & Plugin && Tool
 - Inspired by [Blocker](http://blockergame.com/)
@@ -161,5 +160,5 @@ Naming
 - [Express.js - app.listen vs server.listen](http://stackoverflow.com/questions/17696801/express-js-app-listen-vs-server-listen)
 - Introduction to development of multiplayer HTML5 games (with Socket.io) [1](http://www.slideshare.net/Lotti86/introduction-to-multiplayer-game-development), [2](https://github.com/Lotti/codemotion2015)
 - Express serve static file, [1](http://stackoverflow.com/questions/5924072/express-js-cant-get-my-static-files-why), [2](https://expressjs.com/en/starter/static-files.html)
-- Generate id, [1](http://stackoverflow.com/questions/24041220/sending-message-to-a-specific-id-in-socket-io-1-0\), [2](http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript), [3](https://github.com/dylang/shortid), [4](https://github.com/broofa/node-uuid)
+- Generate id, [1](http://stackoverflow.com/questions/24041220/sending-message-to-a-specific-id-in-socket-io-1-0/), [2](http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript), [3](https://github.com/dylang/shortid), [4](https://github.com/broofa/node-uuid)
 - [Remove / Generate client id](http://stackoverflow.com/questions/7702461/socket-io-custom-client-id)

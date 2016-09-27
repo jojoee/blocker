@@ -10,13 +10,11 @@ var CONFIG = require('./config'),
 
 Play = function(GAME) {
 
+  this.isGameReady = false;
+
   this.enterKeyDelay = 200;
   this.bubbleDelay = 3000;
   this.automoveDelay = 1000;
-  
-  this.nZombies = 8;
-  this.nMachines = 8;
-  this.nBats = 8;
 
   /** @type {Array.number} map that can tell which point is walkable */
   this.VTMap = {};
@@ -26,9 +24,6 @@ Play = function(GAME) {
   this.vtmapDebugGroup;
   this.stoneShadowGroup;
   this.stoneGroup;
-
-  // item
-  this.potionGroup; // unused
 
   // monster
   this.zombieShadowGroup;
@@ -42,8 +37,9 @@ Play = function(GAME) {
   this.batGroup;
 
   // hero
-  this.enemyShadowGroup; // unused
-  this.enemyGroup; // unused
+  this.enemyShadowGroup;
+  this.enemyWeaponGroup;
+  this.enemyGroup;
   this.playerShadowGroup;
   this.playerWeaponGroup;
   this.playerGroup;
@@ -59,70 +55,14 @@ Play = function(GAME) {
 
   // sky
   this.treeGroup;
-  this.skyGroup; // unused
-  this.nameGroup; // unused
   this.bubbleGroup;
-  
+
   // input
-  this.cursors; // unused
   this.spaceKey;
   this.enterKey;
 };
 
 Play.prototype = {
-
-  /**
-   * Get random started creature position
-   * not be allowed at
-   * - fire
-   * - bush
-   * - well
-   * - stone
-   * 
-   * @returns {Position} return birth(able) position
-   */
-  getRandomStartedCreaturePosition: function() {
-    return this.getCreaturePositionByExclusion([1, 3, 5, 6]);
-  },
-
-  /**
-   * Get random started creature position (real x, y in map)
-   * by excluding given `arr`
-   * 
-   * note
-   * it's work, if the monster sprite is not over than
-   * mapTileWidth and mapTileHeight
-   * 
-   * @param {Array.number} arr - Array of tile index that you do not want
-   * @returns {Position} return position (middle of tile)
-   */
-  getCreaturePositionByExclusion: function(arr) {
-    var nTileWidth = this.VTMap.nTileWidth,
-      nTileHeight = this.VTMap.nTileHeight,
-      tileWidth = this.VTMap.mapTileWidth,
-      tileHeight = this.VTMap.mapTileHeight;
-    
-    var tileIndexX,
-      tileIndexY,
-      isUnBirthAble = true;
-
-    while (isUnBirthAble) {
-      tileIndexX = UTIL.getRandomInt(0, nTileWidth - 1);
-      tileIndexY = UTIL.getRandomInt(0, nTileHeight - 1);
-
-      // if the tile value is not be contained in
-      if (arr.indexOf(this.VTMap.data[tileIndexY][tileIndexX]) === -1) {
-        isUnBirthAble = false;
-      }
-    }
-    
-    // we got point (0, 0) of the tile
-    // so we need to convert it to middle point of this tile
-    var zeroPos = this.convertTileIndexToPoint(tileIndexX, tileIndexY),
-      midelPos = new Position(zeroPos.x + tileWidth / 2, zeroPos.y + tileHeight / 2);
-    
-    return midelPos;
-  },
 
   /**
    * Get random started creature position
@@ -155,30 +95,14 @@ Play.prototype = {
         targetPos.x,
         targetPos.y
       );
-      
+
       // if more than minimum distance
       if (distance > 600) {
         isTooClose = false;
-      } 
+      }
     }
-     
-    return targetPos; 
-  },
 
-  /**
-   * Convert tile index to point (0, 0)
-   * 
-   * @param {number} tileIndexX - index of tile x
-   * @param {number} tileIndexY - index of tile y
-   * 
-   * @returns {Position} return position of tile at (0, 0) 
-   */
-  convertTileIndexToPoint: function(tileIndexX, tileIndexY) {
-    var x = tileIndexX * this.VTMap.mapTileWidth,
-      y = tileIndexY * this.VTMap.mapTileHeight,
-      result = new Position(x, y);
-
-    return result;
+    return targetPos;
   },
 
   setCreatureLabel: function(creature) {
@@ -232,7 +156,7 @@ Play.prototype = {
     this.bubbleGroup.add(creature.blr.bubble);
     this.updateCreatureBubble(creature);
   },
-  
+
   updateCreatureBubble: function(creature) {
     if (creature.blr.bubble.visible && creature.blr.misc.lastMessage) {
       this.updateCreatureBubbleText(creature);
@@ -264,10 +188,10 @@ Play.prototype = {
   /**
    * Log creature respawning into log list
    * 
-   * @param {Object} creature - creature object
+   * @param {Creature} creature
    */
   logCreatureRespawning: function(creature) {
-    var logText = creature.blr.misc.creatureType + ' ' + creature.blr.info.id +
+    var logText = creature.blr.info.type + ' ' + creature.blr.info.id +
       ' (' + creature.blr.info.life + ') is respawn at ' + creature.body.x + ', ' + creature.body.y;
     UI.addTextToLogList(logText);
   },
@@ -275,21 +199,23 @@ Play.prototype = {
   /**
    * Log creature message into log list
    * 
-   * @param {Object} creature - creature object
+   * @param {Creature} creature
    */
   logCreatureMessage: function(creature) {
-    var logText = creature.blr.misc.creatureType + ' ' + creature.blr.info.id +
+    var logText = creature.blr.info.type + ' ' + creature.blr.info.id +
       ': ' + creature.blr.misc.lastMessage;
     UI.addTextToLogList(logText);
   },
 
   /**
    * Spawn zombie
+   * 
+   * @param {CreatureInfo} creatureInfo
    */
-  spawnZombie: function() {
+  spawnZombie: function(creatureInfo) {
     // init
-    var monsterBlr = new Zombie();
-    var monster = this.spawnMonster(this.zombieGroup, monsterBlr.phrInfo);
+    var monsterBlr = new Zombie(creatureInfo);
+    var monster = this.spawnMonster(this.zombieGroup, monsterBlr.phrInfo, creatureInfo.startVector);
     monster.blr = monsterBlr;
     this.updateCreatureLastPosition(monster);
     monster.animations.add('blink', [0, 1, 0]);
@@ -316,16 +242,21 @@ Play.prototype = {
     // optional
 
     // misc
-    monster.blr.info.reset();
+    monster.blr.reset();
     this.logCreatureRespawning(monster);
-    monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
+    monster.blr.misc.autoMoveTargetPos = new Position(monster.x, monster.y);
     UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
   },
 
-  spawnMachine: function() {
+  /**
+   * Spawn machine
+   * 
+   * @param {CreatureInfo} creatureInfo
+   */
+  spawnMachine: function(creatureInfo) {
     // init
-    var monsterBlr = new Machine();
-    var monster = this.spawnMonster(this.machineGroup, monsterBlr.phrInfo);
+    var monsterBlr = new Machine(creatureInfo);
+    var monster = this.spawnMonster(this.machineGroup, monsterBlr.phrInfo, creatureInfo.startVector);
     monster.blr = monsterBlr;
     this.updateCreatureLastPosition(monster);
     monster.animations.add('blink', [0, 1, 0]);
@@ -365,19 +296,21 @@ Play.prototype = {
     monster.body.moves = false;
 
     // misc
-    monster.blr.info.reset();
+    monster.blr.reset();
     this.logCreatureRespawning(monster);
-    monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
+    monster.blr.misc.autoMoveTargetPos = new Position(monster.x, monster.y);
     UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
   },
 
   /**
-   * Spawn bat monster
+   * Spawn bat
+   * 
+   * @param {CreatureInfo} creatureInfo
    */
-  spawnBat: function() {
+  spawnBat: function(creatureInfo) {
     // init
-    var monsterBlr = new Bat();
-    var monster = this.spawnMonster(this.batGroup, monsterBlr.phrInfo);
+    var monsterBlr = new Bat(creatureInfo);
+    var monster = this.spawnMonster(this.batGroup, monsterBlr.phrInfo, creatureInfo.startVector);
     monster.blr = monsterBlr;
     this.updateCreatureLastPosition(monster);
     monster.animations.add('blink', [0, 1, 0]);
@@ -406,24 +339,22 @@ Play.prototype = {
     monster.blr.weapon.scale.setTo(0.7, 0.7);
 
     // misc
-    monster.blr.info.reset();
+    monster.blr.reset();
     this.logCreatureRespawning(monster);
-    monster.blr.misc.autoMoveTargetPos = this.getRandomAutoMovePosition(monster);
+    monster.blr.misc.autoMoveTargetPos = new Position(monster.x, monster.y);
     UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
   },
 
   /**
    * Spawn monster
    * 
-   * @param {Array.Group} monsterGroup - array of Phaser Group
-   * @param {CreatureInfo} monsterPhrInfo
-   * @param {Position} startPos - started position
+   * @param {Object} monsterGroup - Phaser Group object
+   * @param {Object} monsterPhrInfo
+   * @param {Vector} startVector - start vector
    * 
    * @return {DisplayObject} Phaser DisplayObject
    */
-  spawnMonster: function(monsterGroup, monsterPhrInfo, startPos) {
-    if (typeof startPos === 'undefined') startPos = this.getRandomStartedCreaturePosition();
-
+  spawnMonster: function(monsterGroup, monsterPhrInfo, startVector) {
     var monsterSpriteName = monsterPhrInfo.spriteName,
       monsterBodyOffset = monsterPhrInfo.bodyOffset,
       monsterBodyWidth = monsterPhrInfo.width,
@@ -432,7 +363,7 @@ Play.prototype = {
       monsterBodyHeightSize = monsterBodyHeight - monsterBodyOffset * 2,
       monsterBodyMass = monsterPhrInfo.bodyMass;
 
-    var monster = monsterGroup.create(startPos.x, startPos.y, monsterSpriteName);
+    var monster = monsterGroup.create(startVector.x, startVector.y, monsterSpriteName);
     GAME.physics.enable(monster);
     monster.anchor.set(0.5);
     monster.body.setSize(
@@ -443,6 +374,7 @@ Play.prototype = {
     );
     monster.body.tilePadding.set(monsterBodyOffset, monsterBodyOffset);
     monster.body.mass = monsterBodyMass;
+    monster.body.rotation = startVector.rotation;
 
     return monster;
   },
@@ -454,8 +386,6 @@ Play.prototype = {
    * @param {[type]} tile     [description]
    */
   onCreatureOverlapWell: function(creature, tile) {
-    // console.log('onCreatureOverlapWell - ' + creature.blr.info.id + ' is on well');
-
     this.onCreatureIsRecovered(creature, 'well');
   },
 
@@ -468,7 +398,7 @@ Play.prototype = {
           ' (' + creature.blr.info.life++ + ' > ' + creature.blr.info.life + ')  was recovered from ' + recoveredFrom;
         UI.addTextToLogList(logText);
 
-        creature.blr.info.updateLastRecoverTimestamp();
+        creature.blr.updateLastRecoverTimestamp();
         this.playRecoverParticle(creature);
         creature.animations.play('recover', 10, false, false);
       }
@@ -482,8 +412,6 @@ Play.prototype = {
    * @param {[type]} tile     [description]
    */
   onCreatureOverlapFire: function(creature, tile) {
-    // console.log('onCreatureOverlapFire - ' + creature.blr.info.id + ' is on fire');
-
     this.onCreatureIsDamaged(creature, 'fire');
   },
 
@@ -502,7 +430,7 @@ Play.prototype = {
         ' (' + creature.blr.info.life-- + ' > ' + creature.blr.info.life + ')  was damaged from ' + damageFrom;
       UI.addTextToLogList(logText);
 
-      creature.blr.info.updateLastDamageTimestamp();
+      creature.blr.updateLastDamageTimestamp();
       this.playDamageParticle(creature);
       creature.animations.play('blink', 10, false, false);
 
@@ -540,14 +468,6 @@ Play.prototype = {
     this.updateCreatureWeapon(creature);
     this.updateCreatureShadow(creature);
     this.logCreatureRespawning(creature);
-  },
-
-  onOverlapStone: function() {
-    console.log('onOverlapStone');
-  },
-
-  onOverlapBush: function() {
-    console.log('onOverlapBush');
   },
 
   setDashEmitter: function() {
@@ -629,12 +549,12 @@ Play.prototype = {
     var i = 0, // row
       j = 0, // column
       renderPadding = 4;
-      mapData = this.VTMap.data,
+    mapData = this.VTMap.data,
       mapTileWidth = this.VTMap.mapTileWidth,
       mapTileHeight = this.VTMap.mapTileHeight,
       nTileWidth = this.VTMap.nTileWidth,
       nTileHeight = this.VTMap.nTileHeight;
-  
+
     var bmdWidth = mapTileWidth - renderPadding * 2,
       bmdHeight = mapTileHeight - renderPadding * 2;
 
@@ -651,7 +571,7 @@ Play.prototype = {
         // walkable
         if (mapPoint !== 0) {
           var x = (j * mapTileHeight) + renderPadding;
-            y = (i * mapTileWidth) + renderPadding,
+          y = (i * mapTileWidth) + renderPadding,
             drawnObject = GAME.add.sprite(x, y, bmd);
 
           this.vtmapDebugGroup.add(drawnObject);
@@ -660,34 +580,8 @@ Play.prototype = {
     }
   },
 
-  /**
-   * Creature 2D array
-   * 
-   * @see http://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript
-   * 
-   * @param {number} nRows
-   * @param {number} nCols
-   * @param {any} defaultValue
-   */
-  creature2DArray: function(nRows, nCols, defaultValue) {
-    var arr = [],
-      i = 0,
-      j = 0;
-
-    for (i = 0; i < nRows; i++) {
-      arr.push([]);
-      arr[i].push(new Array(nCols));
-
-      for (j = 0; j < nCols; j++) {
-        arr[i][j] = defaultValue;
-      }
-    }
-
-    return arr;
-  },
-
   onPlayerOverlapZombie: function(player, monster) {
-    
+
   },
 
   onPlayerOverlapMachine: function(player, monster) {
@@ -781,10 +675,10 @@ Play.prototype = {
 
       if (!monster.blr.misc.isIdle) {
         var distance = GAME.physics.arcade.distanceToXY(
-            monster,
-            monster.blr.misc.autoMoveTargetPos.x,
-            monster.blr.misc.autoMoveTargetPos.y
-          );
+          monster,
+          monster.blr.misc.autoMoveTargetPos.x,
+          monster.blr.misc.autoMoveTargetPos.y
+        );
 
         // first time, auto move mode
         // if monster
@@ -793,7 +687,7 @@ Play.prototype = {
         if ((ts - monster.blr.misc.autoMoveTimestamp > 6000) ||
           distance < 200) {
           var targetPos = this.getRandomAutoMovePosition(monster);
-          
+
           monster.blr.misc.isAutomove = true; // unused
           monster.blr.misc.autoMoveTargetPos = targetPos;
           monster.blr.misc.autoMoveTimestamp = UTIL.getCurrentUtcTimestamp();
@@ -903,17 +797,200 @@ Play.prototype = {
     if (typeof newX === 'undefined') newX = creature.x;
     if (typeof newY === 'undefined') newY = creature.y;
     if (typeof newRotation === 'undefined') newRotation = creature.rotation;
-    
+
     if (this.isCreatureMove(creature)) {
       creature.blr.weapon.x = newX;
       creature.blr.weapon.y = newY;
     }
 
     creature.blr.weapon.rotation = newRotation;
+  },  
+
+  /*================================================================ Socket
+   */
+
+  setSocketHandlers: function() {
+    SOCKET.on(EVENT_NAME.server.newPlayer, this.onPlayerConnect.bind(this));
+    SOCKET.on(EVENT_NAME.server.disconnectedPlayer, this.onPlayerDisconnect.bind(this));
+    SOCKET.on(EVENT_NAME.player.message, this.onPlayerMessage.bind(this));
+    SOCKET.on(EVENT_NAME.player.move, this.onPlayerMove.bind(this));
   },
 
-  preload: function() {
+  onPlayerReady: function(data) {
+    if (IS_DEBUG) UTIL.clientLog('Init data', data);
+    var zombieInfos = data.zombieInfos,
+      machineInfos = data.machineInfos,
+      playerInfo = data.playerInfo,
+      batInfos = data.batInfos,
+      existingPlayerInfo = data.existingPlayerInfo;
+
+    this.VTMap = data.VTMap;
+
+    // draw VTMap to game
+    if (IS_DEBUG) {
+      this.debugMap();
+    }
+
+    // creature - zombie
+    var nZombies = zombieInfos.length;
+    for (var i = 0; i < nZombies; i++) {
+      this.spawnZombie(zombieInfos[i]);
+    }
     
+    // creature - machine
+    var nMachines = machineInfos.length;
+    for (var i = 0; i < nMachines; i++) {
+      this.spawnMachine(machineInfos[i]);
+    }
+    
+    // creature - bat
+    var nBats = batInfos.length;
+    for (var i = 0; i < nBats; i++) {
+      this.spawnBat(batInfos[i]);
+    }
+    
+    // player
+    var playerOffset = 8,
+      playerBodySize = 46 - playerOffset * 2;
+
+    this.player = {};
+
+    // player - shadow
+    var shadowTmp = GAME.add.sprite(playerInfo.startVector.x, playerInfo.startVector.y, 'shadow');
+    shadowTmp.anchor.set(0.1);
+    shadowTmp.scale.setTo(0.7, 0.7);
+    shadowTmp.alpha = .3;
+
+    // player - weapon
+    var weaponTmp = GAME.add.sprite(playerInfo.startVector.x, playerInfo.startVector.y, 'bowWeapon');
+    weaponTmp.animations.add('attack', [0, 1, 2, 3, 4, 5, 0]);
+    weaponTmp.anchor.set(0.3, 0.5);
+    weaponTmp.scale.setTo(0.5);
+
+    // player - body
+    this.player = GAME.add.sprite(playerInfo.startVector.x, playerInfo.startVector.y, 'hero');
+    this.player.blr = new Hero(playerInfo);
+    this.updateCreatureLastPosition(this.player);
+    this.player.animations.add('blink', [0, 1, 0]);
+    this.player.animations.add('recover', [0, 2, 0]);
+    this.player.anchor.set(0.5);
+    GAME.physics.enable(this.player);
+    this.player.body.collideWorldBounds = true;
+    this.player.body.setSize(playerBodySize, playerBodySize, playerOffset, playerOffset);
+    this.player.body.tilePadding.set(playerOffset, playerOffset);
+    this.player.body.maxAngular = 500;
+    this.player.body.angularDrag = 50;
+
+    // player - bullet
+    var bulletGroup = GAME.add.group();
+    bulletGroup.enableBody = true;
+    bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    bulletGroup.createMultiple(this.player.blr.misc.nBullets, 'arrowBullet');
+    bulletGroup.setAll('anchor.x', 0.5);
+    bulletGroup.setAll('anchor.y', 0.5);
+    bulletGroup.setAll('outOfBoundsKill', true);
+    bulletGroup.setAll('checkWorldBounds', true);
+
+    // player - bubble
+    this.setCreatureBubble(this.player);
+
+    // player
+    this.player.blr.reset();
+    this.playerGroup.add(this.player);
+    this.setCreatureLabel(this.player);
+    this.player.blr.shadow = shadowTmp;
+    this.playerShadowGroup.add(this.player.blr.shadow);
+    this.player.blr.weapon = weaponTmp;
+    this.playerWeaponGroup.add(this.player.blr.weapon);
+    this.player.blr.bullet = bulletGroup;
+    this.playerArrowGroup.add(this.player.blr.bullet);
+    UI.addCreatureInfoToCreatureList(this.player.blr.info, 'player');
+    if (IS_IMMORTAL) {
+      this.player.blr.misc.isImmortal = true;
+    }
+
+    // camera
+    GAME.camera.follow(this.player);
+
+    // reorder z-index (hack)
+    GAME.world.bringToTop(this.floorGroup);
+    GAME.world.bringToTop(this.stoneShadowGroup);
+    GAME.world.bringToTop(this.stoneGroup);
+    GAME.world.bringToTop(this.vtmapDebugGroup);
+
+    GAME.world.bringToTop(this.dashEmitterGroup);
+    GAME.world.bringToTop(this.recoverEmitterGroup);
+    GAME.world.bringToTop(this.damageEmitterGroup);
+
+    GAME.world.bringToTop(this.zombieShadowGroup);
+    GAME.world.bringToTop(this.machineShadowGroup);
+    GAME.world.bringToTop(this.batShadowGroup);
+    GAME.world.bringToTop(this.enemyShadowGroup); // unused
+    GAME.world.bringToTop(this.playerShadowGroup);
+
+    GAME.world.bringToTop(this.zombieWeaponGroup);
+    GAME.world.bringToTop(this.zombieGroup);
+    GAME.world.bringToTop(this.machineGroup);
+    GAME.world.bringToTop(this.machineWeaponGroup);
+    GAME.world.bringToTop(this.batWeaponGroup);
+    GAME.world.bringToTop(this.batGroup);
+
+    GAME.world.bringToTop(this.playerWeaponGroup);
+    GAME.world.bringToTop(this.enemyGroup); // unused
+    GAME.world.bringToTop(this.playerGroup);
+
+    GAME.world.bringToTop(this.playerArrowGroup);
+    GAME.world.bringToTop(this.machineLaserGroup);
+
+    GAME.world.bringToTop(this.treeGroup);
+    GAME.world.bringToTop(this.bubbleGroup);
+
+    this.setSocketHandlers();
+    this.isGameReady = true;
+  },
+
+  onPlayerConnect: function(data) {
+    UTIL.clientLog('New player is connected', data);
+
+    // screen
+    // add player id to player list widget
+
+    // game
+    // add new enemy
+  },
+
+  onPlayerDisconnect: function(data) {
+    UTIL.clientLog('Player is disconnected', data);
+
+    // screen
+    // remove player id from player list widget
+
+    // game
+    // remove enemt from game
+  },
+
+  onPlayerMessage: function(data) {
+    util.clientLog('Receive the player\'s message', data);
+
+    // screen
+    // add player message to log
+
+    // game
+    // bouble message to the game
+  },
+
+  onPlayerMove: function(data) {
+    // util.clientLog('Enemy is move');
+
+    // game
+    // move the enemy
+  },
+
+  /*================================================================ Stage
+   */
+
+  preload: function() {
+
   },
 
   init: function() {
@@ -923,9 +1000,6 @@ Play.prototype = {
     this.stoneShadowGroup = GAME.add.group();
     this.stoneGroup = GAME.add.group();
     this.vtmapDebugGroup = GAME.add.group();
-
-    // item
-    this.potionGroup = GAME.add.group(); // unused
 
     // monster
     this.zombieShadowGroup = GAME.add.group();
@@ -940,6 +1014,7 @@ Play.prototype = {
 
     // hero
     this.enemyShadowGroup = GAME.add.group(); // unused
+    this.enemyWeaponGroup = GAME.add.group();
     this.enemyGroup = GAME.add.group(); // unused
     this.playerShadowGroup = GAME.add.group();
     this.playerWeaponGroup = GAME.add.group();
@@ -969,12 +1044,22 @@ Play.prototype = {
     GAME.scale.setResizeCallback(function() {
       GAME.scale.setGameSize(window.innerWidth, window.innerHeight);
     });
+
+    // socket
+    SOCKET.on('connect', function() {
+      UTIL.clientLog('Connected to server');
+    });
+
+    SOCKET.on('disconnect', function() {
+      UTIL.clientLog('Disconnected from ' + SOCKET_URL);
+    });
+
+    // player is ready
+    SOCKET.on(EVENT_NAME.player.ready, this.onPlayerReady.bind(this));
   },
 
   create: function() {
-    // ping the server that game already setted
-    //
-    // SOCKET.emit(EVENT_NAME.player.ready, null);
+    GAME.time.advancedTiming = true;
 
     // world
     GAME.world.setBounds(0, 0, GAME_WORLD_WIDTH, GAME_WORLD_HEIGHT);
@@ -982,47 +1067,16 @@ Play.prototype = {
     // system & world
     GAME.physics.startSystem(Phaser.Physics.ARCADE);
 
-    /*
-    1: layer 1 - bush
-    2: layer 0 - ground
-    3: layer 1 - rock
-    4: layer 2 - tree
-    5: layer 0 - well
-    6: layer 0 - fire
-    */
-
-    /*-------------------------------- Layer 0
-     */
-
     // bg
     GAME.stage.backgroundColor = '#3db148';
 
     // map - floor
     var map = GAME.add.tilemap('mapTile');
     map.addTilesetImage('map');
-    
-    // VTMap
-    this.VTMap.mapTileWidth = map.tileWidth;
-    this.VTMap.mapTileHeight = map.tileHeight;
-    this.VTMap.nTileWidth = map.width;
-    this.VTMap.nTileHeight = map.height;
-    this.VTMap.data = this.creature2DArray(
-      this.VTMap.nTileWidth,
-      this.VTMap.nTileHeight,
-      0
-    );
-
     this.floorGroup = map.createLayer(0);
     this.floorGroup.resizeWorld();
     map.setTileIndexCallback(5, this.onCreatureOverlapWell, this, this.floorGroup);
     map.setTileIndexCallback(6, this.onCreatureOverlapFire, this, this.floorGroup);
-    map.forEach(function(tile) {
-      if (tile.index === 5 || tile.index === 6) {
-
-        // update VTMap
-        this.VTMap.data[tile.y][tile.x] = tile.index;
-      }
-    }, this, 0, 0, 50, 50, this.floorGroup);
 
     // map - stone (rock, bush)
     this.stoneGroup = map.createLayer(1);
@@ -1033,337 +1087,221 @@ Play.prototype = {
         stoneShadow.scale.setTo(0.7, 0.7);
         stoneShadow.alpha = .3;
         this.stoneShadowGroup.add(stoneShadow);
-
-        // update VTMap
-        this.VTMap.data[tile.y][tile.x] = tile.index;
       }
     }, this, 0, 0, 50, 50, this.stoneGroup);
 
-    // draw VTMap to game
-    if (IS_DEBUG) {
-      this.debugMap();
-    }
-    
+    // map - tree
+    this.treeGroup = map.createLayer(2);
+
+    // keyboard
+    this.spaceKey = GAME.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.enterKey = GAME.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+
     // emitter
     this.setDashEmitter();
     this.setRecoverEmitter();
     this.setDamageEmitter();
 
-    // creature - zombie
-    for (var i = 0; i < this.nZombies; i++) {
-      this.spawnZombie();
-    }
-
-    // creature - machine
-    for (var i = 0; i < this.nMachines; i++) {
-      this.spawnMachine();
-    }
-
-    // creature - bat
-    for (var i = 0; i < this.nBats; i++) {
-      this.spawnBat();
-    }
-
-    // player
-    var startPos = this.getRandomStartedCreaturePosition(),
-      playerOffset = 8,
-      playerBodySize = 46 - playerOffset * 2;
-    
-    this.player = {};
-
-    // player - shadow
-    var shadowTmp = GAME.add.sprite(startPos.x, startPos.y, 'shadow');
-    shadowTmp.anchor.set(0.1);
-    shadowTmp.scale.setTo(0.7, 0.7);
-    shadowTmp.alpha = .3;
-
-    // player - weapon
-    var weaponTmp = GAME.add.sprite(startPos.x, startPos.y, 'bowWeapon');
-    weaponTmp.animations.add('attack', [0, 1, 2, 3, 4, 5, 0]);
-    weaponTmp.anchor.set(0.3, 0.5);
-    weaponTmp.scale.setTo(0.5);
-
-    // player - body
-    this.player = GAME.add.sprite(startPos.x, startPos.y, 'hero');
-    this.player.blr = new Hero();
-    this.updateCreatureLastPosition(this.player);
-    this.player.animations.add('blink', [0, 1, 0]);
-    this.player.animations.add('recover', [0, 2, 0]);
-    this.player.anchor.set(0.5);
-    GAME.physics.enable(this.player);
-    this.player.body.collideWorldBounds = true;
-    this.player.body.setSize(playerBodySize, playerBodySize, playerOffset, playerOffset);
-    this.player.body.tilePadding.set(playerOffset, playerOffset);
-    this.player.body.maxAngular = 500;
-    this.player.body.angularDrag = 50;
-
-    // player - bullet
-    var bulletGroup = GAME.add.group();
-    bulletGroup.enableBody = true;
-    bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    bulletGroup.createMultiple(this.player.blr.misc.nBullets, 'arrowBullet');
-    bulletGroup.setAll('anchor.x', 0.5);
-    bulletGroup.setAll('anchor.y', 0.5);
-    bulletGroup.setAll('outOfBoundsKill', true);
-    bulletGroup.setAll('checkWorldBounds', true);
-
-    // player - bubble
-    this.setCreatureBubble(this.player);
-
-    // player
-    this.player.blr.info.reset();
-    this.playerGroup.add(this.player);
-    this.setCreatureLabel(this.player);
-    this.player.blr.shadow = shadowTmp;
-    this.playerShadowGroup.add(this.player.blr.shadow);
-    this.player.blr.weapon = weaponTmp;
-    this.playerWeaponGroup.add(this.player.blr.weapon);
-    this.player.blr.bullet = bulletGroup;
-    this.playerArrowGroup.add(this.player.blr.bullet);
-    UI.addCreatureInfoToCreatureList(this.player.blr.info, 'player');
-    if (IS_IMMORTAL) {
-      this.player.blr.misc.isImmortal = true;
-    }
-
-    // map - tree
-    this.treeGroup = map.createLayer(2);
-
-    // camera
-    GAME.camera.follow(this.player);
-
-    // keyboard
-    this.cursors = GAME.input.keyboard.createCursorKeys(); // unused
-    this.spaceKey = GAME.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    this.enterKey = GAME.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-
-    // reorder z-index (hack)
-    GAME.world.bringToTop(this.floorGroup);
-    GAME.world.bringToTop(this.stoneShadowGroup);
-    GAME.world.bringToTop(this.stoneGroup);
-    GAME.world.bringToTop(this.vtmapDebugGroup);
-
-    GAME.world.bringToTop(this.dashEmitterGroup);
-    GAME.world.bringToTop(this.recoverEmitterGroup);
-    GAME.world.bringToTop(this.damageEmitterGroup);
-
-    GAME.world.bringToTop(this.potionGroup); // unused
-
-    GAME.world.bringToTop(this.zombieShadowGroup);
-    GAME.world.bringToTop(this.machineShadowGroup);
-    GAME.world.bringToTop(this.batShadowGroup);
-    GAME.world.bringToTop(this.enemyShadowGroup); // unused
-    GAME.world.bringToTop(this.playerShadowGroup);
-
-    GAME.world.bringToTop(this.zombieWeaponGroup);
-    GAME.world.bringToTop(this.zombieGroup);
-    GAME.world.bringToTop(this.machineGroup);
-    GAME.world.bringToTop(this.machineWeaponGroup);
-    GAME.world.bringToTop(this.batWeaponGroup);
-    GAME.world.bringToTop(this.batGroup);
-
-    GAME.world.bringToTop(this.playerWeaponGroup);
-    GAME.world.bringToTop(this.enemyGroup); // unused
-    GAME.world.bringToTop(this.playerGroup);
-
-    GAME.world.bringToTop(this.playerArrowGroup);
-    GAME.world.bringToTop(this.machineLaserGroup);
-
-    GAME.world.bringToTop(this.treeGroup);
-    GAME.world.bringToTop(this.skyGroup); // unused
-    GAME.world.bringToTop(this.nameGroup); // unused
-    GAME.world.bringToTop(this.bubbleGroup);
+    // player ready
+    SOCKET.emit(EVENT_NAME.player.ready, null);
   },
 
   update: function() {
-    var ts = UTIL.getCurrentUtcTimestamp();
+    if (this.isGameReady) {
+      var ts = UTIL.getCurrentUtcTimestamp();
 
-    // collide - creature with floorGroup
-    GAME.physics.arcade.collide(this.zombieGroup, this.floorGroup);
-    GAME.physics.arcade.collide(this.machineGroup, this.floorGroup);
-    GAME.physics.arcade.collide(this.batGroup, this.floorGroup);
-    GAME.physics.arcade.collide(this.playerGroup, this.floorGroup);
+      // collide - creature with floorGroup
+      GAME.physics.arcade.collide(this.zombieGroup, this.floorGroup);
+      GAME.physics.arcade.collide(this.machineGroup, this.floorGroup);
+      GAME.physics.arcade.collide(this.batGroup, this.floorGroup);
+      GAME.physics.arcade.collide(this.playerGroup, this.floorGroup);
 
-    // collide - creature with stoneGroup
-    GAME.physics.arcade.collide(this.zombieGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
-    GAME.physics.arcade.collide(this.machineGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
-    GAME.physics.arcade.collide(this.batGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
-    GAME.physics.arcade.collide(this.playerGroup, this.stoneGroup, this.onPlayerCollideStoneGroup, null, this);
+      // collide - creature with stoneGroup
+      GAME.physics.arcade.collide(this.zombieGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
+      GAME.physics.arcade.collide(this.machineGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
+      GAME.physics.arcade.collide(this.batGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
+      GAME.physics.arcade.collide(this.playerGroup, this.stoneGroup, this.onPlayerCollideStoneGroup, null, this);
 
-    // collide - player with monster
-    GAME.physics.arcade.collide(this.playerGroup, this.zombieGroup, this.onPlayerCollideMonster, null, this);
-    GAME.physics.arcade.collide(this.playerGroup, this.machineGroup, this.onPlayerCollideMonster, null, this);
-    GAME.physics.arcade.collide(this.playerGroup, this.batGroup, this.onPlayerCollideMonster, null, this);
+      // collide - player with monster
+      GAME.physics.arcade.collide(this.playerGroup, this.zombieGroup, this.onPlayerCollideMonster, null, this);
+      GAME.physics.arcade.collide(this.playerGroup, this.machineGroup, this.onPlayerCollideMonster, null, this);
+      GAME.physics.arcade.collide(this.playerGroup, this.batGroup, this.onPlayerCollideMonster, null, this);
 
-    // overlap - player with monster
-    GAME.physics.arcade.overlap(this.playerGroup, this.zombieGroup, this.onPlayerOverlapZombie, null, this);
-    GAME.physics.arcade.overlap(this.playerGroup, this.machineGroup, this.onPlayerOverlapMachine, null, this);
-    GAME.physics.arcade.overlap(this.playerGroup, this.batGroup, this.onPlayerOverlapBat, null, this);
+      // overlap - player with monster
+      GAME.physics.arcade.overlap(this.playerGroup, this.zombieGroup, this.onPlayerOverlapZombie, null, this);
+      GAME.physics.arcade.overlap(this.playerGroup, this.machineGroup, this.onPlayerOverlapMachine, null, this);
+      GAME.physics.arcade.overlap(this.playerGroup, this.batGroup, this.onPlayerOverlapBat, null, this);
 
-    // overlap - player with monster weapon
-    GAME.physics.arcade.overlap(this.playerGroup, this.zombieWeaponGroup, this.onPlayerOverlapZombieWeapon, null, this);
-    GAME.physics.arcade.overlap(this.playerGroup, this.machineWeaponGroup, this.onPlayerOverlapMachineWeapon, null, this);
-    GAME.physics.arcade.overlap(this.playerGroup, this.batWeaponGroup, this.onPlayerOverlapBatWeapon, null, this);
+      // overlap - player with monster weapon
+      GAME.physics.arcade.overlap(this.playerGroup, this.zombieWeaponGroup, this.onPlayerOverlapZombieWeapon, null, this);
+      GAME.physics.arcade.overlap(this.playerGroup, this.machineWeaponGroup, this.onPlayerOverlapMachineWeapon, null, this);
+      GAME.physics.arcade.overlap(this.playerGroup, this.batWeaponGroup, this.onPlayerOverlapBatWeapon, null, this);
 
-    // overlap - player arrow with monster
-    GAME.physics.arcade.overlap(this.playerArrowGroup, this.zombieGroup, this.onPlayerArrowOverlapMonster, null, this);
-    GAME.physics.arcade.overlap(this.playerArrowGroup, this.machineGroup, this.onPlayerArrowOverlapMonster, null, this);
-    GAME.physics.arcade.overlap(this.playerArrowGroup, this.batGroup, this.onPlayerArrowOverlapMonster, null, this);
+      // overlap - player arrow with monster
+      GAME.physics.arcade.overlap(this.playerArrowGroup, this.zombieGroup, this.onPlayerArrowOverlapMonster, null, this);
+      GAME.physics.arcade.overlap(this.playerArrowGroup, this.machineGroup, this.onPlayerArrowOverlapMonster, null, this);
+      GAME.physics.arcade.overlap(this.playerArrowGroup, this.batGroup, this.onPlayerArrowOverlapMonster, null, this);
 
-    // overlap - machine laser overlap player
-    GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
+      // overlap - machine laser overlap player
+      GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
 
-    // player
-    if (this.player.alive) {
+      // player
+      if (this.player.alive) {
 
-      // reset
-      this.player.body.velocity.x = 0;
-      this.player.body.velocity.y = 0;
-      this.player.body.angularVelocity = 0;
-      if (ts - this.player.blr.misc.lastMessageTimestamp > this.bubbleDelay) {
-        this.player.blr.bubble.visible = false;
-      }
-
-      // input - left click
-      if (GAME.input.activePointer.leftButton.isDown) {
-        // move
-
-        GAME.physics.arcade.moveToPointer(this.player, this.player.blr.phrInfo.velocitySpeed);
-
-        //  if it's overlapping the mouse, don't move any more
-        if (Phaser.Rectangle.contains(this.player.body, GAME.input.x, GAME.input.y)) {
-          this.player.body.velocity.setTo(0, 0);
-
-        } else {
-          // update player + weapon rotation
-          this.updateCreatureRotationByFollowingMouse(this.player);
-          this.playDashParticle(this.player);
+        // reset
+        this.player.body.velocity.x = 0;
+        this.player.body.velocity.y = 0;
+        this.player.body.angularVelocity = 0;
+        if (ts - this.player.blr.misc.lastMessageTimestamp > this.bubbleDelay) {
+          this.player.blr.bubble.visible = false;
         }
-      }
 
-      // input -  right click || spacebar
-      if (GAME.input.activePointer.rightButton.isDown || this.spaceKey.isDown) {
-        // fire arrow
-        this.heroFireArrow(this.player);
-      }
+        // input - left click
+        if (GAME.input.activePointer.leftButton.isDown) {
+          // move
 
-      // message
-      // 200 is key pressing delay 
-      if (this.enterKey.isDown && ts - this.player.blr.misc.lastEnterTimestamp > this.enterKeyDelay) {
+          GAME.physics.arcade.moveToPointer(this.player, this.player.blr.phrInfo.velocitySpeed);
 
-        // if start typing
-        if (!this.player.blr.misc.isTyping) {
-          this.player.blr.updateLastEnterTimestamp(ts);
-          this.player.blr.misc.isTyping = true;
+          //  if it's overlapping the mouse, don't move any more
+          if (Phaser.Rectangle.contains(this.player.body, GAME.input.x, GAME.input.y)) {
+            this.player.body.velocity.setTo(0, 0);
 
-          UI.enableMessageInput();
-
-        } else {
-          this.player.blr.updateLastEnterTimestamp(ts);
-          this.player.blr.misc.isTyping = false;
-
-          // update
-          var message = UI.getMessageInput();
-          if (message) {
-            // set message
-            this.player.blr.updateLastMessageTimestamp(ts);
-            this.player.blr.misc.lastMessage = message;
-            this.player.blr.bubble.setText(message);
-            this.player.blr.bubble.visible = true;
-
-            // add message text to log
-            this.logCreatureMessage(this.player);
+          } else {
+            // update player + weapon rotation
+            this.updateCreatureRotationByFollowingMouse(this.player);
+            this.playDashParticle(this.player);
           }
-          
-          UI.disableMessageInput();
-        }  
+        }
+
+        // input -  right click || spacebar
+        if (GAME.input.activePointer.rightButton.isDown || this.spaceKey.isDown) {
+          // fire arrow
+          this.heroFireArrow(this.player);
+        }
+
+        // message
+        // 200 is key pressing delay 
+        if (this.enterKey.isDown && ts - this.player.blr.misc.lastEnterTimestamp > this.enterKeyDelay) {
+
+          // if start typing
+          if (!this.player.blr.misc.isTyping) {
+            this.player.blr.updateLastEnterTimestamp(ts);
+            this.player.blr.misc.isTyping = true;
+
+            UI.enableMessageInput();
+
+          } else {
+            this.player.blr.updateLastEnterTimestamp(ts);
+            this.player.blr.misc.isTyping = false;
+
+            // update
+            var message = UI.getMessageInput();
+            if (message) {
+              // set message
+              this.player.blr.updateLastMessageTimestamp(ts);
+              this.player.blr.misc.lastMessage = message;
+              this.player.blr.bubble.setText(message);
+              this.player.blr.bubble.visible = true;
+
+              // add message text to log
+              this.logCreatureMessage(this.player);
+            }
+
+            UI.disableMessageInput();
+          }
+        }
+
+        this.updateCreatureLastPosition(this.player);
       }
 
-      this.updateCreatureLastPosition(this.player);
+      /*
+      // monster - zombie
+      this.zombieGroup.forEachAlive(function(monster) {
+        if (monster.alive) {
+          // reset
+          monster.body.velocity.y = 0;
+          monster.body.velocity.x = 0;
+          monster.body.angularVelocity = 0;
+
+          // autoMove
+          this.monsterAutoMove(monster);
+        }
+      }, this);
+
+      // monster - machine
+      this.machineGroup.forEachAlive(function(monster) {
+        if (monster.alive) {
+          // reset
+          monster.body.velocity.y = 0;
+          monster.body.velocity.x = 0;
+          monster.body.angularVelocity = 0;
+
+          // bullet
+          if (!IS_INVISIBLE && GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
+            if (ts > monster.blr.misc.nextFireTimestamp &&
+              monster.blr.bullet.countDead() > 0) {
+              monster.blr.misc.nextFireTimestamp = UTIL.getCurrentUtcTimestamp() + monster.blr.misc.fireRate;
+
+              var bullet = monster.blr.bullet.getFirstDead();
+              bullet.reset(monster.blr.weapon.x, monster.blr.weapon.y);
+              bullet.rotation = GAME.physics.arcade.moveToObject(bullet, this.player, monster.blr.misc.bulletSpeed);
+            }
+          }
+        }
+      }, this);
+
+      // monster - bat
+      this.batGroup.forEachAlive(function(monster) {
+        if (monster.alive) {
+          // reset
+          monster.body.velocity.y = 0;
+          monster.body.velocity.x = 0;
+          monster.body.angularVelocity = 0;
+
+          // autoMove
+          this.monsterAutoMove(monster);
+        }
+      }, this);
+      */
     }
-
-    // monster - zombie
-    this.zombieGroup.forEachAlive(function(monster) {
-      if (monster.alive) {
-        // reset
-        monster.body.velocity.y = 0;
-        monster.body.velocity.x = 0;
-        monster.body.angularVelocity = 0;
-        
-        // autoMove
-        this.monsterAutoMove(monster);
-      }
-    }, this);
-
-    // monster - machine
-    this.machineGroup.forEachAlive(function(monster) {
-      if (monster.alive) {
-        // reset
-        monster.body.velocity.y = 0;
-        monster.body.velocity.x = 0;
-        monster.body.angularVelocity = 0;
-
-        // bullet
-        if (!IS_INVISIBLE && GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
-          if (ts > monster.blr.misc.nextFireTimestamp &&
-            monster.blr.bullet.countDead() > 0) {
-            monster.blr.misc.nextFireTimestamp = UTIL.getCurrentUtcTimestamp() + monster.blr.misc.fireRate; 
-
-            var bullet = monster.blr.bullet.getFirstDead();
-            bullet.reset(monster.blr.weapon.x, monster.blr.weapon.y);
-            bullet.rotation = GAME.physics.arcade.moveToObject(bullet, this.player, monster.blr.misc.bulletSpeed);
-          }
-        }
-      }
-    }, this);
-
-    // monster - bat
-    this.batGroup.forEachAlive(function(monster) {
-      if (monster.alive) {
-        // reset
-        monster.body.velocity.y = 0;
-        monster.body.velocity.x = 0;
-        monster.body.angularVelocity = 0;
-
-        // autoMove
-        this.monsterAutoMove(monster);
-      }
-    }, this);
   },
 
   preRender: function() {
     // All `sub` (weapon, shadow, bubble) should be updated here 
     // no need to update `child` (label position), cause it's automatically updated 
 
-    this.updateCreatureLabelText(this.player);
-    this.updateCreatureWeapon(this.player);
-    this.updateCreatureShadow(this.player);
-    this.updateCreatureBubble(this.player);
+    if (this.isGameReady) {
+      this.updateCreatureLabelText(this.player);
+      this.updateCreatureWeapon(this.player);
+      this.updateCreatureShadow(this.player);
+      this.updateCreatureBubble(this.player);
 
-    this.zombieGroup.forEachAlive(function(monster) {
-      this.updateCreatureLabelText(monster);
-      this.updateCreatureWeapon(monster);
-      this.updateCreatureShadow(monster);
-    }, this);
+      this.zombieGroup.forEachAlive(function(monster) {
+        this.updateCreatureLabelText(monster);
+        this.updateCreatureWeapon(monster);
+        this.updateCreatureShadow(monster);
+      }, this);
 
-    this.machineGroup.forEachAlive(function(monster) {
-      var newX = monster.x,
-        newY = monster.y,
-        newRotation = GAME.physics.arcade.angleBetween(monster, this.player);
-      
-      this.updateCreatureLabelText(monster);
-      this.updateCreatureWeapon(monster, newX, newY, newRotation);
-      this.updateCreatureShadow(monster);
-    }, this);
+      this.machineGroup.forEachAlive(function(monster) {
+        var newX = monster.x,
+          newY = monster.y,
+          newRotation = GAME.physics.arcade.angleBetween(monster, this.player);
 
-    this.batGroup.forEachAlive(function(monster) {
-      this.updateCreatureLabelText(monster);
-      this.updateCreatureWeapon(monster);
-      this.updateCreatureShadow(monster);
-    }, this);
+        this.updateCreatureLabelText(monster);
+        this.updateCreatureWeapon(monster, newX, newY, newRotation);
+        this.updateCreatureShadow(monster);
+      }, this);
+
+      this.batGroup.forEachAlive(function(monster) {
+        this.updateCreatureLabelText(monster);
+        this.updateCreatureWeapon(monster);
+        this.updateCreatureShadow(monster);
+      }, this);
+    }
   },
 
   render: function() {
-    if (IS_DEBUG) {
+    if (this.isGameReady && IS_DEBUG) {
       var creatureBodyDebugColor = 'rgba(0,255, 0, 0.4)',
         weaponBodyDebugColor = 'rgba(215, 125, 125, 0.4)';
 
@@ -1373,6 +1311,7 @@ Play.prototype = {
 
       // middle
       GAME.debug.start(32, 260);
+      GAME.debug.line('Frames per second (FPS) ' + GAME.time.fps);
       GAME.debug.line('zombieGroup living ' + this.zombieGroup.countLiving());
       GAME.debug.line('zombieGroup dead ' + this.zombieGroup.countDead());
       GAME.debug.line('machineGroup living ' + this.machineGroup.countLiving());

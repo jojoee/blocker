@@ -8,6 +8,20 @@ var Util = {
    */
 
   /**
+   * Returns a random number between min (inclusive) and max (exclusive)
+   * 
+   * @see http://stackoverflow.com/questions/1527803/generating-random-whole-numbers-in-javascript-in-a-specific-range
+   * 
+   * @param {number} min - float number
+   * @param {number} max - float number
+   * @returns {number} float number
+   */
+  getRandomArbitrary: function(min, max) {
+    return Math.random() * (max - min) + min;
+  },
+
+
+  /**
    * Returns a random integer between min (inclusive) and max (inclusive)
    * Using Math.round() will give you a non-uniform distribution! 
    * 
@@ -57,6 +71,32 @@ var Util = {
       dy = y1 - y2;
 
     return Math.sqrt(dx * dx + dy * dy);
+  },
+
+  /**
+   * Creature 2D array
+   * 
+   * @see http://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript
+   * 
+   * @param {number} nRows
+   * @param {number} nCols
+   * @param {any} defaultValue
+   */
+  creature2DArray: function(nRows, nCols, defaultValue) {
+    var arr = [],
+      i = 0,
+      j = 0;
+
+    for (i = 0; i < nRows; i++) {
+      arr.push([]);
+      arr[i].push(new Array(nCols));
+
+      for (j = 0; j < nCols; j++) {
+        arr[i][j] = defaultValue;
+      }
+    }
+
+    return arr;
   },
 
   /*---------------------------------------------------------------- Date & Time

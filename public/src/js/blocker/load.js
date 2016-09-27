@@ -84,7 +84,6 @@ Load.prototype = {
   },
 
   create: function() {
-    // GAME.stateTransitionExponential.to('Play');
     GAME.state.start('Play');
   }
 };

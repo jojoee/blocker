@@ -75,19 +75,25 @@ var Message = function(playerId, text, utcTimestamp) {
 
 /**
  * CreatureInfo
- * internal class
  * 
+ * @param {string} id
+ * @param {string} type
+ * @param {Vector} startVector
  * @param {number} life
- * @param {number} [maxLife]
+ * @param {number} maxLife
  */
-var CreatureInfo = function(life, maxLife) {
-  if (typeof maxLife == 'undefined') maxLife = life;
-
+var CreatureInfo = function(id, type, startVector, life, maxLife) {
   /** @type {string} */
-  this.id = '';
+  this.id = id;
+
+  /** @type {string} creature type */
+  this.type = type;
+
+  /** @type {Vector} start vector of creature */
+  this.startVector = startVector;
 
   /** @type {numberr} */
-  this.life = 1;
+  this.life = life;
 
   /** @type {number} initialize */
   this.initialLife = life;
@@ -103,25 +109,6 @@ var CreatureInfo = function(life, maxLife) {
 
   /** @type {number} immortal delay (milliseconds) */
   this.immortalDelay = 800;
-
-  // initialize
-  this.init();
-};
-
-CreatureInfo.prototype.updateLastDamageTimestamp = function() {
-  this.lastDamageTimestamp = UTIL.getCurrentUtcTimestamp();
-};
-
-CreatureInfo.prototype.updateLastRecoverTimestamp = function() {
-  this.lastRecoverTimestamp = UTIL.getCurrentUtcTimestamp();
-};
-
-CreatureInfo.prototype.init = function() {
-  this.id = UTIL.getRandomId();
-};
-
-CreatureInfo.prototype.reset = function() {
-  this.life = this.initialLife;
 };
 
 /**
@@ -134,6 +121,8 @@ var Creature = function(info, phrInfo, misc) {
   this.misc = misc;
 
   this.lastPos = {};
+  
+  /** @type {Sprite} Phaser sprite object (label) */
   this.label = {};
 
   /** @type {Sprite} Phaser sprite object (shadow) */
@@ -147,6 +136,18 @@ var Creature = function(info, phrInfo, misc) {
 
   /** @type {Group} Phaser group object */
   this.bullet = {};
+};
+
+Creature.prototype.updateLastDamageTimestamp = function() {
+  this.info.lastDamageTimestamp = UTIL.getCurrentUtcTimestamp();
+};
+
+Creature.prototype.updateLastRecoverTimestamp = function() {
+  this.info.lastRecoverTimestamp = UTIL.getCurrentUtcTimestamp();
+};
+
+Creature.prototype.reset = function() {
+  this.info.life = this.info.initialLife;
 };
 
 /**
@@ -188,8 +189,13 @@ Creature.prototype.updateLastIdleTimestamp = function(ts) {
   this.misc.lastIdleTimestamp = ts;
 };
 
-var Hero = function() {
-  var info = new CreatureInfo(10),
+/**
+ * Hero
+ * 
+ * @param {CreatureInfo} creatureInfo
+ */
+var Hero = function(creatureInfo) {
+  var info = creatureInfo,
     phrInfo = {
       spriteName: '',
       width: 0,
@@ -199,7 +205,6 @@ var Hero = function() {
       velocitySpeed: 200,
     },
     misc = {
-      creatureType: 'hero',
       isImmortal: false,
       visibleRange: 300,
 
@@ -228,8 +233,13 @@ var Hero = function() {
 Hero.prototype = Object.create(Creature.prototype);
 Hero.prototype.constructor = Hero;
 
-var Zombie = function() {
-  var info = new CreatureInfo(5, 8),
+/**
+ * Zombie
+ * 
+ * @param {CreatureInfo} creatureInfo
+ */
+var Zombie = function(creatureInfo) {
+  var info = creatureInfo,
     phrInfo = {
       spriteName: 'zombie',
       width: 46,
@@ -239,7 +249,6 @@ var Zombie = function() {
       velocitySpeed: 100,
     },
     misc = {
-      creatureType: 'zombie',
       isImmortal: false,
       visibleRange: 200,
 
@@ -262,8 +271,13 @@ var Zombie = function() {
 Zombie.prototype = Object.create(Creature.prototype);
 Zombie.prototype.constructor = Zombie;
 
-var Machine = function() {
-  var info = new CreatureInfo(5),
+/**
+ * Machine
+ * 
+ * @param {CreatureInfo} creatureInfo
+ */
+var Machine = function(creatureInfo) {
+  var info = creatureInfo,
     phrInfo = {
       spriteName: 'machine',
       width: 46,
@@ -273,7 +287,6 @@ var Machine = function() {
       velocitySpeed: 120,
     },
     misc = {
-      creatureType: 'machine',
       isImmortal: false,
       visibleRange: 300,
 
@@ -302,8 +315,13 @@ var Machine = function() {
 Machine.prototype = Object.create(Creature.prototype);
 Machine.prototype.constructor = Machine;
 
-var Bat = function() {
-  var info = new CreatureInfo(3),
+/**
+ * Bat
+ * 
+ * @param {CreatureInfo} creatureInfo
+ */
+var Bat = function(creatureInfo) {
+  var info = creatureInfo,
     phrInfo = {
       spriteName: 'bat',
       width: 46,
@@ -313,7 +331,6 @@ var Bat = function() {
       velocitySpeed: 120,
     },
     misc = {
-      creatureType: 'bat',
       isImmortal: false,
       visibleRange: 240,
       
@@ -340,7 +357,7 @@ module.exports = {
   Position: Position,
   Vector: Vector,
   Message: Message,
-  // CreatureInfo: CreatureInfo,
+  CreatureInfo: CreatureInfo,
   // Creature: Creature,
   Hero: Hero,
   Zombie: Zombie,

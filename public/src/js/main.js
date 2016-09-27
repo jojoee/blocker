@@ -35,9 +35,7 @@ if (IS_DEBUG) {
   console.log('IS_IMMORTAL', IS_IMMORTAL);
 }
 
-blocker.Util.init();
 UI.init();
-
 GAME.state.add('Boot', blocker.Boot);
 GAME.state.add('Load', blocker.Load);
 GAME.state.add('Play', blocker.Play);
