@@ -72,8 +72,7 @@ Naming
 - [ ] Monster path finder, [1](http://jojoee.github.io/phaser-examples/games/paths-face/), [2](http://jojoee.github.io/phaser-examples/games/boids-steering/), [3](http://jojoee.github.io/phaser-examples/games/easystarjs/)
 - [ ] Player / Enemy can collect item in the floor
 - [ ] Implement [Shields.io](https://shields.io/)
-- [ ] Server minimap
-- [ ] Client minimap
+- [x] minimap, [1](http://www.html5gamedevs.com/topic/14182-creating-a-mini-map-in-phaser/), [2](http://www.html5gamedevs.com/topic/14930-creating-a-mini-map-from-a-render-texture/), [3](https://gist.github.com/jafrmartins/73e1e344237c980f3707f2760835f0bf)
 - [x] Invisible mode
 - [ ] Creature sight feature, [1](http://jojoee.github.io/phaser-examples/games/bresenham-light/), [2](http://www.emanueleferonato.com/wp-content/uploads/2014/10/survival/), [3](http://jojoee.github.io/phaser-examples/games/horror-ray-casting/)
 - [ ] Tutorial for development
