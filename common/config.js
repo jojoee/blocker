@@ -25,14 +25,6 @@ var commonConfig = {
     worldWidth: 2300,
     worldHeight: 2300,
   },
-  hero: {
-    width: 46,
-    height: 46,
-  },
-  monster: {
-    width: 46,
-    height: 46,
-  },
   eventName: {
     player: {
       // player is ready to connect

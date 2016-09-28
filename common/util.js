@@ -196,7 +196,7 @@ var Util = {
     if (typeof data === 'undefined') data = '';
 
     console.error(title, data);
-  }
+  },
 };
 
 module.exports = Util;

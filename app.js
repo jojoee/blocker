@@ -9,6 +9,7 @@ var EXPRESS = require('express'),
   SERVER = require('http').Server(APP),
   IO = require('socket.io')(SERVER),
   UTIL = require('./common/util'),
+  GUTIL = require('./common/gutil'),
   CONFIG = require('./common/config'),
   SERVER_CONFIG = require('./server/config'),
   mapJson = require('./public/src/asset/image/map.json'),
@@ -176,7 +177,7 @@ function getNewCreatureInfo(type, life, maxLife) {
   var creatureId = getUniqueCreatureId(),
     startPosition = getRandomStartCreaturePosition();
 
-  var startRotation = getRandomRotation(), 
+  var startRotation = GUTIL.getRandomRotation(), 
     startVector = new Vector(startPosition.x, startPosition.y, startRotation),
     creatureInfo = new CreatureInfo(creatureId, type, startVector, life, maxLife);
 
@@ -198,15 +199,6 @@ function getRandomStartCreaturePosition() {
 }
 
 /**
- * Get random rotation
- * 
- * @returns {number} rotation (float)
- */
-function getRandomRotation() {
-  return UTIL.getRandomArbitrary(-Math.PI, Math.PI);
-}
-
-/**
  * Get random creature position (real x, y in map)
  * by excluding given `arr`
  * 
@@ -225,7 +217,8 @@ function getCreaturePositionByExclusion(arr) {
 
   var tileIndexX,
     tileIndexY,
-    isNotOk = true;
+    isNotOk = true,
+    middlePos;
 
   while (isNotOk) {
     tileIndexX = UTIL.getRandomInt(0, nTileWidth - 1);
@@ -237,28 +230,9 @@ function getCreaturePositionByExclusion(arr) {
     }
   }
 
-  // we got point (0, 0) of the tile
-  // so we need to convert it to middle point of this tile
-  var zeroPos = convertTileIndexToPoint(tileIndexX, tileIndexY),
-    midelPos = new Position(zeroPos.x + tileWidth / 2, zeroPos.y + tileHeight / 2);
+  middlePos = GUTIL.convertTileIndexToPoint(tileIndexX, tileIndexY);
 
-  return midelPos;
-}
-
-/**
- * Convert tile index to point (0, 0)
- * 
- * @param {number} tileIndexX - index of tile x
- * @param {number} tileIndexY - index of tile y
- * 
- * @returns {Position} return position of tile at (0, 0) 
- */
-function convertTileIndexToPoint(tileIndexX, tileIndexY) {
-  var x = tileIndexX * VTMAP.mapTileWidth,
-    y = tileIndexY * VTMAP.mapTileHeight,
-    result = new Position(x, y);
-
-  return result;
+  return middlePos;
 }
 
 /*================================================================ Game
@@ -321,7 +295,7 @@ function getPlayerInfoIndexById(playerId) {
     }
   }
 
-  util.serverBugLog('getPlayerInfoIndexById', 'Not found playerId', playerId);
+  UTIL.serverBugLog('getPlayerInfoIndexById', 'Not found playerId', playerId);
 
   return -1;
 }

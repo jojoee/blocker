@@ -1,6 +1,6 @@
-var CONFIG = require('./config'),
-  UI = require('./../ui'),
+var GCONFIG = require('./config'),
   MODULE = require('./../../../../common/module'),
+  GUTIL = require('./../../../../common/gutil'),
   Position = MODULE.Position,
   Vector = MODULE.Vector,
   Hero = MODULE.Hero,
@@ -55,6 +55,8 @@ Play = function(GAME) {
 
   // sky
   this.treeGroup;
+  this.miniMapBg;
+  this.miniMapUnit;
   this.bubbleGroup;
 
   // input
@@ -107,7 +109,7 @@ Play.prototype = {
 
   setCreatureLabel: function(creature) {
     var labelStyle = {
-        font: '13px ' + CONFIG.mainFontFamily,
+        font: '13px ' + GCONFIG.mainFontFamily,
         fill: '#fff',
         align: 'left',
       },
@@ -141,7 +143,7 @@ Play.prototype = {
 
   setCreatureBubble: function(creature) {
     var bubbleStyle = {
-        font: '12px ' + CONFIG.mainFontFamily,
+        font: '12px ' + GCONFIG.mainFontFamily,
         fill: '#000',
         backgroundColor: '#ffffff',
         align: 'center',
@@ -804,7 +806,105 @@ Play.prototype = {
     }
 
     creature.blr.weapon.rotation = newRotation;
-  },  
+  },
+
+  setMiniMap: function() {
+    // tile size must be square
+    var miniMapSize = 5,
+      miniMapBgBmd = GAME.add.bitmapData(
+        miniMapSize * this.VTMap.nTileWidth,
+        miniMapSize * this.VTMap.nTileHeight
+      ),
+      miniMapBgSpr;
+    
+    // row
+    for (var i = 0; i < this.VTMap.nTileHeight; i++) {
+      // column
+      for (var j = 0; j < this.VTMap.nTileWidth; j++) {
+        var mapData = this.VTMap.data[i][j],
+          color = '#36a941',
+          miniMapX = j * miniMapSize,
+          miniMapY = i * miniMapSize;
+
+        switch (mapData) {
+          // brush
+          case 1:
+            color = '#4ed469';
+            break;
+          // stone
+          case 3:
+            color = '#b4baaf';
+            break;
+          // well
+          case 5:
+            color = '#409fff';
+            break;
+          // fire
+          case 6:
+            color = '#f07373';
+            break;
+        }
+
+        miniMapBgBmd.ctx.fillStyle = color;
+        // actually, param 3 and 4 should be 5 (equal to miniMapSize)
+        // but I want some kind of padding between each tile
+        // so, it should be 4 instead 
+        miniMapBgBmd.ctx.fillRect(miniMapX, miniMapY, 4, 4);
+      }
+    }
+    
+    miniMapBgSpr = GAME.add.sprite(6, 6, miniMapBgBmd);
+    miniMapBgSpr.alpha = 0.6;
+    miniMapBgSpr.fixedToCamera = true;
+    this.miniMapBg.add(miniMapBgSpr);
+  },
+
+  /**
+   * Update unit (in miniMap)
+   */
+  updateMinimap: function() {
+    // tile size must be square
+    var miniMapSize = 5,
+      miniMapUnitBmd = GAME.add.bitmapData(
+        miniMapSize * this.VTMap.nTileWidth,
+        miniMapSize * this.VTMap.nTileHeight
+      ),
+      miniMapUnitSpr;
+    
+    // destroy
+    this.miniMapUnit.forEachAlive(function(unitSpr) {
+      unitSpr.destroy();
+    });
+
+    // create new one
+    miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.playerGroup, '#fff');
+    miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.zombieGroup, '#776b9f');
+    miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.machineGroup, '#776b9f');
+    miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.batGroup, '#776b9f');
+    
+    miniMapUnitSpr = GAME.add.sprite(6, 6, miniMapUnitBmd);
+    miniMapUnitSpr.fixedToCamera = true;
+    this.miniMapUnit.add(miniMapUnitSpr);
+  },
+
+  addCreatureGroupToMiniMapUnitBmd: function(miniMapUnitBmd, creatureGroup, colorCode) {
+    var miniMapSize = 5;
+
+    creatureGroup.forEachAlive(function(creature) {
+      var x = creature.x,
+        y = creature.y,
+        tileIndex = GUTIL.convertPointToTileIndex(x, y),
+        miniMapX = tileIndex.x * miniMapSize,
+        miniMapY = tileIndex.y * miniMapSize;
+
+      miniMapUnitBmd.ctx.fillStyle = colorCode;
+      // actually, it should be the same as `setMiniMap`
+      // but I want to add more padding
+      miniMapUnitBmd.ctx.fillRect(miniMapX + 1, miniMapY + 1, 2, 2);
+    });
+
+    return miniMapUnitBmd;
+  },
 
   /*================================================================ Socket
    */
@@ -830,6 +930,9 @@ Play.prototype = {
     if (IS_DEBUG) {
       this.debugMap();
     }
+
+    // set miniMap
+    this.setMiniMap();
 
     // creature - zombie
     var nZombies = zombieInfos.length;
@@ -943,7 +1046,8 @@ Play.prototype = {
     GAME.world.bringToTop(this.machineLaserGroup);
 
     GAME.world.bringToTop(this.treeGroup);
-    GAME.world.bringToTop(this.bubbleGroup);
+    GAME.world.bringToTop(this.miniMapBg);
+    GAME.world.bringToTop(this.miniMapUnit);
 
     this.setSocketHandlers();
     this.isGameReady = true;
@@ -1026,8 +1130,8 @@ Play.prototype = {
 
     // sky
     this.treeGroup = GAME.add.group();
-    this.skyGroup = GAME.add.group();
-    this.nameGroup = GAME.add.group();
+    this.miniMapBg = GAME.add.group();
+    this.miniMapUnit = GAME.add.group();
     this.bubbleGroup = GAME.add.group();
 
     // disable default right-click's behavior on the canvas
@@ -1263,6 +1367,8 @@ Play.prototype = {
         }
       }, this);
       */
+
+      this.updateMinimap();
     }
   },
 
