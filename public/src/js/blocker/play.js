@@ -40,10 +40,9 @@ Play = function(GAME) {
   this.batGroup;
 
   // hero
-  this.enemyShadowGroup;
+  this.heroShadowGroup;
   this.enemyWeaponGroup;
   this.enemyGroup;
-  this.playerShadowGroup;
   this.playerWeaponGroup;
   this.playerGroup;
 
@@ -60,7 +59,7 @@ Play = function(GAME) {
   this.treeGroup;
   this.miniMapBg;
   this.miniMapUnit;
-  this.bubbleGroup;
+  this.heroBubbleGroup;
 
   // input
   this.spaceKey;
@@ -144,7 +143,7 @@ Play.prototype = {
     creature.blr.label.y = -(creature.height / 2) - (creature.blr.label.height / 2) + labelTopOffset;
   },
 
-  setCreatureBubble: function(creature) {
+  setHeroBubble: function(creature) {
     var bubbleStyle = {
         font: '12px ' + GCONFIG.mainFontFamily,
         fill: '#000',
@@ -158,7 +157,7 @@ Play.prototype = {
     bubble.visible = false;
 
     creature.blr.bubble = bubble;
-    this.bubbleGroup.add(creature.blr.bubble);
+    this.heroBubbleGroup.add(creature.blr.bubble);
     this.updateCreatureBubble(creature);
   },
 
@@ -361,9 +360,6 @@ Play.prototype = {
     // blr
     monster.blr = monsterBlr;
 
-    // label
-    this.setCreatureLabel(monster);
-
     // shadow
     var shadow = GAME.add.sprite(monster.x, monster.y, 'shadow');
     shadow.anchor.set(0.1);
@@ -371,6 +367,9 @@ Play.prototype = {
     shadow.alpha = .3;
     monster.blr.shadow = shadow;
     this.monsterShadowGroup.add(monster.blr.shadow);
+
+    // label
+    this.setCreatureLabel(monster);
 
     return monster;
   },
@@ -383,9 +382,9 @@ Play.prototype = {
 
     this.player = this.spawnHero(heroBlr);
     this.playerGroup.add(this.player);
-    this.playerShadowGroup.add(this.player.blr.shadow);
     this.playerWeaponGroup.add(this.player.blr.weapon);
     this.playerArrowGroup.add(this.player.blr.bullet);
+
     UI.addCreatureInfoToCreatureList(this.player.blr.info, 'player');
 
     if (IS_IMMORTAL) {
@@ -404,57 +403,58 @@ Play.prototype = {
       bodySize = 46 - bodyOffset * 2;
 
     // init & sprite
-    var player = GAME.add.sprite(startVector.x, startVector.y, 'hero');
-    player.blr = heroBlr;
-    player.anchor.set(0.5);
+    var hero = GAME.add.sprite(startVector.x, startVector.y, 'hero');
+    hero.blr = heroBlr;
+    hero.anchor.set(0.5);
 
     // body
-    GAME.physics.enable(player);
-    player.body.collideWorldBounds = true;
-    player.body.setSize(bodySize, bodySize, bodyOffset, bodyOffset);
-    player.body.tilePadding.set(bodyOffset, bodyOffset);
-    player.body.maxAngular = 500;
-    player.body.angularDrag = 50;
+    GAME.physics.enable(hero);
+    hero.body.collideWorldBounds = true;
+    hero.body.setSize(bodySize, bodySize, bodyOffset, bodyOffset);
+    hero.body.tilePadding.set(bodyOffset, bodyOffset);
+    hero.body.maxAngular = 500;
+    hero.body.angularDrag = 50;
 
     // shadow
     var shadowTmp = GAME.add.sprite(startVector.x, startVector.y, 'shadow');
     shadowTmp.anchor.set(0.1);
     shadowTmp.scale.setTo(0.7, 0.7);
     shadowTmp.alpha = .3;
-    player.blr.shadow = shadowTmp;
+    hero.blr.shadow = shadowTmp;
+    this.heroShadowGroup.add(hero.blr.shadow);
 
     // weapon
     var weaponTmp = GAME.add.sprite(startVector.x, startVector.y, 'bowWeapon');
     weaponTmp.animations.add('attack', [0, 1, 2, 3, 4, 5, 0]);
     weaponTmp.anchor.set(0.3, 0.5);
     weaponTmp.scale.setTo(0.5);
-    player.blr.weapon = weaponTmp;
+    hero.blr.weapon = weaponTmp;
 
     // animation
-    player.animations.add('blink', [0, 1, 0]);
-    player.animations.add('recover', [0, 2, 0]);
+    hero.animations.add('blink', [0, 1, 0]);
+    hero.animations.add('recover', [0, 2, 0]);
 
     // bullet
     var bulletGroup = GAME.add.group();
     bulletGroup.enableBody = true;
     bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    bulletGroup.createMultiple(player.blr.misc.nBullets, 'arrowBullet');
+    bulletGroup.createMultiple(hero.blr.misc.nBullets, 'arrowBullet');
     bulletGroup.setAll('anchor.x', 0.5);
     bulletGroup.setAll('anchor.y', 0.5);
     bulletGroup.setAll('outOfBoundsKill', true);
     bulletGroup.setAll('checkWorldBounds', true);
-    player.blr.bullet = bulletGroup;
-
-    // bubble
-    this.setCreatureBubble(player);
+    hero.blr.bullet = bulletGroup;
 
     // label
-    this.setCreatureLabel(player);
+    this.setCreatureLabel(hero);
+
+    // bubble
+    this.setHeroBubble(hero);
 
     // misc
-    player.blr.reset();
+    hero.blr.reset();
 
-    return player;
+    return hero;
   },
 
   /**
@@ -1056,8 +1056,7 @@ Play.prototype = {
 
     // shadow
     GAME.world.bringToTop(this.monsterShadowGroup);
-    GAME.world.bringToTop(this.enemyShadowGroup);
-    GAME.world.bringToTop(this.playerShadowGroup);
+    GAME.world.bringToTop(this.heroShadowGroup);
 
     // monster
     GAME.world.bringToTop(this.zombieWeaponGroup);
@@ -1081,6 +1080,7 @@ Play.prototype = {
     GAME.world.bringToTop(this.treeGroup);
     GAME.world.bringToTop(this.miniMapBg);
     GAME.world.bringToTop(this.miniMapUnit);
+    GAME.world.bringToTop(this.heroBubbleGroup);
 
     this.setSocketHandlers();
     this.isGameReady = true;
@@ -1148,8 +1148,7 @@ Play.prototype = {
     this.batGroup = GAME.add.group();
 
     // hero
-    this.enemyShadowGroup = GAME.add.group();
-    this.playerShadowGroup = GAME.add.group();
+    this.heroShadowGroup = GAME.add.group();
     this.enemyWeaponGroup = GAME.add.group();
     this.enemyGroup = GAME.add.group();
     this.playerWeaponGroup = GAME.add.group();
@@ -1163,7 +1162,7 @@ Play.prototype = {
     this.treeGroup = GAME.add.group();
     this.miniMapBg = GAME.add.group();
     this.miniMapUnit = GAME.add.group();
-    this.bubbleGroup = GAME.add.group();
+    this.heroBubbleGroup = GAME.add.group();
 
     // disable default right-click's behavior on the canvas
     GAME.canvas.oncontextmenu = function(e) {
