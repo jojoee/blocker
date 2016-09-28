@@ -1412,11 +1412,11 @@ Play.prototype = {
         weaponBodyDebugColor = 'rgba(215, 125, 125, 0.4)';
 
       // top
-      GAME.debug.bodyInfo(this.player, 32, 32);
-      GAME.debug.spriteInfo(this.player, 32, 164);
+      GAME.debug.bodyInfo(this.player, 264, 18);
+      GAME.debug.spriteInfo(this.player, 264, 120);
 
       // middle
-      GAME.debug.start(32, 260);
+      GAME.debug.start(6, 276);
       GAME.debug.line('Frames per second (FPS) ' + GAME.time.fps);
       GAME.debug.line('zombieGroup living ' + this.zombieGroup.countLiving());
       GAME.debug.line('zombieGroup dead ' + this.zombieGroup.countDead());
