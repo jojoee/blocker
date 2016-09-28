@@ -52,8 +52,9 @@ Play = function(GAME) {
   this.recoverEmitterGroup;
 
   // bullet
-  this.playerArrowGroup;
   this.machineLaserGroup;
+  this.enemyArrowGroup;
+  this.playerArrowGroup;
 
   // sky
   this.treeGroup;
@@ -234,12 +235,6 @@ Play.prototype = {
     this.zombieWeaponGroup.add(monster.blr.weapon);
 
     // optional
-
-    // misc
-    monster.blr.reset();
-    this.logCreatureRespawning(monster);
-    monster.blr.misc.autoMoveTargetPos = new Position(monster.x, monster.y);
-    UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
   },
 
   /**
@@ -278,12 +273,6 @@ Play.prototype = {
 
     // optional
     monster.body.moves = false;
-
-    // misc
-    monster.blr.reset();
-    this.logCreatureRespawning(monster);
-    monster.blr.misc.autoMoveTargetPos = new Position(monster.x, monster.y);
-    UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
   },
 
   /**
@@ -312,12 +301,6 @@ Play.prototype = {
     monster.scale.setTo(0.7, 0.7);
     monster.blr.shadow.scale.setTo(0.5, 0.5);
     monster.blr.weapon.scale.setTo(0.7, 0.7);
-
-    // misc
-    monster.blr.reset();
-    this.logCreatureRespawning(monster);
-    monster.blr.misc.autoMoveTargetPos = new Position(monster.x, monster.y);
-    UI.addCreatureInfoToCreatureList(monster.blr.info, 'creature');
   },
 
   /**
@@ -371,11 +354,18 @@ Play.prototype = {
     // label
     this.setCreatureLabel(monster);
 
+    // misc
+    this.logCreatureRespawning(monster);
+    monster.blr.misc.autoMoveTargetPos = new Position(monster.x, monster.y);
+    UI.addCreatureIdToCreatureList(monster.blr.info.id, 'monster');
+
     return monster;
   },
 
   /**
    * Spawn player
+   * 
+   * @param {Object} playerInfo
    */
   spawnPlayer: function(playerInfo) {
     var heroBlr = new Hero(playerInfo);
@@ -385,11 +375,27 @@ Play.prototype = {
     this.playerWeaponGroup.add(this.player.blr.weapon);
     this.playerArrowGroup.add(this.player.blr.bullet);
 
-    UI.addCreatureInfoToCreatureList(this.player.blr.info, 'player');
+    UI.addCreatureIdToCreatureList(this.player.blr.info.id, 'player');
 
     if (IS_IMMORTAL) {
       this.player.blr.misc.isImmortal = true;
     }
+  },
+
+  /**
+   * Spawn enemy
+   * 
+   * @param {Object} playerInfo
+   */
+  spawnEnemy: function(playerInfo) {
+    var heroBlr = new Hero(playerInfo);
+
+    var enemy = this.spawnHero(heroBlr);
+    this.enemyGroup.add(enemy);
+    this.enemyWeaponGroup.add(enemy.blr.weapon);
+    this.enemyArrowGroup.add(enemy.blr.bullet);
+
+    UI.addCreatureIdToCreatureList(enemy.blr.info.id, 'enemy');
   },
 
   /**
@@ -455,6 +461,30 @@ Play.prototype = {
     hero.blr.reset();
 
     return hero;
+  },
+
+  removeEnemy: function(playerInfo) {
+    var isFound = false;
+
+    this.enemyGroup.forEach(function(enemy) {
+      if (enemy.blr.info.id === playerInfo.id) {
+        enemy.blr.bullet.destroy();
+        enemy.blr.label.destroy();
+        enemy.blr.bullet.destroy();
+        enemy.blr.weapon.destroy();
+        enemy.blr.shadow.destroy();
+        enemy.destroy();
+
+        // misc
+        console.log('enemy ' + enemy.blr.info.id + ' is removed');
+        isFound = true;
+        UI.removeCreatureIdFromCreatureList(enemy.blr.info.id);
+      }
+    }, this);
+
+    if (!isFound) {
+      console.error('not found enemy ' + playerInfo.id, playerInfo);
+    }
   },
 
   /**
@@ -957,6 +987,7 @@ Play.prototype = {
 
       // create new one
       miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.playerGroup, '#fff');
+      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.enemyGroup, '#60f0ff');
       miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.zombieGroup, '#776b9f');
       miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.machineGroup, '#776b9f');
       miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.batGroup, '#776b9f');
@@ -1073,8 +1104,9 @@ Play.prototype = {
     GAME.world.bringToTop(this.playerGroup);
 
     // bullet
-    GAME.world.bringToTop(this.playerArrowGroup);
     GAME.world.bringToTop(this.machineLaserGroup);
+    GAME.world.bringToTop(this.enemyArrowGroup);
+    GAME.world.bringToTop(this.playerArrowGroup);
 
     // sky
     GAME.world.bringToTop(this.treeGroup);
@@ -1089,21 +1121,17 @@ Play.prototype = {
   onPlayerConnect: function(data) {
     UTIL.clientLog('New player is connected', data);
 
-    // screen
-    // add player id to player list widget
-
-    // game
-    // add new enemy
+    // enemy
+    var playerInfo = data.playerInfo;
+    this.spawnEnemy(playerInfo);
   },
 
   onPlayerDisconnect: function(data) {
     UTIL.clientLog('Player is disconnected', data);
 
-    // screen
-    // remove player id from player list widget
-
-    // game
-    // remove enemt from game
+    // enemy
+    var playerInfo = data.playerInfo;
+    this.removeEnemy(playerInfo);
   },
 
   onPlayerMessage: function(data) {
@@ -1155,8 +1183,9 @@ Play.prototype = {
     this.playerGroup = GAME.add.group();
 
     // bullet
-    this.playerArrowGroup = GAME.add.group();
     this.machineLaserGroup = GAME.add.group();
+    this.enemyArrowGroup = GAME.add.group();
+    this.playerArrowGroup = GAME.add.group();
 
     // sky
     this.treeGroup = GAME.add.group();

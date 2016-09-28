@@ -31,15 +31,14 @@ var Ui = {
    */
 
   /**
-   * Add creature info to creature list
+   * Add creature id to creature list
    * 
-   * @param {CreatureInfo} creatureInfo
-   * @param {string} [customClass=]
+   * @param {string} creatureId
+   * @param {string} [customClass=creature]
    */
-  addCreatureInfoToCreatureList: function(creatureInfo, customClass) {
+  addCreatureIdToCreatureList: function(creatureId, customClass) {
     if (typeof customClass === 'undefined') customClass = 'creature';
-    var creatureId = creatureInfo.id,
-      liEle = document.createElement('li'),
+    var liEle = document.createElement('li'),
       t = document.createTextNode(creatureId);
 
     liEle.appendChild(t);
@@ -50,14 +49,12 @@ var Ui = {
   },
 
   /**
-   * Remove creature from creature list
-   * unused
+   * Remove creature id from creature list
    * 
-   * @param {CreatureInfo} creatureInfo
+   * @param {string} creatureId
    */
-  removeCreatureFromCreatureList: function(creatureInfo) {
-    var creatureId = creatureInfo.id,
-      liEle = document.querySelectorAll('[data-creature-id="' + creatureId + '"]')[0];
+  removeCreatureIdFromCreatureList: function(creatureId) {
+    var liEle = document.querySelectorAll('[data-creature-id="' + creatureId + '"]')[0];
 
     UTIL.removeElement(liEle);
   },
