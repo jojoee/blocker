@@ -45,7 +45,7 @@ var Gutil = {
     } else {
       // we got point (0, 0) of the tile
       // so we need to convert it to middle point of this tile
-      var midelPos = new Position(zeroPos.x + tileWidth / 2, zeroPos.y + tileHeight / 2);
+      var middlePos = new Position(zeroPos.x + tileWidth / 2, zeroPos.y + tileHeight / 2);
       result = middlePos;
     }
 

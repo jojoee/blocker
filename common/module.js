@@ -114,13 +114,17 @@ var CreatureInfo = function(id, type, startVector, life, maxLife) {
 /**
  * Creature
  * internal class
+ * 
+ * @param {Object} info
+ * @param {Object} phrInfo
+ * @param {Object} misc
  */
 var Creature = function(info, phrInfo, misc) {
   this.info = info;
   this.phrInfo = phrInfo;
   this.misc = misc;
 
-  this.lastPos = {};
+  this.lastPos = info.startVector;
   
   /** @type {Sprite} Phaser sprite object (label) */
   this.label = {};

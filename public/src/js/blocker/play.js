@@ -12,12 +12,17 @@ Play = function(GAME) {
 
   this.isGameReady = false;
 
+  this.lastMiniMapUpdatingTimestamp = 0;
+  this.miniMapUpdatingDelay = 500;
+
   this.enterKeyDelay = 200;
   this.bubbleDelay = 3000;
   this.automoveDelay = 1000;
 
   /** @type {Array.number} map that can tell which point is walkable */
   this.VTMap = {};
+
+  this.player = {};
 
   // floor
   this.floorGroup;
@@ -26,13 +31,11 @@ Play = function(GAME) {
   this.stoneGroup;
 
   // monster
-  this.zombieShadowGroup;
+  this.monsterShadowGroup;
   this.zombieWeaponGroup;
   this.zombieGroup;
-  this.machineShadowGroup;
   this.machineWeaponGroup;
   this.machineGroup;
-  this.batShadowGroup;
   this.batWeaponGroup;
   this.batGroup;
 
@@ -217,20 +220,10 @@ Play.prototype = {
   spawnZombie: function(creatureInfo) {
     // init
     var monsterBlr = new Zombie(creatureInfo);
-    var monster = this.spawnMonster(this.zombieGroup, monsterBlr.phrInfo, creatureInfo.startVector);
-    monster.blr = monsterBlr;
-    this.updateCreatureLastPosition(monster);
-    monster.animations.add('blink', [0, 1, 0]);
-    monster.body.collideWorldBounds = true;
-    this.setCreatureLabel(monster);
+    var monster = this.spawnMonster(this.zombieGroup, monsterBlr);
 
-    // shadow
-    var shadow = GAME.add.sprite(monster.x, monster.y, 'shadow');
-    shadow.anchor.set(0.1);
-    shadow.scale.setTo(0.7, 0.7);
-    shadow.alpha = .3;
-    monster.blr.shadow = shadow;
-    this.zombieShadowGroup.add(monster.blr.shadow);
+    // animation
+    monster.animations.add('blink', [0, 1, 0]);
 
     // weapon
     var weapon = GAME.add.sprite(monster.x, monster.y, 'handsWeapon');
@@ -258,20 +251,10 @@ Play.prototype = {
   spawnMachine: function(creatureInfo) {
     // init
     var monsterBlr = new Machine(creatureInfo);
-    var monster = this.spawnMonster(this.machineGroup, monsterBlr.phrInfo, creatureInfo.startVector);
-    monster.blr = monsterBlr;
-    this.updateCreatureLastPosition(monster);
-    monster.animations.add('blink', [0, 1, 0]);
-    monster.body.collideWorldBounds = true;
-    this.setCreatureLabel(monster);
+    var monster = this.spawnMonster(this.machineGroup, monsterBlr);
 
-    // shadow
-    var shadow = GAME.add.sprite(monster.x, monster.y, 'shadow');
-    shadow.anchor.set(0.1);
-    shadow.scale.setTo(0.7, 0.7);
-    shadow.alpha = .3;
-    monster.blr.shadow = shadow;
-    this.machineShadowGroup.add(monster.blr.shadow);
+    // animation
+    monster.animations.add('blink', [0, 1, 0]);
 
     // weapon
     var weapon = GAME.add.sprite(monster.x, monster.y, 'laserTurretWeapon');
@@ -312,20 +295,10 @@ Play.prototype = {
   spawnBat: function(creatureInfo) {
     // init
     var monsterBlr = new Bat(creatureInfo);
-    var monster = this.spawnMonster(this.batGroup, monsterBlr.phrInfo, creatureInfo.startVector);
-    monster.blr = monsterBlr;
-    this.updateCreatureLastPosition(monster);
-    monster.animations.add('blink', [0, 1, 0]);
-    monster.body.collideWorldBounds = true;
-    this.setCreatureLabel(monster);
+    var monster = this.spawnMonster(this.batGroup, monsterBlr);
 
-    // shadow
-    var shadow = GAME.add.sprite(monster.x, monster.y, 'shadow');
-    shadow.anchor.set(0.1);
-    shadow.scale.setTo(0.5, 0.5);
-    shadow.alpha = .3;
-    monster.blr.shadow = shadow;
-    this.batShadowGroup.add(monster.blr.shadow);
+    // animation
+    monster.animations.add('blink', [0, 1, 0]);
 
     // weapon
     var weapon = GAME.add.sprite(monster.x, monster.y, 'wingsWeapon');
@@ -338,6 +311,7 @@ Play.prototype = {
 
     // optional
     monster.scale.setTo(0.7, 0.7);
+    monster.blr.shadow.scale.setTo(0.5, 0.5);
     monster.blr.weapon.scale.setTo(0.7, 0.7);
 
     // misc
@@ -351,12 +325,14 @@ Play.prototype = {
    * Spawn monster
    * 
    * @param {Object} monsterGroup - Phaser Group object
-   * @param {Object} monsterPhrInfo
-   * @param {Vector} startVector - start vector
+   * @param {Object} monsterBlr
    * 
    * @return {DisplayObject} Phaser DisplayObject
    */
-  spawnMonster: function(monsterGroup, monsterPhrInfo, startVector) {
+  spawnMonster: function(monsterGroup, monsterBlr) {
+    var monsterPhrInfo = monsterBlr.phrInfo,
+      startVector = monsterBlr.info.startVector;
+
     var monsterSpriteName = monsterPhrInfo.spriteName,
       monsterBodyOffset = monsterPhrInfo.bodyOffset,
       monsterBodyWidth = monsterPhrInfo.width,
@@ -365,9 +341,12 @@ Play.prototype = {
       monsterBodyHeightSize = monsterBodyHeight - monsterBodyOffset * 2,
       monsterBodyMass = monsterPhrInfo.bodyMass;
 
+    // sprite
     var monster = monsterGroup.create(startVector.x, startVector.y, monsterSpriteName);
     GAME.physics.enable(monster);
     monster.anchor.set(0.5);
+
+    // body
     monster.body.setSize(
       monsterBodyWidthSize,
       monsterBodyHeightSize,
@@ -377,8 +356,105 @@ Play.prototype = {
     monster.body.tilePadding.set(monsterBodyOffset, monsterBodyOffset);
     monster.body.mass = monsterBodyMass;
     monster.body.rotation = startVector.rotation;
+    monster.body.collideWorldBounds = true;
+
+    // blr
+    monster.blr = monsterBlr;
+
+    // label
+    this.setCreatureLabel(monster);
+
+    // shadow
+    var shadow = GAME.add.sprite(monster.x, monster.y, 'shadow');
+    shadow.anchor.set(0.1);
+    shadow.scale.setTo(0.7, 0.7);
+    shadow.alpha = .3;
+    monster.blr.shadow = shadow;
+    this.monsterShadowGroup.add(monster.blr.shadow);
 
     return monster;
+  },
+
+  /**
+   * Spawn player
+   */
+  spawnPlayer: function(playerInfo) {
+    var heroBlr = new Hero(playerInfo);
+
+    this.player = this.spawnHero(heroBlr);
+    this.playerGroup.add(this.player);
+    this.playerShadowGroup.add(this.player.blr.shadow);
+    this.playerWeaponGroup.add(this.player.blr.weapon);
+    this.playerArrowGroup.add(this.player.blr.bullet);
+    UI.addCreatureInfoToCreatureList(this.player.blr.info, 'player');
+
+    if (IS_IMMORTAL) {
+      this.player.blr.misc.isImmortal = true;
+    }
+  },
+
+  /**
+   * Spawn hero
+   * 
+   * @param {Object} heroBlr
+   */
+  spawnHero: function(heroBlr) {
+    var startVector = heroBlr.info.startVector,
+      bodyOffset = 8,
+      bodySize = 46 - bodyOffset * 2;
+
+    // init & sprite
+    var player = GAME.add.sprite(startVector.x, startVector.y, 'hero');
+    player.blr = heroBlr;
+    player.anchor.set(0.5);
+
+    // body
+    GAME.physics.enable(player);
+    player.body.collideWorldBounds = true;
+    player.body.setSize(bodySize, bodySize, bodyOffset, bodyOffset);
+    player.body.tilePadding.set(bodyOffset, bodyOffset);
+    player.body.maxAngular = 500;
+    player.body.angularDrag = 50;
+
+    // shadow
+    var shadowTmp = GAME.add.sprite(startVector.x, startVector.y, 'shadow');
+    shadowTmp.anchor.set(0.1);
+    shadowTmp.scale.setTo(0.7, 0.7);
+    shadowTmp.alpha = .3;
+    player.blr.shadow = shadowTmp;
+
+    // weapon
+    var weaponTmp = GAME.add.sprite(startVector.x, startVector.y, 'bowWeapon');
+    weaponTmp.animations.add('attack', [0, 1, 2, 3, 4, 5, 0]);
+    weaponTmp.anchor.set(0.3, 0.5);
+    weaponTmp.scale.setTo(0.5);
+    player.blr.weapon = weaponTmp;
+
+    // animation
+    player.animations.add('blink', [0, 1, 0]);
+    player.animations.add('recover', [0, 2, 0]);
+
+    // bullet
+    var bulletGroup = GAME.add.group();
+    bulletGroup.enableBody = true;
+    bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    bulletGroup.createMultiple(player.blr.misc.nBullets, 'arrowBullet');
+    bulletGroup.setAll('anchor.x', 0.5);
+    bulletGroup.setAll('anchor.y', 0.5);
+    bulletGroup.setAll('outOfBoundsKill', true);
+    bulletGroup.setAll('checkWorldBounds', true);
+    player.blr.bullet = bulletGroup;
+
+    // bubble
+    this.setCreatureBubble(player);
+
+    // label
+    this.setCreatureLabel(player);
+
+    // misc
+    player.blr.reset();
+
+    return player;
   },
 
   /**
@@ -396,7 +472,7 @@ Play.prototype = {
       var ts = UTIL.getCurrentUtcTimestamp();
 
       if (ts > creature.blr.info.lastRecoverTimestamp + creature.blr.info.immortalDelay) {
-        var logText = '+1 life ' + creature.blr.misc.creatureType + ' ' + creature.blr.info.id +
+        var logText = '+1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
           ' (' + creature.blr.info.life++ + ' > ' + creature.blr.info.life + ')  was recovered from ' + recoveredFrom;
         UI.addTextToLogList(logText);
 
@@ -428,7 +504,7 @@ Play.prototype = {
 
     if (!creature.blr.misc.isImmortal &&
       (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay)) {
-      var logText = '-1 life ' + creature.blr.misc.creatureType + ' ' + creature.blr.info.id +
+      var logText = '-1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
         ' (' + creature.blr.info.life-- + ' > ' + creature.blr.info.life + ')  was damaged from ' + damageFrom;
       UI.addTextToLogList(logText);
 
@@ -438,7 +514,7 @@ Play.prototype = {
 
       // is die
       if (creature.blr.info.life <= 0) {
-        var logText = creature.blr.misc.creatureType + ' ' + creature.blr.info.id + ' was died by ' + damageFrom;
+        var logText = creature.blr.info.type + ' ' + creature.blr.info.id + ' was died by ' + damageFrom;
         UI.addTextToLogList(logText);
 
         // disable - kill monster @24092016-0120
@@ -863,28 +939,36 @@ Play.prototype = {
    * Update unit (in miniMap)
    */
   updateMinimap: function() {
-    // tile size must be square
-    var miniMapSize = 5,
-      miniMapUnitBmd = GAME.add.bitmapData(
-        miniMapSize * this.VTMap.nTileWidth,
-        miniMapSize * this.VTMap.nTileHeight
-      ),
-      miniMapUnitSpr;
-    
-    // destroy
-    this.miniMapUnit.forEachAlive(function(unitSpr) {
-      unitSpr.destroy();
-    });
+    var ts = UTIL.getCurrentUtcTimestamp();
 
-    // create new one
-    miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.playerGroup, '#fff');
-    miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.zombieGroup, '#776b9f');
-    miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.machineGroup, '#776b9f');
-    miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.batGroup, '#776b9f');
-    
-    miniMapUnitSpr = GAME.add.sprite(6, 6, miniMapUnitBmd);
-    miniMapUnitSpr.fixedToCamera = true;
-    this.miniMapUnit.add(miniMapUnitSpr);
+    if (ts - this.lastMiniMapUpdatingTimestamp > this.miniMapUpdatingDelay) {
+      // tile size must be square
+      var miniMapSize = 5,
+        miniMapUnitBmd = GAME.add.bitmapData(
+          miniMapSize * this.VTMap.nTileWidth,
+          miniMapSize * this.VTMap.nTileHeight
+        ),
+        miniMapUnitSpr;
+      
+      // destroy
+      this.miniMapUnit.forEachAlive(function(unitSpr) {
+        unitSpr.destroy();
+      });
+
+      // create new one
+      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.playerGroup, '#fff');
+      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.zombieGroup, '#776b9f');
+      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.machineGroup, '#776b9f');
+      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.batGroup, '#776b9f');
+      
+      // create sprite and add to group
+      miniMapUnitSpr = GAME.add.sprite(6, 6, miniMapUnitBmd);
+      miniMapUnitSpr.fixedToCamera = true;
+      this.miniMapUnit.add(miniMapUnitSpr);
+
+      // update timestamp
+      this.lastMiniMapUpdatingTimestamp = ts;
+    }
   },
 
   addCreatureGroupToMiniMapUnitBmd: function(miniMapUnitBmd, creatureGroup, colorCode) {
@@ -951,86 +1035,31 @@ Play.prototype = {
     for (var i = 0; i < nBats; i++) {
       this.spawnBat(batInfos[i]);
     }
-    
-    // player
-    var playerOffset = 8,
-      playerBodySize = 46 - playerOffset * 2;
 
-    this.player = {};
-
-    // player - shadow
-    var shadowTmp = GAME.add.sprite(playerInfo.startVector.x, playerInfo.startVector.y, 'shadow');
-    shadowTmp.anchor.set(0.1);
-    shadowTmp.scale.setTo(0.7, 0.7);
-    shadowTmp.alpha = .3;
-
-    // player - weapon
-    var weaponTmp = GAME.add.sprite(playerInfo.startVector.x, playerInfo.startVector.y, 'bowWeapon');
-    weaponTmp.animations.add('attack', [0, 1, 2, 3, 4, 5, 0]);
-    weaponTmp.anchor.set(0.3, 0.5);
-    weaponTmp.scale.setTo(0.5);
-
-    // player - body
-    this.player = GAME.add.sprite(playerInfo.startVector.x, playerInfo.startVector.y, 'hero');
-    this.player.blr = new Hero(playerInfo);
-    this.updateCreatureLastPosition(this.player);
-    this.player.animations.add('blink', [0, 1, 0]);
-    this.player.animations.add('recover', [0, 2, 0]);
-    this.player.anchor.set(0.5);
-    GAME.physics.enable(this.player);
-    this.player.body.collideWorldBounds = true;
-    this.player.body.setSize(playerBodySize, playerBodySize, playerOffset, playerOffset);
-    this.player.body.tilePadding.set(playerOffset, playerOffset);
-    this.player.body.maxAngular = 500;
-    this.player.body.angularDrag = 50;
-
-    // player - bullet
-    var bulletGroup = GAME.add.group();
-    bulletGroup.enableBody = true;
-    bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    bulletGroup.createMultiple(this.player.blr.misc.nBullets, 'arrowBullet');
-    bulletGroup.setAll('anchor.x', 0.5);
-    bulletGroup.setAll('anchor.y', 0.5);
-    bulletGroup.setAll('outOfBoundsKill', true);
-    bulletGroup.setAll('checkWorldBounds', true);
-
-    // player - bubble
-    this.setCreatureBubble(this.player);
-
-    // player
-    this.player.blr.reset();
-    this.playerGroup.add(this.player);
-    this.setCreatureLabel(this.player);
-    this.player.blr.shadow = shadowTmp;
-    this.playerShadowGroup.add(this.player.blr.shadow);
-    this.player.blr.weapon = weaponTmp;
-    this.playerWeaponGroup.add(this.player.blr.weapon);
-    this.player.blr.bullet = bulletGroup;
-    this.playerArrowGroup.add(this.player.blr.bullet);
-    UI.addCreatureInfoToCreatureList(this.player.blr.info, 'player');
-    if (IS_IMMORTAL) {
-      this.player.blr.misc.isImmortal = true;
-    }
+    // creature - player
+    this.spawnPlayer(playerInfo);
 
     // camera
     GAME.camera.follow(this.player);
 
     // reorder z-index (hack)
+    // floor
     GAME.world.bringToTop(this.floorGroup);
     GAME.world.bringToTop(this.stoneShadowGroup);
     GAME.world.bringToTop(this.stoneGroup);
     GAME.world.bringToTop(this.vtmapDebugGroup);
 
+    // emitter
     GAME.world.bringToTop(this.dashEmitterGroup);
     GAME.world.bringToTop(this.recoverEmitterGroup);
     GAME.world.bringToTop(this.damageEmitterGroup);
 
-    GAME.world.bringToTop(this.zombieShadowGroup);
-    GAME.world.bringToTop(this.machineShadowGroup);
-    GAME.world.bringToTop(this.batShadowGroup);
-    GAME.world.bringToTop(this.enemyShadowGroup); // unused
+    // shadow
+    GAME.world.bringToTop(this.monsterShadowGroup);
+    GAME.world.bringToTop(this.enemyShadowGroup);
     GAME.world.bringToTop(this.playerShadowGroup);
 
+    // monster
     GAME.world.bringToTop(this.zombieWeaponGroup);
     GAME.world.bringToTop(this.zombieGroup);
     GAME.world.bringToTop(this.machineGroup);
@@ -1038,13 +1067,17 @@ Play.prototype = {
     GAME.world.bringToTop(this.batWeaponGroup);
     GAME.world.bringToTop(this.batGroup);
 
+    // hero
+    GAME.world.bringToTop(this.enemyWeaponGroup);
+    GAME.world.bringToTop(this.enemyGroup);
     GAME.world.bringToTop(this.playerWeaponGroup);
-    GAME.world.bringToTop(this.enemyGroup); // unused
     GAME.world.bringToTop(this.playerGroup);
 
+    // bullet
     GAME.world.bringToTop(this.playerArrowGroup);
     GAME.world.bringToTop(this.machineLaserGroup);
 
+    // sky
     GAME.world.bringToTop(this.treeGroup);
     GAME.world.bringToTop(this.miniMapBg);
     GAME.world.bringToTop(this.miniMapUnit);
@@ -1106,21 +1139,19 @@ Play.prototype = {
     this.vtmapDebugGroup = GAME.add.group();
 
     // monster
-    this.zombieShadowGroup = GAME.add.group();
+    this.monsterShadowGroup = GAME.add.group();
     this.zombieWeaponGroup = GAME.add.group();
     this.zombieGroup = GAME.add.group();
-    this.machineShadowGroup = GAME.add.group();
     this.machineWeaponGroup = GAME.add.group();
     this.machineGroup = GAME.add.group();
-    this.batShadowGroup = GAME.add.group();
     this.batWeaponGroup = GAME.add.group();
     this.batGroup = GAME.add.group();
 
     // hero
-    this.enemyShadowGroup = GAME.add.group(); // unused
-    this.enemyWeaponGroup = GAME.add.group();
-    this.enemyGroup = GAME.add.group(); // unused
+    this.enemyShadowGroup = GAME.add.group();
     this.playerShadowGroup = GAME.add.group();
+    this.enemyWeaponGroup = GAME.add.group();
+    this.enemyGroup = GAME.add.group();
     this.playerWeaponGroup = GAME.add.group();
     this.playerGroup = GAME.add.group();
 

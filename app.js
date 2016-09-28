@@ -149,6 +149,9 @@ function initMonsters() {
   }
 }
 
+/*================================================================ Game
+ */
+
 function getNewZombieInfo() {
   return getNewCreatureInfo('zombie', 5, 8);
 }
@@ -230,13 +233,10 @@ function getCreaturePositionByExclusion(arr) {
     }
   }
 
-  middlePos = GUTIL.convertTileIndexToPoint(tileIndexX, tileIndexY);
+  middlePos = GUTIL.convertTileIndexToPoint(tileIndexX, tileIndexY, tileWidth, tileHeight, true);
 
   return middlePos;
 }
-
-/*================================================================ Game
- */
 
 function isDuplicateCreatureId(creatureid, creatureInfos) {
   var i = 0,
