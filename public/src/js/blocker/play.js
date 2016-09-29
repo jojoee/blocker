@@ -1162,19 +1162,17 @@ Play.prototype = {
     this.isGameReady = true;
   },
 
-  onPlayerConnect: function(data) {
-    UTIL.clientLog('New player is connected', data);
+  onPlayerConnect: function(playerInfo) {
+    UTIL.clientLog('New player is connected', playerInfo);
 
     // enemy
-    var playerInfo = data.playerInfo;
     this.spawnEnemy(playerInfo);
   },
 
-  onPlayerDisconnect: function(data) {
-    UTIL.clientLog('Player is disconnected', data);
+  onPlayerDisconnect: function(playerInfo) {
+    UTIL.clientLog('Player is disconnected', playerInfo);
 
     // enemy
-    var playerInfo = data.playerInfo;
     this.removeEnemy(playerInfo);
   },
 

@@ -345,10 +345,7 @@ IO.on('connection', function(socket) {
     removePlayer(playerInfo.id);
 
     // send disconnected player
-    var data = {
-      playerInfo: playerInfo
-    };
-    socket.broadcast.emit(EVENT_NAME.server.disconnectedPlayer, data);
+    socket.broadcast.emit(EVENT_NAME.server.disconnectedPlayer, playerInfo);
   });
 
   // ready
@@ -370,10 +367,7 @@ IO.on('connection', function(socket) {
 
     // broadcast new player data
     // to existing players
-    var data = {
-      playerInfo: playerInfo,
-    };
-    socket.broadcast.emit(EVENT_NAME.server.newPlayer, data);
+    socket.broadcast.emit(EVENT_NAME.server.newPlayer, playerInfo);
   });
 
   // message
