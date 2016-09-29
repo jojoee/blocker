@@ -163,14 +163,14 @@ Play.prototype = {
   },
 
   updateCreatureBubble: function(creature) {
-    if (creature.blr.bubble.visible && creature.blr.misc.lastMessage) {
+    if (creature.blr.bubble.visible && creature.blr.info.lastMessage) {
       this.updateCreatureBubbleText(creature);
       this.updateCreatureBubblePosition(creature);
     }
   },
 
   updateCreatureBubbleText: function(creature) {
-    var bubbletext = creature.blr.misc.lastMessage;
+    var bubbletext = creature.blr.info.lastMessage;
     creature.blr.bubble.setText(bubbletext);
   },
 
@@ -180,6 +180,14 @@ Play.prototype = {
 
     creature.blr.bubble.x = creature.x;
     creature.blr.bubble.y = creature.y;
+  },
+
+  updateCreatureBubbleVisibility: function(creature) {
+    var ts = UTIL.getCurrentUtcTimestamp();
+
+    if (ts - creature.blr.info.lastMessageTimestamp > this.bubbleDelay) {
+      creature.blr.bubble.visible = false;
+    }
   },
 
   updateCreatureLastVector: function(creature) {
@@ -208,7 +216,7 @@ Play.prototype = {
    */
   logCreatureMessage: function(creature) {
     var logText = creature.blr.info.type + ' ' + creature.blr.info.id +
-      ': ' + creature.blr.misc.lastMessage;
+      ': ' + creature.blr.info.lastMessage;
     UI.addTextToLogList(logText);
   },
 
@@ -1170,12 +1178,19 @@ Play.prototype = {
     this.removeEnemy(playerInfo);
   },
 
-  onPlayerMessage: function(data) {
-    // screen
-    // add player message to log
+  onPlayerMessage: function(playerInfo) {
+    var enemy = this.getEnemyByPlayerId(playerInfo.id);
+    
+    if (!UTIL.isEmptyObject(enemy)) {
+      // update info
+      enemy.blr.updateLastMessageTimestamp(playerInfo.lastMessageTimestamp);
+      enemy.blr.info.lastMessage = playerInfo.lastMessage;
+      enemy.blr.bubble.setText(playerInfo.lastMessage);
+      enemy.blr.bubble.visible = true;
 
-    // game
-    // bouble message to the game
+      // add message text to log
+      this.logCreatureMessage(enemy);
+    }
   },
 
   onPlayerMove: function(playerInfo) {
@@ -1345,6 +1360,14 @@ Play.prototype = {
       // overlap - machine laser overlap player
       GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
 
+      // reset - bubble - player
+      this.updateCreatureBubbleVisibility(this.player);
+
+      // reset - bubble - enemy
+      this.enemyGroup.forEach(function(creature) {
+        this.updateCreatureBubbleVisibility(creature);
+      }, this);
+
       // player
       if (this.player.alive) {
 
@@ -1352,9 +1375,6 @@ Play.prototype = {
         this.player.body.velocity.x = 0;
         this.player.body.velocity.y = 0;
         this.player.body.angularVelocity = 0;
-        if (ts - this.player.blr.misc.lastMessageTimestamp > this.bubbleDelay) {
-          this.player.blr.bubble.visible = false;
-        }
 
         // input - left click
         if (GAME.input.activePointer.leftButton.isDown) {
@@ -1370,7 +1390,7 @@ Play.prototype = {
             // update player + weapon rotation
             this.updateCreatureRotationByFollowingMouse(this.player);
 
-            // send `move` event to the server
+            // broadcast `move` event
             this.updateCreatureLastVector(this.player);
             SOCKET.emit(EVENT_NAME.player.move, this.player.blr.info);
           }
@@ -1402,12 +1422,15 @@ Play.prototype = {
             if (message) {
               // set message
               this.player.blr.updateLastMessageTimestamp(ts);
-              this.player.blr.misc.lastMessage = message;
+              this.player.blr.info.lastMessage = message;
               this.player.blr.bubble.setText(message);
               this.player.blr.bubble.visible = true;
 
               // add message text to log
               this.logCreatureMessage(this.player);
+
+              // broadcast `message` event
+              SOCKET.emit(EVENT_NAME.player.message, this.player.blr.info);
             }
 
             UI.disableMessageInput();

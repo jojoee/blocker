@@ -62,6 +62,7 @@ Vector.prototype.updateByJson = function(obj) {
 
 /**
  * Message object
+ * unused
  * 
  * @param {string} playerId
  * @param {string} text
@@ -112,6 +113,12 @@ var CreatureInfo = function(id, type, startVector, life, maxLife) {
 
   /** @type {number} immortal delay (milliseconds) */
   this.immortalDelay = 800;
+
+  /** @type {string} last message */
+  this.lastMessage = '';
+
+  /** @type {number} last message timestamp */
+  this.lastMessageTimestamp = 0;
 };
 
 /**
@@ -126,8 +133,6 @@ var Creature = function(info, phrInfo, misc) {
   this.info = info;
   this.phrInfo = phrInfo;
   this.misc = misc;
-
-  this.lastPos = info.startVector;
   
   /** @type {Sprite} Phaser sprite object (label) */
   this.label = {};
@@ -158,23 +163,13 @@ Creature.prototype.reset = function() {
 };
 
 /**
- * Update lastEnterTimestamp
- * 
- * @param {number} [ts] - last enter timestamp 
- */
-Creature.prototype.updateLastEnterTimestamp = function(ts) {
-  if (typeof ts === 'undefined') ts = UTIL.getCurrentUtcTimestamp();
-  this.misc.lastEnterTimestamp = ts;
-};
-
-/**
  * Update lastMessageTimestamp
  * 
  * @param {number} [ts] - last message timestamp 
  */
 Creature.prototype.updateLastMessageTimestamp = function(ts) {
   if (typeof ts === 'undefined') ts = UTIL.getCurrentUtcTimestamp(); 
-  this.misc.lastMessageTimestamp = ts;
+  this.info.lastMessageTimestamp = ts;
 };
 
 /**
@@ -183,7 +178,17 @@ Creature.prototype.updateLastMessageTimestamp = function(ts) {
  * @param {string} txt - message text
  */
 Creature.prototype.updateLastMessage = function(txt) {
-  this.misc.lastMessage = txt;
+  this.info.lastMessage = txt;
+};
+
+/**
+ * Update lastEnterTimestamp
+ * 
+ * @param {number} [ts] - last enter timestamp 
+ */
+Creature.prototype.updateLastEnterTimestamp = function(ts) {
+  if (typeof ts === 'undefined') ts = UTIL.getCurrentUtcTimestamp();
+  this.misc.lastEnterTimestamp = ts;
 };
 
 /**
@@ -231,8 +236,6 @@ var Hero = function(creatureInfo) {
       // bubble
       isTyping: false,
       lastEnterTimestamp: 0,
-      lastMessageTimestamp: 0,
-      lastMessage: '',
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -269,8 +272,6 @@ var Zombie = function(creatureInfo) {
       // bubble
       isTyping: false,
       lastEnterTimestamp: 0,
-      lastMessageTimestamp: 0,
-      lastMessage: '',
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -313,8 +314,6 @@ var Machine = function(creatureInfo) {
       // bubble
       isTyping: false,
       lastEnterTimestamp: 0,
-      lastMessageTimestamp: 0,
-      lastMessage: '',
     };
   
   Creature.call(this, info, phrInfo, misc);
@@ -351,8 +350,6 @@ var Bat = function(creatureInfo) {
       // bubble
       isTyping: false,
       lastEnterTimestamp: 0,
-      lastMessageTimestamp: 0,
-      lastMessage: '',
     };
   
   Creature.call(this, info, phrInfo, misc);

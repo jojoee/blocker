@@ -16,7 +16,6 @@ var EXPRESS = require('express'),
   VTMAP = {},
   MODULE = require('./common/module'),
   SERVER_MODULE = require('./server/module'),
-  Message = MODULE.Message,
   Vector = MODULE.Vector,
   Position = MODULE.Position,
   CreatureInfo = MODULE.CreatureInfo;
@@ -378,13 +377,11 @@ IO.on('connection', function(socket) {
   });
 
   // message
-  // TODO: complete it
-  socket.on(EVENT_NAME.player.message, function(player) {
-    var playerIdx = getPlayerInfoIndexById(playerId);
+  socket.on(EVENT_NAME.player.message, function(playerInfo) {
+    var playerId = playerInfo.id;
 
     if (isExistingPlayer(playerId)) {
-      var data = {};
-      IO.emit(EVENT_NAME.player.message, data);
+      socket.broadcast.emit(EVENT_NAME.player.message, playerInfo);
     }
   });
 
