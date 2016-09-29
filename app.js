@@ -359,7 +359,7 @@ IO.on('connection', function(socket) {
     var data = {
       VTMap: VTMAP,
       playerInfo: playerInfo,
-      existingPlayerInfo: PLAYER_INFOS,
+      existingPlayerInfos: PLAYER_INFOS,
       zombieInfos: ZOMBIE_INFOS,
       machineInfos: MACHINE_INFOS,
       batInfos: BAT_INFOS,
@@ -389,13 +389,11 @@ IO.on('connection', function(socket) {
   });
 
   // move
-  // TODO: complete it
-  socket.on(EVENT_NAME.player.move, function(position) {
-    var playerIdx = getPlayerInfoIndexById(playerId);
+  socket.on(EVENT_NAME.player.move, function(playerInfo) {
+    var playerId = playerInfo.id;
 
     if (isExistingPlayer(playerId)) {
-      var data = {};
-      socket.broadcast.emit(EVENT_NAME.player.move, data);
+      socket.broadcast.emit(EVENT_NAME.player.move, playerInfo);
     }
   });
 });

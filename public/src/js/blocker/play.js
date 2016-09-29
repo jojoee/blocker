@@ -19,7 +19,7 @@ Play = function(GAME) {
   this.bubbleDelay = 3000;
   this.automoveDelay = 1000;
 
-  /** @type {Array.number} map that can tell which point is walkable */
+  /** @type {Object} virtual map, used for calculating */
   this.VTMap = {};
 
   this.player = {};
@@ -182,8 +182,8 @@ Play.prototype = {
     creature.blr.bubble.y = creature.y;
   },
 
-  updateCreatureLastPosition: function(creature) {
-    creature.blr.lastPos = {
+  updateCreatureLastVector: function(creature) {
+    creature.blr.info.lastVector = {
       x: creature.x,
       y: creature.y,
       rotation: creature.rotation,
@@ -459,6 +459,7 @@ Play.prototype = {
 
     // misc
     hero.blr.reset();
+    this.logCreatureRespawning(hero);
 
     return hero;
   },
@@ -867,11 +868,11 @@ Play.prototype = {
   },
 
   isCreatureMove: function(creature) {
-    return (creature.x !== creature.blr.lastPos.x || creature.y !== creature.blr.lastPos.y);
+    return (creature.x !== creature.blr.info.lastVector.x || creature.y !== creature.blr.info.lastVector.y);
   },
 
   isCreatureRotate: function(creature) {
-    return (creature.rotation !== creature.blr.lastPos.rotation);
+    return (creature.rotation !== creature.blr.info.lastVector.rotation);
   },
 
   /**
@@ -886,10 +887,8 @@ Play.prototype = {
     if (typeof newX === 'undefined') newX = creature.x;
     if (typeof newY === 'undefined') newY = creature.y;
 
-    if (this.isCreatureMove(creature)) {
-      creature.blr.shadow.x = newX;
-      creature.blr.shadow.y = newY;
-    }
+    creature.blr.shadow.x = newX;
+    creature.blr.shadow.y = newY;
   },
 
   /**
@@ -906,11 +905,8 @@ Play.prototype = {
     if (typeof newY === 'undefined') newY = creature.y;
     if (typeof newRotation === 'undefined') newRotation = creature.rotation;
 
-    if (this.isCreatureMove(creature)) {
-      creature.blr.weapon.x = newX;
-      creature.blr.weapon.y = newY;
-    }
-
+    creature.blr.weapon.x = newX;
+    creature.blr.weapon.y = newY;
     creature.blr.weapon.rotation = newRotation;
   },
 
@@ -1021,6 +1017,40 @@ Play.prototype = {
     return miniMapUnitBmd;
   },
 
+  /**
+   * Get enemy object by playerId
+   * implemented "break" hack
+   * 
+   * @see http://stackoverflow.com/questions/2641347/how-to-short-circuit-array-foreach-like-calling-break
+   * 
+   * @param {string} playerId
+   * @returns {Object} Phaser sprite object and including with other components
+   */
+  getEnemyByPlayerId: function(playerId) {
+    var isFound = false,
+      result = {},
+      BreakException = {};
+
+    try {
+      this.enemyGroup.forEach(function(hero) {
+        if (hero.blr.info.id === playerId) {
+          isFound = true;
+          result = hero;
+          throw BreakException;
+        }
+      }, this);
+
+    } catch (e) {
+      if (e !== BreakException) throw e;
+    }
+
+    if (!isFound) {
+      UTIL.serverBugLog('getEnemyByPlayerId', 'Not found playerId', playerId);
+    }
+
+    return result;
+  },
+
   /*================================================================ Socket
    */
 
@@ -1037,7 +1067,7 @@ Play.prototype = {
       machineInfos = data.machineInfos,
       playerInfo = data.playerInfo,
       batInfos = data.batInfos,
-      existingPlayerInfo = data.existingPlayerInfo;
+      existingPlayerInfos = data.existingPlayerInfos;
 
     this.VTMap = data.VTMap;
 
@@ -1049,25 +1079,31 @@ Play.prototype = {
     // set miniMap
     this.setMiniMap();
 
-    // creature - zombie
+    // monster - zombie
     var nZombies = zombieInfos.length;
     for (var i = 0; i < nZombies; i++) {
       this.spawnZombie(zombieInfos[i]);
     }
     
-    // creature - machine
+    // monster - machine
     var nMachines = machineInfos.length;
     for (var i = 0; i < nMachines; i++) {
       this.spawnMachine(machineInfos[i]);
     }
     
-    // creature - bat
+    // monster - bat
     var nBats = batInfos.length;
     for (var i = 0; i < nBats; i++) {
       this.spawnBat(batInfos[i]);
     }
 
-    // creature - player
+    // hero - enemy
+    var nEnemies = existingPlayerInfos.length;
+    for (var i = 0; i < nEnemies; i++) {
+      this.spawnEnemy(existingPlayerInfos[i]);
+    }
+
+    // hero - player
     this.spawnPlayer(playerInfo);
 
     // camera
@@ -1135,8 +1171,6 @@ Play.prototype = {
   },
 
   onPlayerMessage: function(data) {
-    util.clientLog('Receive the player\'s message', data);
-
     // screen
     // add player message to log
 
@@ -1144,11 +1178,14 @@ Play.prototype = {
     // bouble message to the game
   },
 
-  onPlayerMove: function(data) {
-    // util.clientLog('Enemy is move');
-
-    // game
-    // move the enemy
+  onPlayerMove: function(playerInfo) {
+    var enemy = this.getEnemyByPlayerId(playerInfo.id);
+    
+    if (!UTIL.isEmptyObject(enemy)) {
+      enemy.x = playerInfo.lastVector.x;
+      enemy.y = playerInfo.lastVector.y;
+      enemy.rotation = playerInfo.lastVector.rotation;
+    }
   },
 
   /*================================================================ Stage
@@ -1332,7 +1369,10 @@ Play.prototype = {
           } else {
             // update player + weapon rotation
             this.updateCreatureRotationByFollowingMouse(this.player);
-            this.playDashParticle(this.player);
+
+            // send `move` event to the server
+            this.updateCreatureLastVector(this.player);
+            SOCKET.emit(EVENT_NAME.player.move, this.player.blr.info);
           }
         }
 
@@ -1374,7 +1414,7 @@ Play.prototype = {
           }
         }
 
-        this.updateCreatureLastPosition(this.player);
+        this.updateCreatureLastVector(this.player);
       }
 
       /*
@@ -1432,35 +1472,61 @@ Play.prototype = {
   },
 
   preRender: function() {
-    // All `sub` (weapon, shadow, bubble) should be updated here 
-    // no need to update `child` (label position), cause it's automatically updated 
+    // All `sub`(s) should be here
+    // - weapon
+    // - shadow
+    // - particle
+    // - label (just update text, cause it's child)
+    // - bubble 
 
     if (this.isGameReady) {
+      // hero - player
+      if (this.isCreatureMove(this.player)) {
+        this.updateCreatureWeapon(this.player);
+        this.updateCreatureShadow(this.player);
+        this.playDashParticle(this.player);
+      }
       this.updateCreatureLabelText(this.player);
-      this.updateCreatureWeapon(this.player);
-      this.updateCreatureShadow(this.player);
       this.updateCreatureBubble(this.player);
 
-      this.zombieGroup.forEachAlive(function(monster) {
-        this.updateCreatureLabelText(monster);
-        this.updateCreatureWeapon(monster);
-        this.updateCreatureShadow(monster);
+      // hero - enemy
+      this.enemyGroup.forEachAlive(function(hero) {
+        if (this.isCreatureMove(hero)) {
+          this.updateCreatureWeapon(hero);
+          this.updateCreatureShadow(hero);
+          this.playDashParticle(hero);
+        }
+        this.updateCreatureLabelText(hero);
+        this.updateCreatureBubble(hero);
       }, this);
 
+      // monster - zombie
+      this.zombieGroup.forEachAlive(function(monster) {
+        if (this.isCreatureMove(monster)) {
+          this.updateCreatureWeapon(monster);
+          this.updateCreatureShadow(monster);
+        }
+        this.updateCreatureLabelText(monster);
+      }, this);
+
+      // monster - machine
       this.machineGroup.forEachAlive(function(monster) {
         var newX = monster.x,
           newY = monster.y,
           newRotation = GAME.physics.arcade.angleBetween(monster, this.player);
 
-        this.updateCreatureLabelText(monster);
+        // this monster can not move
         this.updateCreatureWeapon(monster, newX, newY, newRotation);
-        this.updateCreatureShadow(monster);
+        this.updateCreatureLabelText(monster);
       }, this);
 
+      // monster - bat
       this.batGroup.forEachAlive(function(monster) {
+        if (this.isCreatureMove(monster)) {
+          this.updateCreatureWeapon(monster);
+          this.updateCreatureShadow(monster);
+        }
         this.updateCreatureLabelText(monster);
-        this.updateCreatureWeapon(monster);
-        this.updateCreatureShadow(monster);
       }, this);
     }
   },

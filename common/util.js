@@ -8,6 +8,24 @@ var Util = {
    */
 
   /**
+   * Check if the object is empty
+   * 
+   * @see http://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object
+   * @see http://stackoverflow.com/questions/4994201/is-object-empty
+   * 
+   * @param {Object} obj
+   * @returns {boolean}
+   */
+  isEmptyObject: function(obj) {
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop))
+        return false;
+    }
+
+    return true && JSON.stringify(obj) === JSON.stringify({});
+  },
+
+  /**
    * Returns a random number between min (inclusive) and max (exclusive)
    * 
    * @see http://stackoverflow.com/questions/1527803/generating-random-whole-numbers-in-javascript-in-a-specific-range

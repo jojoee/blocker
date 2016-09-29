@@ -92,6 +92,9 @@ var CreatureInfo = function(id, type, startVector, life, maxLife) {
   /** @type {Vector} start vector of creature */
   this.startVector = startVector;
 
+  /** @type {Vector} last vector of creature */
+  this.lastVector = startVector,
+
   /** @type {numberr} */
   this.life = life;
 
@@ -220,7 +223,7 @@ var Hero = function(creatureInfo) {
       
       // automove
       isAutomove: false,
-      autoMoveTargetPos: null,
+      autoMoveTargetPos: {},
       autoMoveTimestamp: 0,
       isIdle: false,
       lastIdleTimestamp: 0,
@@ -258,7 +261,7 @@ var Zombie = function(creatureInfo) {
 
       // automove
       isAutomove: false,
-      autoMoveTargetPos: null,
+      autoMoveTargetPos: {},
       autoMoveTimestamp: 0,
       isIdle: false,
       lastIdleTimestamp: 0,
@@ -302,7 +305,7 @@ var Machine = function(creatureInfo) {
       
       // automove
       isAutomove: false,
-      autoMoveTargetPos: null,
+      autoMoveTargetPos: {},
       autoMoveTimestamp: 0,
       isIdle: false,
       lastIdleTimestamp: 0,
@@ -340,7 +343,7 @@ var Bat = function(creatureInfo) {
       
       // automove
       isAutomove: false,
-      autoMoveTargetPos: null,
+      autoMoveTargetPos: {},
       autoMoveTimestamp: 0,
       isIdle: false,
       lastIdleTimestamp: 0,
