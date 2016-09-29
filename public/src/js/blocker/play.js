@@ -190,6 +190,11 @@ Play.prototype = {
     }
   },
 
+  /**
+   * Update creature lastVector
+   * 
+   * @param {Object} Phaser sprite object
+   */
   updateCreatureLastVector: function(creature) {
     creature.blr.info.lastVector = {
       x: creature.x,
@@ -470,30 +475,6 @@ Play.prototype = {
     this.logCreatureRespawning(hero);
 
     return hero;
-  },
-
-  removeEnemy: function(playerInfo) {
-    var isFound = false;
-
-    this.enemyGroup.forEach(function(enemy) {
-      if (enemy.blr.info.id === playerInfo.id) {
-        enemy.blr.bullet.destroy();
-        enemy.blr.label.destroy();
-        enemy.blr.bullet.destroy();
-        enemy.blr.weapon.destroy();
-        enemy.blr.shadow.destroy();
-        enemy.destroy();
-
-        // misc
-        console.log('enemy ' + enemy.blr.info.id + ' is removed');
-        isFound = true;
-        UI.removeCreatureIdFromCreatureList(enemy.blr.info.id);
-      }
-    }, this);
-
-    if (!isFound) {
-      console.error('not found enemy ' + playerInfo.id, playerInfo);
-    }
   },
 
   /**
@@ -821,30 +802,6 @@ Play.prototype = {
     }
   },
 
-  heroFireArrow: function(hero) {
-    var ts = UTIL.getCurrentUtcTimestamp();
-
-    if (ts > hero.blr.misc.nextFireTimestamp &&
-      hero.blr.bullet.countDead() > 0) {
-
-      // update player + weapon rotation
-      this.updateCreatureRotationByFollowingMouse(hero);
-
-      // update bullet
-      // 2 bullet/sec (cause we have 7 frame per animation)
-      hero.blr.weapon.animations.play('attack', 14, false, false);
-      hero.blr.misc.nextFireTimestamp = ts + hero.blr.misc.fireRate;
-
-      var bullet = hero.blr.bullet.getFirstExists(false);
-      bullet.reset(hero.blr.weapon.x, hero.blr.weapon.y);
-      bullet.rotation = GAME.physics.arcade.moveToPointer(
-        bullet,
-        hero.blr.misc.bulletSpeed,
-        GAME.input.activePointer
-      );
-    }
-  },
-
   /**
    * get rotation between creature and mouse
    * 
@@ -1059,6 +1016,125 @@ Play.prototype = {
     return result;
   },
 
+  /*================================================================ Event
+   */
+
+  playerFireArrow: function(hero) {
+    var ts = UTIL.getCurrentUtcTimestamp();
+
+    if (ts > hero.blr.misc.nextFireTimestamp &&
+      hero.blr.bullet.countDead() > 0) {
+
+      // update body rotation
+      this.updateCreatureRotationByFollowingMouse(hero);
+
+      // update last vector
+      this.updateCreatureLastVector(hero);
+        
+      // update next fire
+      hero.blr.misc.nextFireTimestamp = ts + hero.blr.misc.fireRate;
+
+      // fire
+      var targetPos = new Position(GAME.input.activePointer.worldX, GAME.input.activePointer.worldY);
+      this.heroFireArrow(hero, targetPos);
+
+      // broadcast `fire` event
+      var data = {
+        playerInfo: this.player.blr.info,
+        targetPos: targetPos,
+      };
+      SOCKET.emit(EVENT_NAME.player.fire, data);
+    }
+  },
+
+  enemyFireArrow: function(hero, targetPos) {
+    // force fire
+    this.heroFireArrow(hero, targetPos);
+  },
+
+  /**
+   * Fire arrow
+   * 
+   * @param {Object} Phaser sprite object
+   * @param {Position} target position
+   */
+  heroFireArrow: function(hero, targetPos) {
+    // update weapon
+    this.updateCreatureWeapon(hero);
+
+    // set bullet animation
+    // 2 bullet/sec (cause we have 7 frame per animation)
+    hero.blr.weapon.animations.play('attack', 14, false, false);
+
+    // fire
+    var bullet = hero.blr.bullet.getFirstExists(false);
+    bullet.reset(hero.blr.weapon.x, hero.blr.weapon.y);
+    bullet.rotation = GAME.physics.arcade.moveToXY(
+      bullet,
+      targetPos.x,
+      targetPos.y,
+      hero.blr.misc.bulletSpeed
+    );
+  },
+
+  playerMove: function() {
+    // move
+    GAME.physics.arcade.moveToPointer(this.player, this.player.blr.phrInfo.velocitySpeed);
+
+    //  if it's overlapping the mouse, don't move any more
+    if (Phaser.Rectangle.contains(this.player.body, GAME.input.x, GAME.input.y)) {
+      this.player.body.velocity.setTo(0, 0);
+
+    } else {
+      // update body rotation
+      this.updateCreatureRotationByFollowingMouse(this.player);
+
+      // broadcast `move` event
+      this.updateCreatureLastVector(this.player);
+      var data = {
+        playerInfo: this.player.blr.info,
+      };
+      SOCKET.emit(EVENT_NAME.player.move, data);
+    }
+  },
+
+  playerSendMessage: function() {
+    var ts = UTIL.getCurrentUtcTimestamp();
+    
+    // if start typing
+    if (!this.player.blr.misc.isTyping) {
+      this.player.blr.updateLastEnterTimestamp(ts);
+      this.player.blr.misc.isTyping = true;
+
+      UI.enableMessageInput();
+
+    } else {
+      this.player.blr.updateLastEnterTimestamp(ts);
+      this.player.blr.misc.isTyping = false;
+
+      // update
+      var message = UI.getMessageInput();
+      if (message) {
+        // set message
+        this.player.blr.updateLastMessageTimestamp(ts);
+        this.player.blr.info.lastMessage = message;
+        this.player.blr.bubble.setText(message);
+        this.player.blr.bubble.visible = true;
+
+        // add message text to log
+        this.logCreatureMessage(this.player);
+
+        // broadcast `message` event
+        var data = {
+          playerInfo: this.player.blr.info,
+        };
+        SOCKET.emit(EVENT_NAME.player.message, data);
+      }
+
+      UI.disableMessageInput();
+    }
+  },
+
   /*================================================================ Socket
    */
 
@@ -1067,6 +1143,7 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.server.disconnectedPlayer, this.onPlayerDisconnect.bind(this));
     SOCKET.on(EVENT_NAME.player.message, this.onPlayerMessage.bind(this));
     SOCKET.on(EVENT_NAME.player.move, this.onPlayerMove.bind(this));
+    SOCKET.on(EVENT_NAME.player.fire, this.onPlayerFire.bind(this));
   },
 
   onPlayerReady: function(data) {
@@ -1162,22 +1239,45 @@ Play.prototype = {
     this.isGameReady = true;
   },
 
-  onPlayerConnect: function(playerInfo) {
+  onPlayerConnect: function(data) {
+    var playerInfo = data.playerInfo;
     UTIL.clientLog('New player is connected', playerInfo);
 
     // enemy
     this.spawnEnemy(playerInfo);
   },
 
-  onPlayerDisconnect: function(playerInfo) {
+  onPlayerDisconnect: function(data) {
+    var playerInfo = data.playerInfo;
     UTIL.clientLog('Player is disconnected', playerInfo);
 
-    // enemy
-    this.removeEnemy(playerInfo);
+    // remove enemy
+    var isFound = false;
+
+    this.enemyGroup.forEach(function(enemy) {
+      if (enemy.blr.info.id === playerInfo.id) {
+        enemy.blr.bullet.destroy();
+        enemy.blr.label.destroy();
+        enemy.blr.bullet.destroy();
+        enemy.blr.weapon.destroy();
+        enemy.blr.shadow.destroy();
+        enemy.destroy();
+
+        // misc
+        console.log('enemy ' + enemy.blr.info.id + ' is removed');
+        isFound = true;
+        UI.removeCreatureIdFromCreatureList(enemy.blr.info.id);
+      }
+    }, this);
+
+    if (!isFound) {
+      console.error('not found enemy ' + playerInfo.id, playerInfo);
+    }
   },
 
-  onPlayerMessage: function(playerInfo) {
-    var enemy = this.getEnemyByPlayerId(playerInfo.id);
+  onPlayerMessage: function(data) {
+    var playerInfo = data.playerInfo,
+      enemy = this.getEnemyByPlayerId(playerInfo.id);
     
     if (!UTIL.isEmptyObject(enemy)) {
       // update info
@@ -1191,13 +1291,27 @@ Play.prototype = {
     }
   },
 
-  onPlayerMove: function(playerInfo) {
-    var enemy = this.getEnemyByPlayerId(playerInfo.id);
+  onPlayerMove: function(data) {
+    var playerInfo = data.playerInfo,
+      enemy = this.getEnemyByPlayerId(playerInfo.id);
     
     if (!UTIL.isEmptyObject(enemy)) {
       enemy.x = playerInfo.lastVector.x;
       enemy.y = playerInfo.lastVector.y;
       enemy.rotation = playerInfo.lastVector.rotation;
+    }
+  },
+
+  onPlayerFire: function(data) {
+    var playerInfo = data.playerInfo,
+      targetPos = data.targetPos,
+      enemy = this.getEnemyByPlayerId(playerInfo.id);
+    
+    if (!UTIL.isEmptyObject(enemy)) {
+      enemy.x = playerInfo.lastVector.x;
+      enemy.y = playerInfo.lastVector.y;
+      enemy.rotation = playerInfo.lastVector.rotation;
+      this.enemyFireArrow(enemy, targetPos);
     }
   },
 
@@ -1376,63 +1490,19 @@ Play.prototype = {
 
         // input - left click
         if (GAME.input.activePointer.leftButton.isDown) {
-          // move
-
-          GAME.physics.arcade.moveToPointer(this.player, this.player.blr.phrInfo.velocitySpeed);
-
-          //  if it's overlapping the mouse, don't move any more
-          if (Phaser.Rectangle.contains(this.player.body, GAME.input.x, GAME.input.y)) {
-            this.player.body.velocity.setTo(0, 0);
-
-          } else {
-            // update player + weapon rotation
-            this.updateCreatureRotationByFollowingMouse(this.player);
-
-            // broadcast `move` event
-            this.updateCreatureLastVector(this.player);
-            SOCKET.emit(EVENT_NAME.player.move, this.player.blr.info);
-          }
+          this.playerMove();
         }
 
         // input -  right click || spacebar
         if (GAME.input.activePointer.rightButton.isDown || this.spaceKey.isDown) {
           // fire arrow
-          this.heroFireArrow(this.player);
+          this.playerFireArrow(this.player);
         }
 
         // message
         // 200 is key pressing delay 
         if (this.enterKey.isDown && ts - this.player.blr.misc.lastEnterTimestamp > this.enterKeyDelay) {
-
-          // if start typing
-          if (!this.player.blr.misc.isTyping) {
-            this.player.blr.updateLastEnterTimestamp(ts);
-            this.player.blr.misc.isTyping = true;
-
-            UI.enableMessageInput();
-
-          } else {
-            this.player.blr.updateLastEnterTimestamp(ts);
-            this.player.blr.misc.isTyping = false;
-
-            // update
-            var message = UI.getMessageInput();
-            if (message) {
-              // set message
-              this.player.blr.updateLastMessageTimestamp(ts);
-              this.player.blr.info.lastMessage = message;
-              this.player.blr.bubble.setText(message);
-              this.player.blr.bubble.visible = true;
-
-              // add message text to log
-              this.logCreatureMessage(this.player);
-
-              // broadcast `message` event
-              SOCKET.emit(EVENT_NAME.player.message, this.player.blr.info);
-            }
-
-            UI.disableMessageInput();
-          }
+          this.playerSendMessage();
         }
 
         this.updateCreatureLastVector(this.player);

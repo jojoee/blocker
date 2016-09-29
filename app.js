@@ -345,7 +345,10 @@ IO.on('connection', function(socket) {
     removePlayer(playerInfo.id);
 
     // send disconnected player
-    socket.broadcast.emit(EVENT_NAME.server.disconnectedPlayer, playerInfo);
+    var data = {
+      playerInfo: playerInfo,
+    };
+    socket.broadcast.emit(EVENT_NAME.server.disconnectedPlayer, data);
   });
 
   // ready
@@ -367,24 +370,36 @@ IO.on('connection', function(socket) {
 
     // broadcast new player data
     // to existing players
-    socket.broadcast.emit(EVENT_NAME.server.newPlayer, playerInfo);
+    var data = {
+      playerInfo: playerInfo,
+    };
+    socket.broadcast.emit(EVENT_NAME.server.newPlayer, data);
   });
 
   // message
-  socket.on(EVENT_NAME.player.message, function(playerInfo) {
-    var playerId = playerInfo.id;
+  socket.on(EVENT_NAME.player.message, function(data) {
+    var playerInfo = data.playerInfo;
 
-    if (isExistingPlayer(playerId)) {
-      socket.broadcast.emit(EVENT_NAME.player.message, playerInfo);
+    if (isExistingPlayer(playerInfo.id)) {
+      socket.broadcast.emit(EVENT_NAME.player.message, data);
     }
   });
 
   // move
-  socket.on(EVENT_NAME.player.move, function(playerInfo) {
-    var playerId = playerInfo.id;
+  socket.on(EVENT_NAME.player.move, function(data) {
+    var playerInfo = data.playerInfo;
 
-    if (isExistingPlayer(playerId)) {
-      socket.broadcast.emit(EVENT_NAME.player.move, playerInfo);
+    if (isExistingPlayer(playerInfo.id)) {
+      socket.broadcast.emit(EVENT_NAME.player.move, data);
+    }
+  });
+
+  // fire
+  socket.on(EVENT_NAME.player.fire, function(data) {
+    var playerInfo = data.playerInfo;
+
+    if (isExistingPlayer(playerInfo.id)) {
+      socket.broadcast.emit(EVENT_NAME.player.fire, data);
     }
   });
 });

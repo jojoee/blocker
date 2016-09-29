@@ -35,6 +35,9 @@ var commonConfig = {
 
       // player move
       move: eventPlayerPrefix + 'move',
+
+      // player fire
+      fire: eventPlayerPrefix + 'fire',
     },
     server: {
       // send new player
