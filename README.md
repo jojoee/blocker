@@ -52,7 +52,6 @@ Naming
 - [x] Respawn monster when it's died
 - [ ] Respawn delay
 - [x] Messaging
-- [x] Fix birth point of creature
 - [x] Machine fire laser
 - [x] Monster (random walk)
 - [ ] Phaser server side
@@ -84,7 +83,6 @@ Naming
 - [x] Universal / Isomorphic concepts
 - [ ] Plugin: Screen shaker when player's attacked
 - [ ] HUD
-- [ ] Fix - creature can be pushed through stoneGroup
 - [x] Bring `creature label` to the top
 - [x] Player always top
 - [ ] Boss mode
@@ -107,7 +105,6 @@ Naming
 - [ ] Sound
 - [ ] Effect / Screen transition
 - [ ] Refactor
-- [ ] Refactor (in term of encapsulation)
 - [ ] Local storage
 - [ ] Update DocBlockr
 - [ ] Character selector
@@ -147,6 +144,18 @@ Naming
 - [ ] Optimize player list (e.g. using `Angular`, etc.)
 - [x] CSS preprocessor
 - [ ] Create own `screen-shake` plugin
+
+## Note
+```
+// specific
+IO.sockets.connected[socketId].emit(EVENT_NAME, data);
+
+// all client
+IO.emit(EVENT_NAME, data);
+
+// all other clients the newly created connection
+socket.broadcast.emit(EVENT_NAME, data);
+```
 
 ## Reference & Tutorial & Plugin && Tool
 - Inspired by [Blocker](http://blockergame.com/)
