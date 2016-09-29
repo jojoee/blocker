@@ -913,7 +913,16 @@ Play.prototype = {
    * @param {[type]} tile     [description]
    */
   onCreatureOverlapWell: function(creature, tile) {
-    this.onCreatureIsRecovered(creature, 'well');
+    var isWelled = this.onCreatureIsRecovered(creature, 'well');
+
+    // if creature is player,
+    // then broadcast
+    if (isWelled && creature.blr.info.type === 'hero') {
+      var data = {
+        playerInfo: creature.blr.info,
+      };
+      SOCKET.emit(EVENT_NAME.player.isWelled, data);
+    }
   },
 
   /**
@@ -923,7 +932,16 @@ Play.prototype = {
    * @param {[type]} tile     [description]
    */
   onCreatureOverlapFire: function(creature, tile) {
-    this.onCreatureIsDamaged(creature, 'fire');
+    var isDamaged = this.onCreatureIsDamaged(creature, 'fire');
+
+    // if creature is player,
+    // then broadcast
+    if (isDamaged && creature.blr.info.type === 'hero') {
+      var data = {
+        playerInfo: creature.blr.info,
+      };
+      SOCKET.emit(EVENT_NAME.player.isFired, data);
+    }
   },
 
   onPlayerOverlapZombie: function(player, monster) {
@@ -989,6 +1007,8 @@ Play.prototype = {
    */
 
   onCreatureIsRecovered: function(creature, recoveredFrom) {
+    var isWelled = false;
+
     if (creature.blr.info.life < creature.blr.info.maxLife) {
       var ts = UTIL.getCurrentUtcTimestamp();
 
@@ -997,11 +1017,14 @@ Play.prototype = {
           ' (' + creature.blr.info.life++ + ' > ' + creature.blr.info.life + ')  was recovered from ' + recoveredFrom;
         UI.addTextToLogList(logText);
 
+        isWelled = true;
         creature.blr.updateLastRecoverTimestamp();
         this.playRecoverParticle(creature);
         creature.animations.play('recover', 10, false, false);
       }
     }
+
+    return isWelled;
   },
 
   /**
@@ -1011,7 +1034,8 @@ Play.prototype = {
    * @param {string} damageFrom - where is the damage come frome
    */
   onCreatureIsDamaged: function(creature, damageFrom) {
-    var ts = UTIL.getCurrentUtcTimestamp();
+    var ts = UTIL.getCurrentUtcTimestamp(),
+      isDamaged = false;
 
     if (!creature.blr.misc.isImmortal &&
       (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay)) {
@@ -1019,6 +1043,7 @@ Play.prototype = {
         ' (' + creature.blr.info.life-- + ' > ' + creature.blr.info.life + ')  was damaged from ' + damageFrom;
       UI.addTextToLogList(logText);
 
+      isDamaged = true;
       creature.blr.updateLastDamageTimestamp();
       this.playDamageParticle(creature);
       creature.animations.play('blink', 10, false, false);
@@ -1041,6 +1066,8 @@ Play.prototype = {
         this.respawnCreature(creature);
       }
     }
+
+    return isDamaged;
   },
 
   /*================================================================ Event
@@ -1171,6 +1198,8 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.player.message, this.onPlayerMessage.bind(this));
     SOCKET.on(EVENT_NAME.player.move, this.onPlayerMove.bind(this));
     SOCKET.on(EVENT_NAME.player.fire, this.onPlayerFire.bind(this));
+    SOCKET.on(EVENT_NAME.player.isFired, this.onPlayerIsFired.bind(this));
+    SOCKET.on(EVENT_NAME.player.isWelled, this.onPlayerIsWelled.bind(this));
   },
 
   onPlayerReady: function(data) {
@@ -1339,6 +1368,28 @@ Play.prototype = {
       enemy.y = playerInfo.lastVector.y;
       enemy.rotation = playerInfo.lastVector.rotation;
       this.enemyFireArrow(enemy, targetPos);
+    }
+  },
+
+  onPlayerIsFired: function(data) {
+    var playerInfo = data.playerInfo,
+      enemy = this.getEnemyByPlayerId(playerInfo.id);
+
+    if (!UTIL.isEmptyObject(enemy)) {
+      enemy.blr.info.life = playerInfo.life;
+      this.playDamageParticle(enemy);
+      enemy.animations.play('blink', 10, false, false);
+    }
+  },
+
+  onPlayerIsWelled: function(data) {
+    var playerInfo = data.playerInfo,
+      enemy = this.getEnemyByPlayerId(playerInfo.id);
+
+    if (!UTIL.isEmptyObject(enemy)) {
+      enemy.blr.info.life = playerInfo.life;
+      this.playRecoverParticle(enemy);
+      enemy.animations.play('recover', 10, false, false);
     }
   },
 

@@ -402,6 +402,24 @@ IO.on('connection', function(socket) {
       socket.broadcast.emit(EVENT_NAME.player.fire, data);
     }
   });
+
+  // is fired
+  socket.on(EVENT_NAME.player.isFired, function(data) {
+    var playerInfo = data.playerInfo;
+
+    if (isExistingPlayer(playerInfo.id)) {
+      socket.broadcast.emit(EVENT_NAME.player.isFired, data);
+    }
+  });
+  
+  // is welled
+  socket.on(EVENT_NAME.player.isWelled, function(data) {
+    var playerInfo = data.playerInfo;
+
+    if (isExistingPlayer(playerInfo.id)) {
+      socket.broadcast.emit(EVENT_NAME.player.isWelled, data);
+    }
+  });
 });
 
 /*================================================================ Log / Report

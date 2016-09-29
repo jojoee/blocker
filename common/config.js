@@ -38,6 +38,12 @@ var commonConfig = {
 
       // player fire
       fire: eventPlayerPrefix + 'fire',
+
+      // player is fired
+      isFired: eventPlayerPrefix + 'isFired',
+
+      // player is welled
+      isWelled: eventPlayerPrefix + 'isWelled',
     },
     server: {
       // send new player
