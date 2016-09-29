@@ -110,39 +110,221 @@ Play.prototype = {
     return targetPos;
   },
 
-  setCreatureLabel: function(creature) {
-    var labelStyle = {
-        font: '13px ' + GCONFIG.mainFontFamily,
-        fill: '#fff',
-        align: 'left',
-      },
-      label = GAME.add.text(0, 0, '', labelStyle);
-
-    creature.addChild(label);
-    creature.blr.label = label;
-    this.updateCreatureLabel(creature);
+  /**
+   * Update creature lastVector
+   * 
+   * @param {Object} Phaser sprite object
+   */
+  updateCreatureLastVector: function(creature) {
+    creature.blr.info.lastVector = {
+      x: creature.x,
+      y: creature.y,
+      rotation: creature.rotation,
+    };
   },
 
-  updateCreatureLabel: function(creature) {
-    this.updateCreatureLabelText(creature);
+  forceRestartAutomove: function(monster) {
+    var ts = UTIL.getCurrentUtcTimestamp();
 
-    // update label position only 1 time
-    // cause we using `child`
-    this.updateCreatureLabelPosition(creature);
+    // hacky
+    monster.blr.misc.autoMoveTimestamp = ts - 7000;
+    this.monsterAutoMove(monster);
   },
 
-  updateCreatureLabelText: function(creature) {
-    var labeltext = creature.blr.info.id + ' ' + creature.blr.info.life + '/' + creature.blr.info.maxLife;
-    creature.blr.label.setText(labeltext);
+  /**
+   * Start autoMove mode
+   * used by monster only
+   * 
+   * @param {Object} monster - monster object
+   */
+  monsterAutoMove: function(monster) {
+    var ts = UTIL.getCurrentUtcTimestamp();
+
+    monster.body.velocity.x = 0;
+    monster.body.velocity.y = 0;
+
+    // if near hero, then  follow the hero
+    // if not, then autoMove
+    if (!IS_INVISIBLE && GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
+      monster.blr.misc.isAutomove = false; // unused
+      monster.rotation = GAME.physics.arcade.moveToObject(
+        monster,
+        this.player,
+        monster.blr.phrInfo.velocitySpeed
+      );
+
+    } else {
+      // update isIdle
+      if (monster.blr.misc.isIdle &&
+        ts - monster.blr.misc.lastIdleTimestamp > this.automoveDelay) {
+        monster.blr.misc.isIdle = false;
+      }
+
+      if (!monster.blr.misc.isIdle) {
+        var distance = GAME.physics.arcade.distanceToXY(
+          monster,
+          monster.blr.misc.autoMoveTargetPos.x,
+          monster.blr.misc.autoMoveTargetPos.y
+        );
+
+        // first time, auto move mode
+        // if monster
+        // 1. start autoMove or keep autoMove if it autoMove less than 6sec or
+        // 2. the monster is to close with the target (prevent monster is spinning around the targetPos)
+        if ((ts - monster.blr.misc.autoMoveTimestamp > 6000) ||
+          distance < 200) {
+          var targetPos = this.getRandomAutoMovePosition(monster);
+
+          monster.blr.misc.isAutomove = true; // unused
+          monster.blr.misc.autoMoveTargetPos = targetPos;
+          monster.blr.misc.autoMoveTimestamp = UTIL.getCurrentUtcTimestamp();
+        }
+
+        // keep moving to the existing target position
+        monster.rotation = GAME.physics.arcade.moveToXY(
+          monster,
+          monster.blr.misc.autoMoveTargetPos.x,
+          monster.blr.misc.autoMoveTargetPos.y,
+          monster.blr.phrInfo.velocitySpeed
+        );
+      }
+    }
   },
 
-  updateCreatureLabelPosition: function(creature) {
-    var labelLeftOffset = 0,
-      labelTopOffset = -10;
+  /**
+   * get rotation between creature and mouse
+   * 
+   * @param {[type]} creature
+   * @returns {number} rotation
+   */
+  getRotationBetweenCreatureAndMouse: function(creature) {
+    var result = Math.atan2(
+      GAME.input.y - (creature.position.y - GAME.camera.y),
+      GAME.input.x - (creature.position.x - GAME.camera.x)
+    );
 
-    creature.blr.label.x = -(creature.blr.label.width / 2) - labelLeftOffset;
-    creature.blr.label.y = -(creature.height / 2) - (creature.blr.label.height / 2) + labelTopOffset;
+    return result;
   },
+
+  /**
+   * Update creature follow the mouse
+   * So, this function will update
+   * - body rotation
+   * 
+   * @param {[type]} creature
+   */
+  updateCreatureRotationByFollowingMouse: function(creature) {
+    var newX = creature.x,
+      newY = creature.y,
+      newRotation = this.getRotationBetweenCreatureAndMouse(creature);
+
+    creature.rotation = newRotation;
+  },
+
+  isCreatureMove: function(creature) {
+    return (creature.x !== creature.blr.info.lastVector.x || creature.y !== creature.blr.info.lastVector.y);
+  },
+
+  isCreatureRotate: function(creature) {
+    return (creature.rotation !== creature.blr.info.lastVector.rotation);
+  },
+
+  /**
+   * Update creature shadow
+   * using creature position by default
+   * 
+   * @param {[type]} creature
+   * @param {number} [newX]
+   * @param {number} [newY]
+   */
+  updateCreatureShadow: function(creature, newX, newY) {
+    if (typeof newX === 'undefined') newX = creature.x;
+    if (typeof newY === 'undefined') newY = creature.y;
+
+    creature.blr.shadow.x = newX;
+    creature.blr.shadow.y = newY;
+  },
+
+  /**
+   * Update creature weapon
+   * using creature position by default
+   * 
+   * @param {[type]} creature
+   * @param {number} [newX]
+   * @param {number} [newY]
+   * @param {number} [newRotation]
+   */
+  updateCreatureWeapon: function(creature, newX, newY, newRotation) {
+    if (typeof newX === 'undefined') newX = creature.x;
+    if (typeof newY === 'undefined') newY = creature.y;
+    if (typeof newRotation === 'undefined') newRotation = creature.rotation;
+
+    creature.blr.weapon.x = newX;
+    creature.blr.weapon.y = newY;
+    creature.blr.weapon.rotation = newRotation;
+  },
+
+  /**
+   * Get enemy object by playerId
+   * implemented "break" hack
+   * 
+   * @see http://stackoverflow.com/questions/2641347/how-to-short-circuit-array-foreach-like-calling-break
+   * 
+   * @param {string} playerId
+   * @returns {Object} Phaser sprite object and including with other components
+   */
+  getEnemyByPlayerId: function(playerId) {
+    var isFound = false,
+      result = {},
+      BreakException = {};
+
+    try {
+      this.enemyGroup.forEach(function(hero) {
+        if (hero.blr.info.id === playerId) {
+          isFound = true;
+          result = hero;
+          throw BreakException;
+        }
+      }, this);
+
+    } catch (e) {
+      if (e !== BreakException) throw e;
+    }
+
+    if (!isFound) {
+      UTIL.serverBugLog('getEnemyByPlayerId', 'Not found playerId', playerId);
+    }
+
+    return result;
+  },
+
+  /*================================================================ Log
+   */
+
+  /**
+   * Log creature respawning into log list
+   * 
+   * @param {Creature} creature
+   */
+  logCreatureRespawning: function(creature) {
+    var logText = creature.blr.info.type + ' ' + creature.blr.info.id +
+      ' (' + creature.blr.info.life + ') is respawn at ' + creature.body.x + ', ' + creature.body.y;
+    UI.addTextToLogList(logText);
+  },
+
+  /**
+   * Log creature message into log list
+   * 
+   * @param {Creature} creature
+   */
+  logCreatureMessage: function(creature) {
+    var logText = creature.blr.info.type + ' ' + creature.blr.info.id +
+      ': ' + creature.blr.info.lastMessage;
+    UI.addTextToLogList(logText);
+  },
+
+  /*================================================================ Bubble
+   */
 
   setHeroBubble: function(creature) {
     var bubbleStyle = {
@@ -190,40 +372,45 @@ Play.prototype = {
     }
   },
 
-  /**
-   * Update creature lastVector
-   * 
-   * @param {Object} Phaser sprite object
+  /*================================================================ Label
    */
-  updateCreatureLastVector: function(creature) {
-    creature.blr.info.lastVector = {
-      x: creature.x,
-      y: creature.y,
-      rotation: creature.rotation,
-    };
+
+  setCreatureLabel: function(creature) {
+    var labelStyle = {
+        font: '13px ' + GCONFIG.mainFontFamily,
+        fill: '#fff',
+        align: 'left',
+      },
+      label = GAME.add.text(0, 0, '', labelStyle);
+
+    creature.addChild(label);
+    creature.blr.label = label;
+    this.updateCreatureLabel(creature);
   },
 
-  /**
-   * Log creature respawning into log list
-   * 
-   * @param {Creature} creature
-   */
-  logCreatureRespawning: function(creature) {
-    var logText = creature.blr.info.type + ' ' + creature.blr.info.id +
-      ' (' + creature.blr.info.life + ') is respawn at ' + creature.body.x + ', ' + creature.body.y;
-    UI.addTextToLogList(logText);
+  updateCreatureLabel: function(creature) {
+    this.updateCreatureLabelText(creature);
+
+    // update label position only 1 time
+    // cause we using `child`
+    this.updateCreatureLabelPosition(creature);
   },
 
-  /**
-   * Log creature message into log list
-   * 
-   * @param {Creature} creature
-   */
-  logCreatureMessage: function(creature) {
-    var logText = creature.blr.info.type + ' ' + creature.blr.info.id +
-      ': ' + creature.blr.info.lastMessage;
-    UI.addTextToLogList(logText);
+  updateCreatureLabelText: function(creature) {
+    var labeltext = creature.blr.info.id + ' ' + creature.blr.info.life + '/' + creature.blr.info.maxLife;
+    creature.blr.label.setText(labeltext);
   },
+
+  updateCreatureLabelPosition: function(creature) {
+    var labelLeftOffset = 0,
+      labelTopOffset = -10;
+
+    creature.blr.label.x = -(creature.blr.label.width / 2) - labelLeftOffset;
+    creature.blr.label.y = -(creature.height / 2) - (creature.blr.label.height / 2) + labelTopOffset;
+  },
+
+  /*================================================================ Spawn
+   */
 
   /**
    * Spawn zombie
@@ -478,81 +665,6 @@ Play.prototype = {
   },
 
   /**
-   * Callback event when hit well
-   * 
-   * @param {[type]} creature [description]
-   * @param {[type]} tile     [description]
-   */
-  onCreatureOverlapWell: function(creature, tile) {
-    this.onCreatureIsRecovered(creature, 'well');
-  },
-
-  onCreatureIsRecovered: function(creature, recoveredFrom) {
-    if (creature.blr.info.life < creature.blr.info.maxLife) {
-      var ts = UTIL.getCurrentUtcTimestamp();
-
-      if (ts > creature.blr.info.lastRecoverTimestamp + creature.blr.info.immortalDelay) {
-        var logText = '+1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
-          ' (' + creature.blr.info.life++ + ' > ' + creature.blr.info.life + ')  was recovered from ' + recoveredFrom;
-        UI.addTextToLogList(logText);
-
-        creature.blr.updateLastRecoverTimestamp();
-        this.playRecoverParticle(creature);
-        creature.animations.play('recover', 10, false, false);
-      }
-    }
-  },
-
-  /**
-   * Callback event when hit fire
-   * 
-   * @param {[type]} creature [description]
-   * @param {[type]} tile     [description]
-   */
-  onCreatureOverlapFire: function(creature, tile) {
-    this.onCreatureIsDamaged(creature, 'fire');
-  },
-
-  /**
-   * When creature is damaged
-   * 
-   * @param {Object} creature - creature object
-   * @param {string} damageFrom - where is the damage come frome
-   */
-  onCreatureIsDamaged: function(creature, damageFrom) {
-    var ts = UTIL.getCurrentUtcTimestamp();
-
-    if (!creature.blr.misc.isImmortal &&
-      (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay)) {
-      var logText = '-1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
-        ' (' + creature.blr.info.life-- + ' > ' + creature.blr.info.life + ')  was damaged from ' + damageFrom;
-      UI.addTextToLogList(logText);
-
-      creature.blr.updateLastDamageTimestamp();
-      this.playDamageParticle(creature);
-      creature.animations.play('blink', 10, false, false);
-
-      // is die
-      if (creature.blr.info.life <= 0) {
-        var logText = creature.blr.info.type + ' ' + creature.blr.info.id + ' was died by ' + damageFrom;
-        UI.addTextToLogList(logText);
-
-        // disable - kill monster @24092016-0120
-        //
-        // creature.alive = false;
-        // creature.kill();
-        // creature.blr.weapon.kill();
-        // creature.blr.shadow.kill();
-
-        // respawn
-        // - set init info
-        // - random position
-        this.respawnCreature(creature);
-      }
-    }
-  },
-
-  /**
    * Respawn creature
    * 
    * @param {Creature} creature
@@ -567,6 +679,154 @@ Play.prototype = {
     this.updateCreatureShadow(creature);
     this.logCreatureRespawning(creature);
   },
+
+  /*================================================================ Map
+   */
+
+  debugMap: function() {
+    var i = 0, // row
+      j = 0, // column
+      renderPadding = 4;
+    mapData = this.VTMap.data,
+      mapTileWidth = this.VTMap.mapTileWidth,
+      mapTileHeight = this.VTMap.mapTileHeight,
+      nTileWidth = this.VTMap.nTileWidth,
+      nTileHeight = this.VTMap.nTileHeight;
+
+    var bmdWidth = mapTileWidth - renderPadding * 2,
+      bmdHeight = mapTileHeight - renderPadding * 2;
+
+    var bmd = GAME.add.bitmapData(bmdWidth, bmdHeight);
+    bmd.ctx.beginPath();
+    bmd.ctx.rect(0, 0, bmdWidth, bmdHeight);
+    bmd.ctx.fillStyle = 'rgba(240, 240, 100, .6)';
+    bmd.ctx.fill();
+
+    for (i = 0; i < nTileWidth; i++) {
+      for (j = 0; j < nTileHeight; j++) {
+        var mapPoint = mapData[i][j];
+
+        // walkable
+        if (mapPoint !== 0) {
+          var x = (j * mapTileHeight) + renderPadding;
+          y = (i * mapTileWidth) + renderPadding,
+            drawnObject = GAME.add.sprite(x, y, bmd);
+
+          this.vtmapDebugGroup.add(drawnObject);
+        }
+      }
+    }
+  },
+
+  setMiniMap: function() {
+    // tile size must be square
+    var miniMapSize = 5,
+      miniMapBgBmd = GAME.add.bitmapData(
+        miniMapSize * this.VTMap.nTileWidth,
+        miniMapSize * this.VTMap.nTileHeight
+      ),
+      miniMapBgSpr;
+
+    // row
+    for (var i = 0; i < this.VTMap.nTileHeight; i++) {
+      // column
+      for (var j = 0; j < this.VTMap.nTileWidth; j++) {
+        var mapData = this.VTMap.data[i][j],
+          color = '#36a941',
+          miniMapX = j * miniMapSize,
+          miniMapY = i * miniMapSize;
+
+        switch (mapData) {
+          // brush
+          case 1:
+            color = '#4ed469';
+            break;
+            // stone
+          case 3:
+            color = '#b4baaf';
+            break;
+            // well
+          case 5:
+            color = '#409fff';
+            break;
+            // fire
+          case 6:
+            color = '#f07373';
+            break;
+        }
+
+        miniMapBgBmd.ctx.fillStyle = color;
+        // actually, param 3 and 4 should be 5 (equal to miniMapSize)
+        // but I want some kind of padding between each tile
+        // so, it should be 4 instead 
+        miniMapBgBmd.ctx.fillRect(miniMapX, miniMapY, 4, 4);
+      }
+    }
+
+    miniMapBgSpr = GAME.add.sprite(6, 6, miniMapBgBmd);
+    miniMapBgSpr.alpha = 0.6;
+    miniMapBgSpr.fixedToCamera = true;
+    this.miniMapBg.add(miniMapBgSpr);
+  },
+
+  /**
+   * Update unit (in miniMap)
+   */
+  updateMinimap: function() {
+    var ts = UTIL.getCurrentUtcTimestamp();
+
+    if (ts - this.lastMiniMapUpdatingTimestamp > this.miniMapUpdatingDelay) {
+      // tile size must be square
+      var miniMapSize = 5,
+        miniMapUnitBmd = GAME.add.bitmapData(
+          miniMapSize * this.VTMap.nTileWidth,
+          miniMapSize * this.VTMap.nTileHeight
+        ),
+        miniMapUnitSpr;
+
+      // destroy
+      this.miniMapUnit.forEachAlive(function(unitSpr) {
+        unitSpr.destroy();
+      });
+
+      // create new one
+      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.playerGroup, '#fff');
+      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.enemyGroup, '#60f0ff');
+      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.zombieGroup, '#776b9f');
+      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.machineGroup, '#776b9f');
+      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.batGroup, '#776b9f');
+
+      // create sprite and add to group
+      miniMapUnitSpr = GAME.add.sprite(6, 6, miniMapUnitBmd);
+      miniMapUnitSpr.fixedToCamera = true;
+      this.miniMapUnit.add(miniMapUnitSpr);
+
+      // update timestamp
+      this.lastMiniMapUpdatingTimestamp = ts;
+    }
+  },
+
+  addCreatureGroupToMiniMapUnitBmd: function(miniMapUnitBmd, creatureGroup, colorCode) {
+    var miniMapSize = 5;
+
+    creatureGroup.forEachAlive(function(creature) {
+      var x = creature.x,
+        y = creature.y,
+        tileIndex = GUTIL.convertPointToTileIndex(x, y),
+        miniMapX = tileIndex.x * miniMapSize,
+        miniMapY = tileIndex.y * miniMapSize;
+
+      miniMapUnitBmd.ctx.fillStyle = colorCode;
+      // actually, it should be the same as `setMiniMap`
+      // but I want to add more padding
+      miniMapUnitBmd.ctx.fillRect(miniMapX + 1, miniMapY + 1, 2, 2);
+    });
+
+    return miniMapUnitBmd;
+  },
+
+  /*================================================================ Emitter
+   */
 
   setDashEmitter: function() {
     var nEmitter = 60;
@@ -643,39 +903,27 @@ Play.prototype = {
     this.fadeDamageEmitter();
   },
 
-  debugMap: function() {
-    var i = 0, // row
-      j = 0, // column
-      renderPadding = 4;
-    mapData = this.VTMap.data,
-      mapTileWidth = this.VTMap.mapTileWidth,
-      mapTileHeight = this.VTMap.mapTileHeight,
-      nTileWidth = this.VTMap.nTileWidth,
-      nTileHeight = this.VTMap.nTileHeight;
+  /*================================================================ Overlap
+   */
 
-    var bmdWidth = mapTileWidth - renderPadding * 2,
-      bmdHeight = mapTileHeight - renderPadding * 2;
+  /**
+   * Callback event when hit well
+   * 
+   * @param {[type]} creature [description]
+   * @param {[type]} tile     [description]
+   */
+  onCreatureOverlapWell: function(creature, tile) {
+    this.onCreatureIsRecovered(creature, 'well');
+  },
 
-    var bmd = GAME.add.bitmapData(bmdWidth, bmdHeight);
-    bmd.ctx.beginPath();
-    bmd.ctx.rect(0, 0, bmdWidth, bmdHeight);
-    bmd.ctx.fillStyle = 'rgba(240, 240, 100, .6)';
-    bmd.ctx.fill();
-
-    for (i = 0; i < nTileWidth; i++) {
-      for (j = 0; j < nTileHeight; j++) {
-        var mapPoint = mapData[i][j];
-
-        // walkable
-        if (mapPoint !== 0) {
-          var x = (j * mapTileHeight) + renderPadding;
-          y = (i * mapTileWidth) + renderPadding,
-            drawnObject = GAME.add.sprite(x, y, bmd);
-
-          this.vtmapDebugGroup.add(drawnObject);
-        }
-      }
-    }
+  /**
+   * Callback event when hit fire
+   * 
+   * @param {[type]} creature [description]
+   * @param {[type]} tile     [description]
+   */
+  onCreatureOverlapFire: function(creature, tile) {
+    this.onCreatureIsDamaged(creature, 'fire');
   },
 
   onPlayerOverlapZombie: function(player, monster) {
@@ -718,6 +966,9 @@ Play.prototype = {
     this.onCreatureIsDamaged(monster, 'arrow');
   },
 
+  /*================================================================ Collide
+   */
+
   onMonsterCollideStoneGroup: function(monster, stone) {
     var ts = UTIL.getCurrentUtcTimestamp();
     monster.blr.updateLastIdleTimestamp(ts);
@@ -734,286 +985,62 @@ Play.prototype = {
 
   },
 
-  forceRestartAutomove: function(monster) {
-    var ts = UTIL.getCurrentUtcTimestamp();
-
-    // hacky
-    monster.blr.misc.autoMoveTimestamp = ts - 7000;
-    this.monsterAutoMove(monster);
-  },
-
-  /**
-   * Start autoMove mode
-   * used by monster only
-   * 
-   * @param {Object} monster - monster object
+  /*================================================================ Game event
    */
-  monsterAutoMove: function(monster) {
-    var ts = UTIL.getCurrentUtcTimestamp();
 
-    monster.body.velocity.x = 0;
-    monster.body.velocity.y = 0;
+  onCreatureIsRecovered: function(creature, recoveredFrom) {
+    if (creature.blr.info.life < creature.blr.info.maxLife) {
+      var ts = UTIL.getCurrentUtcTimestamp();
 
-    // if near hero, then  follow the hero
-    // if not, then autoMove
-    if (!IS_INVISIBLE && GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
-      monster.blr.misc.isAutomove = false; // unused
-      monster.rotation = GAME.physics.arcade.moveToObject(
-        monster,
-        this.player,
-        monster.blr.phrInfo.velocitySpeed
-      );
+      if (ts > creature.blr.info.lastRecoverTimestamp + creature.blr.info.immortalDelay) {
+        var logText = '+1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
+          ' (' + creature.blr.info.life++ + ' > ' + creature.blr.info.life + ')  was recovered from ' + recoveredFrom;
+        UI.addTextToLogList(logText);
 
-    } else {
-      // update isIdle
-      if (monster.blr.misc.isIdle &&
-        ts - monster.blr.misc.lastIdleTimestamp > this.automoveDelay) {
-        monster.blr.misc.isIdle = false;
-      }
-
-      if (!monster.blr.misc.isIdle) {
-        var distance = GAME.physics.arcade.distanceToXY(
-          monster,
-          monster.blr.misc.autoMoveTargetPos.x,
-          monster.blr.misc.autoMoveTargetPos.y
-        );
-
-        // first time, auto move mode
-        // if monster
-        // 1. start autoMove or keep autoMove if it autoMove less than 6sec or
-        // 2. the monster is to close with the target (prevent monster is spinning around the targetPos)
-        if ((ts - monster.blr.misc.autoMoveTimestamp > 6000) ||
-          distance < 200) {
-          var targetPos = this.getRandomAutoMovePosition(monster);
-
-          monster.blr.misc.isAutomove = true; // unused
-          monster.blr.misc.autoMoveTargetPos = targetPos;
-          monster.blr.misc.autoMoveTimestamp = UTIL.getCurrentUtcTimestamp();
-        }
-
-        // keep moving to the existing target position
-        monster.rotation = GAME.physics.arcade.moveToXY(
-          monster,
-          monster.blr.misc.autoMoveTargetPos.x,
-          monster.blr.misc.autoMoveTargetPos.y,
-          monster.blr.phrInfo.velocitySpeed
-        );
+        creature.blr.updateLastRecoverTimestamp();
+        this.playRecoverParticle(creature);
+        creature.animations.play('recover', 10, false, false);
       }
     }
   },
 
   /**
-   * get rotation between creature and mouse
+   * When creature is damaged
    * 
-   * @param {[type]} creature
-   * @returns {number} rotation
+   * @param {Object} creature - creature object
+   * @param {string} damageFrom - where is the damage come frome
    */
-  getRotationBetweenCreatureAndMouse: function(creature) {
-    var result = Math.atan2(
-      GAME.input.y - (creature.position.y - GAME.camera.y),
-      GAME.input.x - (creature.position.x - GAME.camera.x)
-    );
-
-    return result;
-  },
-
-  /**
-   * Update creature follow the mouse
-   * So, this function will update
-   * - body rotation
-   * 
-   * @param {[type]} creature
-   */
-  updateCreatureRotationByFollowingMouse: function(creature) {
-    var newX = creature.x,
-      newY = creature.y,
-      newRotation = this.getRotationBetweenCreatureAndMouse(creature);
-
-    creature.rotation = newRotation;
-  },
-
-  isCreatureMove: function(creature) {
-    return (creature.x !== creature.blr.info.lastVector.x || creature.y !== creature.blr.info.lastVector.y);
-  },
-
-  isCreatureRotate: function(creature) {
-    return (creature.rotation !== creature.blr.info.lastVector.rotation);
-  },
-
-  /**
-   * Update creature shadow
-   * using creature position by default
-   * 
-   * @param {[type]} creature
-   * @param {number} [newX]
-   * @param {number} [newY]
-   */
-  updateCreatureShadow: function(creature, newX, newY) {
-    if (typeof newX === 'undefined') newX = creature.x;
-    if (typeof newY === 'undefined') newY = creature.y;
-
-    creature.blr.shadow.x = newX;
-    creature.blr.shadow.y = newY;
-  },
-
-  /**
-   * Update creature weapon
-   * using creature position by default
-   * 
-   * @param {[type]} creature
-   * @param {number} [newX]
-   * @param {number} [newY]
-   * @param {number} [newRotation]
-   */
-  updateCreatureWeapon: function(creature, newX, newY, newRotation) {
-    if (typeof newX === 'undefined') newX = creature.x;
-    if (typeof newY === 'undefined') newY = creature.y;
-    if (typeof newRotation === 'undefined') newRotation = creature.rotation;
-
-    creature.blr.weapon.x = newX;
-    creature.blr.weapon.y = newY;
-    creature.blr.weapon.rotation = newRotation;
-  },
-
-  setMiniMap: function() {
-    // tile size must be square
-    var miniMapSize = 5,
-      miniMapBgBmd = GAME.add.bitmapData(
-        miniMapSize * this.VTMap.nTileWidth,
-        miniMapSize * this.VTMap.nTileHeight
-      ),
-      miniMapBgSpr;
-    
-    // row
-    for (var i = 0; i < this.VTMap.nTileHeight; i++) {
-      // column
-      for (var j = 0; j < this.VTMap.nTileWidth; j++) {
-        var mapData = this.VTMap.data[i][j],
-          color = '#36a941',
-          miniMapX = j * miniMapSize,
-          miniMapY = i * miniMapSize;
-
-        switch (mapData) {
-          // brush
-          case 1:
-            color = '#4ed469';
-            break;
-          // stone
-          case 3:
-            color = '#b4baaf';
-            break;
-          // well
-          case 5:
-            color = '#409fff';
-            break;
-          // fire
-          case 6:
-            color = '#f07373';
-            break;
-        }
-
-        miniMapBgBmd.ctx.fillStyle = color;
-        // actually, param 3 and 4 should be 5 (equal to miniMapSize)
-        // but I want some kind of padding between each tile
-        // so, it should be 4 instead 
-        miniMapBgBmd.ctx.fillRect(miniMapX, miniMapY, 4, 4);
-      }
-    }
-    
-    miniMapBgSpr = GAME.add.sprite(6, 6, miniMapBgBmd);
-    miniMapBgSpr.alpha = 0.6;
-    miniMapBgSpr.fixedToCamera = true;
-    this.miniMapBg.add(miniMapBgSpr);
-  },
-
-  /**
-   * Update unit (in miniMap)
-   */
-  updateMinimap: function() {
+  onCreatureIsDamaged: function(creature, damageFrom) {
     var ts = UTIL.getCurrentUtcTimestamp();
 
-    if (ts - this.lastMiniMapUpdatingTimestamp > this.miniMapUpdatingDelay) {
-      // tile size must be square
-      var miniMapSize = 5,
-        miniMapUnitBmd = GAME.add.bitmapData(
-          miniMapSize * this.VTMap.nTileWidth,
-          miniMapSize * this.VTMap.nTileHeight
-        ),
-        miniMapUnitSpr;
-      
-      // destroy
-      this.miniMapUnit.forEachAlive(function(unitSpr) {
-        unitSpr.destroy();
-      });
+    if (!creature.blr.misc.isImmortal &&
+      (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay)) {
+      var logText = '-1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
+        ' (' + creature.blr.info.life-- + ' > ' + creature.blr.info.life + ')  was damaged from ' + damageFrom;
+      UI.addTextToLogList(logText);
 
-      // create new one
-      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.playerGroup, '#fff');
-      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.enemyGroup, '#60f0ff');
-      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.zombieGroup, '#776b9f');
-      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.machineGroup, '#776b9f');
-      miniMapUnitBmd = this.addCreatureGroupToMiniMapUnitBmd(miniMapUnitBmd, this.batGroup, '#776b9f');
-      
-      // create sprite and add to group
-      miniMapUnitSpr = GAME.add.sprite(6, 6, miniMapUnitBmd);
-      miniMapUnitSpr.fixedToCamera = true;
-      this.miniMapUnit.add(miniMapUnitSpr);
+      creature.blr.updateLastDamageTimestamp();
+      this.playDamageParticle(creature);
+      creature.animations.play('blink', 10, false, false);
 
-      // update timestamp
-      this.lastMiniMapUpdatingTimestamp = ts;
+      // is die
+      if (creature.blr.info.life <= 0) {
+        var logText = creature.blr.info.type + ' ' + creature.blr.info.id + ' was died by ' + damageFrom;
+        UI.addTextToLogList(logText);
+
+        // disable - kill monster @24092016-0120
+        //
+        // creature.alive = false;
+        // creature.kill();
+        // creature.blr.weapon.kill();
+        // creature.blr.shadow.kill();
+
+        // respawn
+        // - set init info
+        // - random position
+        this.respawnCreature(creature);
+      }
     }
-  },
-
-  addCreatureGroupToMiniMapUnitBmd: function(miniMapUnitBmd, creatureGroup, colorCode) {
-    var miniMapSize = 5;
-
-    creatureGroup.forEachAlive(function(creature) {
-      var x = creature.x,
-        y = creature.y,
-        tileIndex = GUTIL.convertPointToTileIndex(x, y),
-        miniMapX = tileIndex.x * miniMapSize,
-        miniMapY = tileIndex.y * miniMapSize;
-
-      miniMapUnitBmd.ctx.fillStyle = colorCode;
-      // actually, it should be the same as `setMiniMap`
-      // but I want to add more padding
-      miniMapUnitBmd.ctx.fillRect(miniMapX + 1, miniMapY + 1, 2, 2);
-    });
-
-    return miniMapUnitBmd;
-  },
-
-  /**
-   * Get enemy object by playerId
-   * implemented "break" hack
-   * 
-   * @see http://stackoverflow.com/questions/2641347/how-to-short-circuit-array-foreach-like-calling-break
-   * 
-   * @param {string} playerId
-   * @returns {Object} Phaser sprite object and including with other components
-   */
-  getEnemyByPlayerId: function(playerId) {
-    var isFound = false,
-      result = {},
-      BreakException = {};
-
-    try {
-      this.enemyGroup.forEach(function(hero) {
-        if (hero.blr.info.id === playerId) {
-          isFound = true;
-          result = hero;
-          throw BreakException;
-        }
-      }, this);
-
-    } catch (e) {
-      if (e !== BreakException) throw e;
-    }
-
-    if (!isFound) {
-      UTIL.serverBugLog('getEnemyByPlayerId', 'Not found playerId', playerId);
-    }
-
-    return result;
   },
 
   /*================================================================ Event
@@ -1030,7 +1057,7 @@ Play.prototype = {
 
       // update last vector
       this.updateCreatureLastVector(hero);
-        
+
       // update next fire
       hero.blr.misc.nextFireTimestamp = ts + hero.blr.misc.fireRate;
 
@@ -1100,7 +1127,7 @@ Play.prototype = {
 
   playerSendMessage: function() {
     var ts = UTIL.getCurrentUtcTimestamp();
-    
+
     // if start typing
     if (!this.player.blr.misc.isTyping) {
       this.player.blr.updateLastEnterTimestamp(ts);
@@ -1169,13 +1196,13 @@ Play.prototype = {
     for (var i = 0; i < nZombies; i++) {
       this.spawnZombie(zombieInfos[i]);
     }
-    
+
     // monster - machine
     var nMachines = machineInfos.length;
     for (var i = 0; i < nMachines; i++) {
       this.spawnMachine(machineInfos[i]);
     }
-    
+
     // monster - bat
     var nBats = batInfos.length;
     for (var i = 0; i < nBats; i++) {
@@ -1278,7 +1305,7 @@ Play.prototype = {
   onPlayerMessage: function(data) {
     var playerInfo = data.playerInfo,
       enemy = this.getEnemyByPlayerId(playerInfo.id);
-    
+
     if (!UTIL.isEmptyObject(enemy)) {
       // update info
       enemy.blr.updateLastMessageTimestamp(playerInfo.lastMessageTimestamp);
@@ -1294,7 +1321,7 @@ Play.prototype = {
   onPlayerMove: function(data) {
     var playerInfo = data.playerInfo,
       enemy = this.getEnemyByPlayerId(playerInfo.id);
-    
+
     if (!UTIL.isEmptyObject(enemy)) {
       enemy.x = playerInfo.lastVector.x;
       enemy.y = playerInfo.lastVector.y;
@@ -1306,7 +1333,7 @@ Play.prototype = {
     var playerInfo = data.playerInfo,
       targetPos = data.targetPos,
       enemy = this.getEnemyByPlayerId(playerInfo.id);
-    
+
     if (!UTIL.isEmptyObject(enemy)) {
       enemy.x = playerInfo.lastVector.x;
       enemy.y = playerInfo.lastVector.y;
