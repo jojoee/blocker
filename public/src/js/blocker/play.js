@@ -1689,6 +1689,9 @@ Play.prototype = {
       // overlap - machine laser overlap player
       GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
 
+      // reset emiiter
+      this.fadeAllEmitters();
+
       // reset - bubble - player
       this.updateCreatureBubbleVisibility(this.player);
 
@@ -1787,13 +1790,15 @@ Play.prototype = {
 
     if (this.isGameReady) {
       // hero - player
-      if (this.isCreatureMove(this.player)) {
-        this.updateCreatureWeapon(this.player);
-        this.updateCreatureShadow(this.player);
-        this.playDashParticle(this.player);
+      if (this.player.alive) {
+        if (this.isCreatureMove(this.player)) {
+          this.updateCreatureWeapon(this.player);
+          this.updateCreatureShadow(this.player);
+          this.playDashParticle(this.player);
+        }
+        this.updateCreatureLabelText(this.player);
+        this.updateCreatureBubble(this.player);
       }
-      this.updateCreatureLabelText(this.player);
-      this.updateCreatureBubble(this.player);
 
       // hero - enemy
       this.enemyGroup.forEachAlive(function(hero) {
