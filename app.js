@@ -378,45 +378,55 @@ IO.on('connection', function(socket) {
 
   // message
   socket.on(EVENT_NAME.player.message, function(data) {
-    var playerInfo = data.playerInfo;
+    var playerInfo = data.playerInfo,
+      playerIdx = getPlayerInfoIndexById(playerInfo.id); 
 
-    if (isExistingPlayer(playerInfo.id)) {
+    if (playerIdx > -1) {
+      PLAYER_INFOS[playerIdx] = playerInfo;
       socket.broadcast.emit(EVENT_NAME.player.message, data);
     }
   });
 
   // move
   socket.on(EVENT_NAME.player.move, function(data) {
-    var playerInfo = data.playerInfo;
+    var playerInfo = data.playerInfo,
+      playerIdx = getPlayerInfoIndexById(playerInfo.id);
 
-    if (isExistingPlayer(playerInfo.id)) {
+    if (playerIdx > -1) {
+      PLAYER_INFOS[playerIdx] = playerInfo;
       socket.broadcast.emit(EVENT_NAME.player.move, data);
     }
   });
 
   // fire
   socket.on(EVENT_NAME.player.fire, function(data) {
-    var playerInfo = data.playerInfo;
+    var playerInfo = data.playerInfo,
+      playerIdx = getPlayerInfoIndexById(playerInfo.id);
 
-    if (isExistingPlayer(playerInfo.id)) {
+    if (playerIdx > -1) {
+      PLAYER_INFOS[playerIdx] = playerInfo;
       socket.broadcast.emit(EVENT_NAME.player.fire, data);
     }
   });
 
   // is fired
   socket.on(EVENT_NAME.player.isFired, function(data) {
-    var playerInfo = data.playerInfo;
+    var playerInfo = data.playerInfo,
+      playerIdx = getPlayerInfoIndexById(playerInfo.id);
 
-    if (isExistingPlayer(playerInfo.id)) {
+    if (playerIdx > -1) {
+      PLAYER_INFOS[playerIdx] = playerInfo;
       socket.broadcast.emit(EVENT_NAME.player.isFired, data);
     }
   });
   
   // is welled
   socket.on(EVENT_NAME.player.isWelled, function(data) {
-    var playerInfo = data.playerInfo;
+    var playerInfo = data.playerInfo,
+      playerIdx = getPlayerInfoIndexById(playerInfo.id);
 
-    if (isExistingPlayer(playerInfo.id)) {
+    if (playerIdx > -1) {
+      PLAYER_INFOS[playerIdx] = playerInfo;
       socket.broadcast.emit(EVENT_NAME.player.isWelled, data);
     }
   });
