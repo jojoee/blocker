@@ -45,11 +45,17 @@ var commonConfig = {
       // player is welled
       isWelled: eventPlayerPrefix + 'isWelled',
 
-      // player is overlapped
+      // player is overlapped (by monster weapon)
       isOverlappedByMonster: eventPlayerPrefix + 'isOverlappedByMonster',
 
       // player is died
       isDied: eventPlayerPrefix + 'isDied',
+
+      // player is respawn
+      isRespawn: eventPlayerPrefix + 'isRespawn',
+
+      // player is respawn itself
+      isRespawnItSelf: eventPlayerPrefix + 'isRespawnItSelf',
     },
     server: {
       // send new player

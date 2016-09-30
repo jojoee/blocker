@@ -176,11 +176,8 @@ function getNewPlayerInfo() {
  * @returns {CreatureInfo}
  */
 function getNewCreatureInfo(type, life, maxLife) {
-  var creatureId = getUniqueCreatureId(),
-    startPosition = getRandomStartCreaturePosition();
-
-  var startRotation = GUTIL.getRandomRotation(), 
-    startVector = new Vector(startPosition.x, startPosition.y, startRotation),
+  var creatureId = getUniqueCreatureId(), 
+    startVector = getRandomStartCreatureVector(),
     creatureInfo = new CreatureInfo(creatureId, type, startVector, life, maxLife);
 
   return creatureInfo;
@@ -198,6 +195,24 @@ function getNewCreatureInfo(type, life, maxLife) {
  */
 function getRandomStartCreaturePosition() {
   return getCreaturePositionByExclusion([1, 3, 5, 6]);
+}
+
+/**
+ * Get random start creature vector
+ * not be allowed at
+ * - fire
+ * - bush
+ * - well
+ * - stone
+ * 
+ * @returns {Vector} start vector
+ */
+function getRandomStartCreatureVector() {
+  var startPosition = getRandomStartCreaturePosition(),
+    startRotation = GUTIL.getRandomRotation(), 
+    startVector = new Vector(startPosition.x, startPosition.y, startRotation);
+
+  return startVector;
 }
 
 /**
@@ -235,6 +250,22 @@ function getCreaturePositionByExclusion(arr) {
   middlePos = GUTIL.convertTileIndexToPoint(tileIndexX, tileIndexY, tileWidth, tileHeight, true);
 
   return middlePos;
+}
+
+/**
+ * Reset creatureInfo
+ * used for respawning only (server side only)
+ * 
+ * @param {CreatureInfo} creatureInfo
+ * @param {Vector} startVector
+ * @returns {CreatureInfo} creatureInfo
+ */
+function resetCreatureInfo(creatureInfo, startVector) {
+  creatureInfo.life = creatureInfo.initialLife;
+  creatureInfo.startVector = startVector;
+  creatureInfo.lastVector = startVector;
+
+  return creatureInfo;
 }
 
 function isDuplicateCreatureId(creatureid, creatureInfos) {
@@ -448,8 +479,22 @@ IO.on('connection', function(socket) {
       playerIdx = getPlayerInfoIndexById(playerInfo.id);
 
     if (playerIdx > -1) {
-      PLAYER_INFOS[playerIdx] = playerInfo;
+      // broadcast
       socket.broadcast.emit(EVENT_NAME.player.isDied, data);
+
+      // reset player info
+      var newStartVector = getRandomStartCreatureVector();
+      playerInfo = resetCreatureInfo(playerInfo, newStartVector);
+
+      // update server data
+      PLAYER_INFOS[playerIdx] = playerInfo;
+
+      // send data
+      var newData = {
+        playerInfo: playerInfo,
+      };
+      IO.sockets.connected[socketId].emit(EVENT_NAME.player.isRespawnItSelf, newData);
+      socket.broadcast.emit(EVENT_NAME.player.isRespawn, newData);
     }
   });
 });

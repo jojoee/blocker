@@ -96,11 +96,14 @@ var CreatureInfo = function(id, type, startVector, life, maxLife) {
   /** @type {number} */
   this.maxLife = maxLife;
 
-  /** @type {Vector} start vector of creature */
-  this.startVector = startVector;
-
   /** @type {number} immortal delay (milliseconds) */
   this.immortalDelay = 800;
+
+  /*---------------------------------------------------------------- Updatable on respawn
+   */
+
+  /** @type {Vector} start vector of creature */
+  this.startVector = startVector;
 
   /*---------------------------------------------------------------- Updatable
    */
@@ -161,14 +164,29 @@ Creature.prototype.updateLastRecoverTimestamp = function() {
   this.info.lastRecoverTimestamp = UTIL.getCurrentUtcTimestamp();
 };
 
+/**
+ * Reset creature (misc)
+ * used by client only
+ */
 Creature.prototype.reset = function() {
-  this.info.life = this.info.initialLife;
+  this.misc.isImmortal = false;
+  
+  // automove
+  this.misc.isAutomove = false;
+  this.misc.autoMoveTargetPos = {};
+  this.misc.autoMoveTimestamp = 0;
+  this.misc.isIdle = false;
+  this.misc.lastIdleTimestamp = 0;
+
+  // bubble
+  this.misc.isTyping = false;
+  this.misc.lastEnterTimestamp = 0;
 };
 
 /**
  * Update lastMessageTimestamp
  * 
- * @param {number} [ts] - last message timestamp 
+ * @param {number} [ts] - last message timestamp
  */
 Creature.prototype.updateLastMessageTimestamp = function(ts) {
   if (typeof ts === 'undefined') ts = UTIL.getCurrentUtcTimestamp(); 
