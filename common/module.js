@@ -90,35 +90,38 @@ var CreatureInfo = function(id, type, startVector, life, maxLife) {
   /** @type {string} creature type */
   this.type = type;
 
-  /** @type {Vector} start vector of creature */
-  this.startVector = startVector;
-
-  /** @type {Vector} last vector of creature */
-  this.lastVector = startVector,
-
-  /** @type {numberr} */
-  this.life = life;
-
   /** @type {number} initialize */
   this.initialLife = life;
 
   /** @type {number} */
   this.maxLife = maxLife;
 
-  /** @type {number} last damage timestamp */
-  this.lastDamageTimestamp = 0;
-
-  /** @type {number} last recover timestamp */
-  this.lastRecoverTimestamp = 0;
+  /** @type {Vector} start vector of creature */
+  this.startVector = startVector;
 
   /** @type {number} immortal delay (milliseconds) */
   this.immortalDelay = 800;
+
+  /*---------------------------------------------------------------- Updatable
+   */
+
+  /** @type {numberr} */
+  this.life = life;
+
+  /** @type {Vector} last vector of creature */
+  this.lastVector = startVector,
 
   /** @type {string} last message */
   this.lastMessage = '';
 
   /** @type {number} last message timestamp */
   this.lastMessageTimestamp = 0;
+
+  /** @type {number} last damage timestamp */
+  this.lastDamageTimestamp = 0;
+
+  /** @type {number} last recover timestamp */
+  this.lastRecoverTimestamp = 0;
 };
 
 /**

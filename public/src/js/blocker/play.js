@@ -610,6 +610,7 @@ Play.prototype = {
 
     // init & sprite
     var hero = GAME.add.sprite(currentVector.x, currentVector.y, 'hero');
+    hero.rotation = currentVector.rotation;
     hero.blr = heroBlr;
     hero.anchor.set(0.5);
 
@@ -631,6 +632,7 @@ Play.prototype = {
 
     // weapon
     var weaponTmp = GAME.add.sprite(currentVector.x, currentVector.y, 'bowWeapon');
+    weaponTmp.rotation = currentVector.rotation;
     weaponTmp.animations.add('attack', [0, 1, 2, 3, 4, 5, 0]);
     weaponTmp.anchor.set(0.3, 0.5);
     weaponTmp.scale.setTo(0.5);
@@ -1082,7 +1084,7 @@ Play.prototype = {
       // update body rotation
       this.updateCreatureRotationByFollowingMouse(hero);
 
-      // update last vector
+      // update last vector (update rotation)
       this.updateCreatureLastVector(hero);
 
       // update next fire
@@ -1143,8 +1145,10 @@ Play.prototype = {
       // update body rotation
       this.updateCreatureRotationByFollowingMouse(this.player);
 
-      // broadcast `move` event
+      // update info
       this.updateCreatureLastVector(this.player);
+
+      // broadcast `move` event
       var data = {
         playerInfo: this.player.blr.info,
       };
@@ -1336,7 +1340,7 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      enemy.blr.info.life = playerInfo.life;
+      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
       
       enemy.blr.updateLastMessageTimestamp(playerInfo.lastMessageTimestamp);
       enemy.blr.info.lastMessage = playerInfo.lastMessage;
@@ -1351,11 +1355,7 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      enemy.blr.info.life = playerInfo.life;
-
-      enemy.x = playerInfo.lastVector.x;
-      enemy.y = playerInfo.lastVector.y;
-      enemy.rotation = playerInfo.lastVector.rotation;
+      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
     }
   },
 
@@ -1365,11 +1365,8 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      enemy.blr.info.life = playerInfo.life;
-      
-      enemy.x = playerInfo.lastVector.x;
-      enemy.y = playerInfo.lastVector.y;
-      enemy.rotation = playerInfo.lastVector.rotation;
+      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
+
       this.enemyFireArrow(enemy, targetPos);
     }
   },
@@ -1379,7 +1376,7 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      enemy.blr.info.life = playerInfo.life;
+      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
 
       this.playDamageParticle(enemy);
       enemy.animations.play('blink', 10, false, false);
@@ -1391,11 +1388,31 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      enemy.blr.info.life = playerInfo.life;
+      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
 
       this.playRecoverParticle(enemy);
       enemy.animations.play('recover', 10, false, false);
     }
+  },
+
+  /**
+   * This function will force update
+   * (it's used every time when receive enemy event data from socket event
+   * except `ready`, `connect`, `disconnect` event)
+   * - life
+   * - body x
+   * - body y
+   * - body rotation
+   * 
+   * @param {Phaser.Sprite} enemy that contain `Creature` object in `blr` property
+   * @param {number} life
+   * @param {Vector} lastVector
+   */
+  forceUpdateEnemyFromSocketEvent: function(enemy, life, lastVector) {
+    enemy.blr.info.life = life;
+    enemy.x = lastVector.x;
+    enemy.y = lastVector.y;
+    enemy.rotation = lastVector.rotation;
   },
 
   /*================================================================ Stage
@@ -1587,8 +1604,6 @@ Play.prototype = {
         if (this.enterKey.isDown && ts - this.player.blr.misc.lastEnterTimestamp > this.enterKeyDelay) {
           this.playerSendMessage();
         }
-
-        this.updateCreatureLastVector(this.player);
       }
 
       /*
