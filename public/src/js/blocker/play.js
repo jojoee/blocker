@@ -1343,7 +1343,12 @@ Play.prototype = {
     // reorder z-index (hack)
     // floor
     GAME.world.bringToTop(this.floorGroup);
+
+    // shadow
     GAME.world.bringToTop(this.stoneShadowGroup);
+    GAME.world.bringToTop(this.monsterShadowGroup);
+    GAME.world.bringToTop(this.heroShadowGroup);
+
     GAME.world.bringToTop(this.stoneGroup);
     GAME.world.bringToTop(this.vtmapDebugGroup);
 
