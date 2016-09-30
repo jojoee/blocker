@@ -1357,10 +1357,6 @@ Play.prototype = {
     GAME.world.bringToTop(this.recoverEmitterGroup);
     GAME.world.bringToTop(this.damageEmitterGroup);
 
-    // shadow
-    GAME.world.bringToTop(this.monsterShadowGroup);
-    GAME.world.bringToTop(this.heroShadowGroup);
-
     // monster
     GAME.world.bringToTop(this.zombieWeaponGroup);
     GAME.world.bringToTop(this.zombieGroup);
