@@ -323,6 +323,44 @@ Play.prototype = {
     UI.addTextToLogList(logText);
   },
 
+  /**
+   * Log on creature is recovered
+   * 
+   * @param {Phaser.Sprite} creature - enemy that contain `Creature` object in `blr` property
+   * @param {string} recoveredFrom - where is the recover come frome
+   */
+  logOnCreatureIsRecovered: function(creature, recoveredFrom) {
+    var logText = '+1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
+          ' (' + creature.blr.info.life++ + ' > ' + creature.blr.info.life + ')  was recovered from ' + recoveredFrom;
+    
+    UI.addTextToLogList(logText);
+  },
+
+  /**
+   * Log on creature is damaged
+   * 
+   * @param {Phaser.Sprite} creature - enemy that contain `Creature` object in `blr` property
+   * @param {string} damageFrom - where is the damage come frome
+   */
+  logOnCreatureIsDamaged: function(creature, damageFrom) {
+    var logText = '-1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
+        ' (' + creature.blr.info.life-- + ' > ' + creature.blr.info.life + ')  was damaged from ' + damageFrom;
+    
+    UI.addTextToLogList(logText);
+  },
+
+  /**
+   * Log on creature is died
+   * 
+   * @param {Phaser.Sprite} creature - enemy that contain `Creature` object in `blr` property
+   * @param {string} damageFrom - where is the damage come frome
+   */
+  logOnCreatureIsDied: function(creature, damageFrom) {
+    var logText = creature.blr.info.type + ' ' + creature.blr.info.id + ' was died by ' + damageFrom;
+
+    UI.addTextToLogList(logText);
+  },
+
   /*================================================================ Bubble
    */
 
@@ -1015,14 +1053,11 @@ Play.prototype = {
       var ts = UTIL.getCurrentUtcTimestamp();
 
       if (ts > creature.blr.info.lastRecoverTimestamp + creature.blr.info.immortalDelay) {
-        var logText = '+1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
-          ' (' + creature.blr.info.life++ + ' > ' + creature.blr.info.life + ')  was recovered from ' + recoveredFrom;
-        UI.addTextToLogList(logText);
-
         isWelled = true;
         creature.blr.updateLastRecoverTimestamp();
         this.playRecoverParticle(creature);
         creature.animations.play('recover', 10, false, false);
+        this.logOnCreatureIsRecovered(creature, recoveredFrom);
       }
     }
 
@@ -1041,19 +1076,15 @@ Play.prototype = {
 
     if (!creature.blr.misc.isImmortal &&
       (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay)) {
-      var logText = '-1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
-        ' (' + creature.blr.info.life-- + ' > ' + creature.blr.info.life + ')  was damaged from ' + damageFrom;
-      UI.addTextToLogList(logText);
-
       isDamaged = true;
       creature.blr.updateLastDamageTimestamp();
       this.playDamageParticle(creature);
       creature.animations.play('blink', 10, false, false);
+      this.logOnCreatureIsDamaged(creature, damageFrom);
 
       // is die
       if (creature.blr.info.life <= 0) {
-        var logText = creature.blr.info.type + ' ' + creature.blr.info.id + ' was died by ' + damageFrom;
-        UI.addTextToLogList(logText);
+        this.logOnCreatureIsDied(creature, damageFrom);
 
         // disable - kill monster @24092016-0120
         //
