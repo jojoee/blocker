@@ -44,6 +44,9 @@ var commonConfig = {
 
       // player is welled
       isWelled: eventPlayerPrefix + 'isWelled',
+
+      // player is overlapped
+      isOverlappedByMonster: eventPlayerPrefix + 'isOverlappedByMonster',
     },
     server: {
       // send new player

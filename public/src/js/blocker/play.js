@@ -1017,15 +1017,42 @@ Play.prototype = {
   },
 
   onPlayerOverlapZombieWeapon: function(player, monsterWeapon) {
-    this.onCreatureIsDamaged(player, 'zombie hands');
+    var damageFrom = 'zombie hands',
+      isDamaged = this.onCreatureIsDamaged(player, damageFrom);
+
+    if (isDamaged) {
+      var data = {
+        playerInfo: player.blr.info,
+        damageFrom: damageFrom,
+      }; 
+      SOCKET.emit(EVENT_NAME.player.isOverlappedByMonster, data);
+    }
   },
 
   onPlayerOverlapMachineWeapon: function(player, monsterWeapon) {
-    this.onCreatureIsDamaged(player, 'machine\'s turret');
+    var damageFrom = 'machine\'s turret',
+      isDamaged = this.onCreatureIsDamaged(player, damageFrom);
+
+    if (isDamaged) {
+      var data = {
+        playerInfo: player.blr.info,
+        damageFrom: damageFrom,
+      }; 
+      SOCKET.emit(EVENT_NAME.player.isOverlappedByMonster, data);
+    }
   },
 
   onPlayerOverlapBatWeapon: function(player, monsterWeapon) {
-    this.onCreatureIsDamaged(player, 'bat wings');
+    var damageFrom = 'bat wings',
+      isDamaged = this.onCreatureIsDamaged(player, damageFrom);
+
+    if (isDamaged) {
+      var data = {
+        playerInfo: player.blr.info,
+        damageFrom: damageFrom,
+      }; 
+      SOCKET.emit(EVENT_NAME.player.isOverlappedByMonster, data);
+    }
   },
 
   onMachineLaserOverlapPlayer: function(laser, player) {
@@ -1255,6 +1282,7 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.player.fire, this.onPlayerFire.bind(this));
     SOCKET.on(EVENT_NAME.player.isFired, this.onPlayerIsFired.bind(this));
     SOCKET.on(EVENT_NAME.player.isWelled, this.onPlayerIsWelled.bind(this));
+    SOCKET.on(EVENT_NAME.player.isOverlappedByMonster, this.onPlayerIsOverlappedByMonster.bind(this));
   },
 
   onPlayerReady: function(data) {
@@ -1447,6 +1475,20 @@ Play.prototype = {
       this.playRecoverParticle(enemy);
       enemy.animations.play('recover', 10, false, false);
       this.logOnCreatureIsRecovered(enemy, 'well');
+    }
+  },
+
+  onPlayerIsOverlappedByMonster: function(data) {
+    var playerInfo = data.playerInfo,
+      damageFrom = data.damageFrom,
+      enemy = this.getEnemyByPlayerId(playerInfo.id);
+
+    if (!UTIL.isEmptyObject(enemy)) {
+      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
+
+      this.playDamageParticle(enemy);
+      enemy.animations.play('blink', 10, false, false);
+      this.logOnCreatureIsDamaged(enemy, damageFrom);
     }
   },
 
