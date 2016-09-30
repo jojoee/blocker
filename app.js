@@ -441,6 +441,17 @@ IO.on('connection', function(socket) {
       socket.broadcast.emit(EVENT_NAME.player.isOverlappedByMonster, data);
     }
   });
+
+  // is died
+  socket.on(EVENT_NAME.player.isDied, function(data) {
+    var playerInfo = data.playerInfo,
+      playerIdx = getPlayerInfoIndexById(playerInfo.id);
+
+    if (playerIdx > -1) {
+      PLAYER_INFOS[playerIdx] = playerInfo;
+      socket.broadcast.emit(EVENT_NAME.player.isDied, data);
+    }
+  });
 });
 
 /*================================================================ Log / Report

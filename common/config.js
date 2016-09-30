@@ -47,6 +47,9 @@ var commonConfig = {
 
       // player is overlapped
       isOverlappedByMonster: eventPlayerPrefix + 'isOverlappedByMonster',
+
+      // player is died
+      isDied: eventPlayerPrefix + 'isDied',
     },
     server: {
       // send new player

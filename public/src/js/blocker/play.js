@@ -1129,21 +1129,25 @@ Play.prototype = {
       creature.animations.play('blink', 10, false, false);
       this.logOnCreatureIsDamaged(creature, damageFrom);
 
-      // is die
+      // is died
       if (creature.blr.info.life <= 0) {
+        creature.blr.shadow.kill();
+        creature.blr.weapon.kill();
+        creature.kill();
         this.logOnCreatureIsDied(creature, damageFrom);
 
-        // disable - kill monster @24092016-0120
-        //
-        // creature.alive = false;
-        // creature.kill();
-        // creature.blr.weapon.kill();
-        // creature.blr.shadow.kill();
+        if (creature.blr.info.type === 'hero') {
+          // on hero is died
+          var data = {
+            playerInfo: creature.blr.info,
+            damageFrom: damageFrom,
+          };
+          SOCKET.emit(EVENT_NAME.player.isDied, data);
 
-        // respawn
-        // - set init info
-        // - random position
-        this.respawnCreature(creature);
+        } else {
+          // on monster is died
+          // TODO: complete it
+        }
       }
     }
 
@@ -1283,6 +1287,7 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.player.isFired, this.onPlayerIsFired.bind(this));
     SOCKET.on(EVENT_NAME.player.isWelled, this.onPlayerIsWelled.bind(this));
     SOCKET.on(EVENT_NAME.player.isOverlappedByMonster, this.onPlayerIsOverlappedByMonster.bind(this));
+    SOCKET.on(EVENT_NAME.player.isDied, this.onPlayerIsDied.bind(this));
   },
 
   onPlayerReady: function(data) {
@@ -1489,6 +1494,21 @@ Play.prototype = {
       this.playDamageParticle(enemy);
       enemy.animations.play('blink', 10, false, false);
       this.logOnCreatureIsDamaged(enemy, damageFrom);
+    }
+  },
+
+  onPlayerIsDied: function(data) {
+    var playerInfo = data.playerInfo,
+      damageFrom = data.damageFrom,
+      enemy = this.getEnemyByPlayerId(playerInfo.id);
+
+    if (!UTIL.isEmptyObject(enemy)) {
+      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
+
+      enemy.blr.shadow.kill();
+      enemy.blr.weapon.kill();
+      enemy.kill();
+      this.logOnCreatureIsDied(enemy, damageFrom);
     }
   },
 
