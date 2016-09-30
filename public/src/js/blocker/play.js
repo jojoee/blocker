@@ -1411,6 +1411,7 @@ Play.prototype = {
 
       this.playDamageParticle(enemy);
       enemy.animations.play('blink', 10, false, false);
+      this.logOnCreatureIsDamaged(enemy, 'fire');
     }
   },
 
@@ -1423,6 +1424,7 @@ Play.prototype = {
 
       this.playRecoverParticle(enemy);
       enemy.animations.play('recover', 10, false, false);
+      this.logOnCreatureIsRecovered(enemy, 'well');
     }
   },
 
