@@ -324,6 +324,26 @@ Play.prototype = {
   },
 
   /**
+   * Log on player connect
+   * 
+   * @param {CreatureInfo} playerInfo
+   */
+  logOnPlayerConnect: function(playerInfo) {
+    var logText = 'hero ' + playerInfo.id + ' connect';
+    UI.addTextToLogList(logText);
+  },
+
+  /**
+   * Log on player disconnect
+   * 
+   * @param {CreatureInfo} playerInfo
+   */
+  logOnPlayerDisconnect: function(playerInfo) {
+    var logText = 'hero ' + playerInfo.id + ' disconnect';
+    UI.addTextToLogList(logText);
+  },
+
+  /**
    * Log on creature is recovered
    * 
    * @param {Phaser.Sprite} creature - enemy that contain `Creature` object in `blr` property
@@ -1333,6 +1353,7 @@ Play.prototype = {
   onPlayerConnect: function(data) {
     var playerInfo = data.playerInfo;
     UTIL.clientLog('New player is connected', playerInfo);
+    this.logOnPlayerConnect(playerInfo);
 
     // enemy
     this.spawnEnemy(playerInfo);
@@ -1341,6 +1362,7 @@ Play.prototype = {
   onPlayerDisconnect: function(data) {
     var playerInfo = data.playerInfo;
     UTIL.clientLog('Player is disconnected', playerInfo);
+    this.logOnPlayerDisconnect(playerInfo);
 
     // remove enemy
     var isFound = false;
