@@ -17,10 +17,11 @@ for develop the client side, please run - `gulp watch`
 2. Build client script: `gulp`
 3. Run app: `pm2 start app.js`
 
-## Code guideline & Naming we use
+## Note
 ```
-1. Base javascript style: [Airbnb](https://github.com/airbnb/javascript)
-2. Function should return only one type
+1. Code guideline & Naming we use
+1.1 Base javascript style: [Airbnb](https://github.com/airbnb/javascript)
+1.2 Function should return only one type
   e.g.
   - getName: string, '' (default)
   - getRandomInt: number, 0 (default)
@@ -31,20 +32,25 @@ for develop the client side, please run - `gulp watch`
   e.g.
   - getIndexOfPlayer: number, -1 (default)
 
-Naming
+2. Naming
 - Function / scope variable: `camelCase`  
 - Global variable: `UPPERCASE`
 - Class: `PascalCase`
 
-*note*
-- Monster
-  + Zombie
-  + Machine
-  + Bat
+3. Creature
+- Zombie (monster)
+- Machine (monster)
+- Bat (monster)
+- Hero
 
-- Creature
-  + Monster
-  + Hero
+4. Socket
+- Send to specific client: IO.sockets.connected[socketId].emit(EVENT_NAME, data);
+- Send to all clients: IO.emit(EVENT_NAME, data);
+- Send to all clients except newly created connection: socket.broadcast.emit(EVENT_NAME, data); 
+
+5. Event flow
+If it's related with monster life or enemy life,
+then broadcast first and take effect from subsequent request.
 ```
 
 ## TODO
@@ -54,8 +60,6 @@ Naming
 - [x] Messaging
 - [x] Machine fire laser
 - [x] Monster (random walk)
-- [ ] Phaser server side
-- [ ] Make it online
 - [x] Implement webfont
 - [x] Implement module pattern both client and server
 - [x] Gulp.js for client development
@@ -115,25 +119,22 @@ Naming
 - [ ] Log filter
 - [x] Set emitter
 - [x] Using [pm2](https://github.com/Unitech/pm2) for deploy
-
-## TODO: Online
-- [ ] Online mode
-- [ ] Global chat
-- [ ] Typing status
-- [ ] Private chat
-- [ ] Online player
-- [ ] Chat log (256 messages)
-- [ ] GM mode / id
-- [ ] Command (that used by player e.g. list all players)
-- [ ] Room / Channel (able to create private room), [1](https://divillysausages.com/2015/07/12/an-intro-to-socket-io/), [2](http://www.tamas.io/advanced-chat-using-node-js-and-socket-io-episode-1/), [3](https://www.joezimjs.com/javascript/plugging-into-socket-io-advanced/)
-
-## TODO: Social
-- [ ] Facebook like + comment
-- [ ] Add social meta (og meta)
-- [ ] Add [Github ribbon](http://tholman.com/github-corners/)
-- [ ] Add Social share
-- [x] Bot player
-- [ ] Bot (make it smoother)
++ [x] Global chat
++ [ ] Phaser server side
++ [ ] Make it online
++ [ ] Typing status
++ [ ] Private chat
++ [ ] Online player
++ [ ] Chat log (256 messages)
++ [ ] GM mode / id
++ [ ] Command (that used by player e.g. list all players)
++ [ ] Room / Channel (able to create private room), [1](https://divillysausages.com/2015/07/12/an-intro-to-socket-io/), [2](http://www.tamas.io/advanced-chat-using-node-js-and-socket-io-episode-1/), [3](https://www.joezimjs.com/javascript/plugging-into-socket-io-advanced/)
+* [ ] Facebook like + comment
+* [ ] Add social meta (og meta)
+* [ ] Add [Github ribbon](http://tholman.com/github-corners/)
+* [ ] Add Social share
+* [ ] Bot player
+* [ ] Bot (make it smoother)
 
 ## In considering
 - [ ] [appmetrics.js](https://github.com/ebidel/appmetrics.js)
@@ -144,18 +145,6 @@ Naming
 - [ ] Optimize player list (e.g. using `Angular`, etc.)
 - [x] CSS preprocessor
 - [ ] Create own `screen-shake` plugin
-
-## Note
-```
-// specific
-IO.sockets.connected[socketId].emit(EVENT_NAME, data);
-
-// all client
-IO.emit(EVENT_NAME, data);
-
-// all other clients the newly created connection
-socket.broadcast.emit(EVENT_NAME, data);
-```
 
 ## Reference & Tutorial & Plugin && Tool
 - Inspired by [Blocker](http://blockergame.com/)
