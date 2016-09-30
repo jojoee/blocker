@@ -1121,7 +1121,9 @@ Play.prototype = {
     var ts = UTIL.getCurrentUtcTimestamp(),
       isDamaged = false;
 
-    if (!creature.blr.misc.isImmortal &&
+    if (creature.alive &&
+      creature.blr.info.life > 0 &&
+      !creature.blr.misc.isImmortal &&
       (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay)) {
       isDamaged = true;
       creature.blr.updateLastDamageTimestamp();
