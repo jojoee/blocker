@@ -221,10 +221,22 @@ Play.prototype = {
     creature.rotation = newRotation;
   },
 
+  /**
+   * Check is creature move
+   * unused
+   * 
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
+   */
   isCreatureMove: function(creature) {
     return (creature.x !== creature.blr.info.lastVector.x || creature.y !== creature.blr.info.lastVector.y);
   },
 
+  /**
+   * Check is creature rotate
+   * unused
+   * 
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
+   */
   isCreatureRotate: function(creature) {
     return (creature.rotation !== creature.blr.info.lastVector.rotation);
   },
@@ -411,6 +423,7 @@ Play.prototype = {
 
   updateCreatureBubbleText: function(creature) {
     var bubbletext = creature.blr.info.lastMessage;
+
     creature.blr.bubble.setText(bubbletext);
   },
 
@@ -751,6 +764,7 @@ Play.prototype = {
     // set position - sub
     this.updateCreatureWeapon(hero);
     this.updateCreatureShadow(hero);
+    this.updateCreatureBubblePosition(hero);
 
     // misc
     hero.blr.reset();
@@ -990,16 +1004,7 @@ Play.prototype = {
    * @param {[type]} tile     [description]
    */
   onCreatureOverlapWell: function(creature, tile) {
-    var isWelled = this.onCreatureIsRecovered(creature, 'well');
-
-    // if creature is player,
-    // then broadcast
-    if (isWelled && creature.blr.info.type === 'hero') {
-      var data = {
-        playerInfo: creature.blr.info,
-      };
-      SOCKET.emit(EVENT_NAME.player.isWelled, data);
-    }
+    this.onCreatureIsRecovered(creature, 'well');
   },
 
   /**
@@ -1009,7 +1014,7 @@ Play.prototype = {
    * @param {[type]} tile     [description]
    */
   onCreatureOverlapFire: function(creature, tile) {
-    this.onCreatureIsDamaged(creature, 'fire', EVENT_NAME.player.isFired);
+    this.onCreatureIsDamaged(creature, 'fire');
   },
 
   onPlayerOverlapZombie: function(player, monster) {
@@ -1025,15 +1030,15 @@ Play.prototype = {
   },
 
   onPlayerOverlapZombieWeapon: function(player, monsterWeapon) {
-    this.onCreatureIsDamaged(player, 'zombie hands', EVENT_NAME.player.isOverlappedByMonster);
+    this.onCreatureIsDamaged(player, 'zombie hands');
   },
 
   onPlayerOverlapMachineWeapon: function(player, monsterWeapon) {
-    this.onCreatureIsDamaged(player, 'machine\'s turret', EVENT_NAME.player.isOverlappedByMonster);
+    this.onCreatureIsDamaged(player, 'machine\'s turret');
   },
 
   onPlayerOverlapBatWeapon: function(player, monsterWeapon) {
-    this.onCreatureIsDamaged(player, 'bat wings', EVENT_NAME.player.isOverlappedByMonster);
+    this.onCreatureIsDamaged(player, 'bat wings');
   },
 
   onMachineLaserOverlapPlayer: function(laser, player) {
@@ -1084,13 +1089,21 @@ Play.prototype = {
         creature.blr.info.life++;
         isWelled = true;
         creature.blr.updateLastRecoverTimestamp();
+
         this.playRecoverParticle(creature);
         creature.animations.play('recover', 10, false, false);
         this.logOnCreatureIsRecovered(creature, recoveredFrom);
+
+        // broadcast
+        if (creature.blr.info.type === 'hero') {
+          var data = {
+            playerInfo: creature.blr.info,
+            recoveredFrom: recoveredFrom,
+          };
+          SOCKET.emit(EVENT_NAME.player.isRecovered, data);
+        }
       }
     }
-
-    return isWelled;
   },
 
   /**
@@ -1099,9 +1112,8 @@ Play.prototype = {
    * @param {Object} creature - creature object
    * @param {string} damageFrom - where is the damage come frome
    */
-  onCreatureIsDamaged: function(creature, damageFrom, socketEventName) {
-    var ts = UTIL.getCurrentUtcTimestamp(),
-      isDamaged = false;
+  onCreatureIsDamaged: function(creature, damageFrom) {
+    var ts = UTIL.getCurrentUtcTimestamp();
 
     // force kill, just in case
     if (creature <= 0) this.killCreature(creature, damageFrom);
@@ -1111,8 +1123,8 @@ Play.prototype = {
       !creature.blr.misc.isImmortal &&
       (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay)) {
       creature.blr.info.life--;
-      isDamaged = true;
       creature.blr.updateLastDamageTimestamp();
+
       this.playDamageParticle(creature);
       creature.animations.play('blink', 10, false, false);
       this.logOnCreatureIsDamaged(creature, damageFrom);
@@ -1128,12 +1140,10 @@ Play.prototype = {
             playerInfo: creature.blr.info,
             damageFrom: damageFrom,
           }; 
-          SOCKET.emit(socketEventName, data);
+          SOCKET.emit(EVENT_NAME.player.isDamaged, data);
         }
       }
     }
-
-    return isDamaged;
   },
 
   killCreature: function(creature, damageFrom) {
@@ -1166,6 +1176,7 @@ Play.prototype = {
   },
 
   killHero: function(hero, damageFrom) {
+    // kill
     hero.blr.label.kill();
     hero.blr.shadow.kill();
     hero.blr.weapon.kill();
@@ -1195,6 +1206,9 @@ Play.prototype = {
 
       // update body rotation
       this.updateCreatureRotationByFollowingMouse(hero);
+
+      // update sub
+      this.updateCreatureWeapon(hero);
 
       // update last vector (update rotation)
       this.updateCreatureLastVector(hero);
@@ -1257,6 +1271,12 @@ Play.prototype = {
       // update body rotation
       this.updateCreatureRotationByFollowingMouse(this.player);
 
+      // update sub
+      this.updateCreatureWeapon(this.player);
+      this.updateCreatureShadow(this.player);
+      this.playDashParticle(this.player);
+      this.updateCreatureBubblePosition(this.player);
+
       // update info
       this.updateCreatureLastVector(this.player);
 
@@ -1316,9 +1336,8 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.player.move, this.onPlayerMove.bind(this));
     SOCKET.on(EVENT_NAME.player.fire, this.onPlayerFire.bind(this));
 
-    SOCKET.on(EVENT_NAME.player.isFired, this.onPlayerIsFired.bind(this));
-    SOCKET.on(EVENT_NAME.player.isWelled, this.onPlayerIsWelled.bind(this));
-    SOCKET.on(EVENT_NAME.player.isOverlappedByMonster, this.onPlayerIsOverlappedByMonster.bind(this));
+    SOCKET.on(EVENT_NAME.player.isDamaged, this.onPlayerIsDamaged.bind(this));
+    SOCKET.on(EVENT_NAME.player.isRecovered, this.onPlayerIsRecovered.bind(this));
 
     SOCKET.on(EVENT_NAME.player.isDied, this.onPlayerIsDied.bind(this));
     SOCKET.on(EVENT_NAME.player.isRespawnItSelf, this.onPlayerIsRespawnItSelf.bind(this));
@@ -1463,11 +1482,14 @@ Play.prototype = {
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
-      
+
+      // set message (same as `playerSendMessage`)
       enemy.blr.updateLastMessageTimestamp(playerInfo.lastMessageTimestamp);
       enemy.blr.info.lastMessage = playerInfo.lastMessage;
       enemy.blr.bubble.setText(playerInfo.lastMessage);
       enemy.blr.bubble.visible = true;
+
+      // log (same as `playerSendMessage`)
       this.logCreatureMessage(enemy);
     }
   },
@@ -1478,6 +1500,12 @@ Play.prototype = {
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
+
+      // update sub (same as `playerMove`)
+      this.updateCreatureWeapon(enemy);
+      this.updateCreatureShadow(enemy);
+      this.playDashParticle(enemy);
+      this.updateCreatureBubblePosition(enemy);
     }
   },
 
@@ -1489,37 +1517,14 @@ Play.prototype = {
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
 
+      // update sub (same as `playerFireArrow`)
+      this.updateCreatureWeapon(enemy);
+
       this.enemyFireArrow(enemy, targetPos);
     }
   },
 
-  onPlayerIsFired: function(data) {
-    var playerInfo = data.playerInfo,
-      enemy = this.getEnemyByPlayerId(playerInfo.id);
-
-    if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
-
-      this.playDamageParticle(enemy);
-      enemy.animations.play('blink', 10, false, false);
-      this.logOnCreatureIsDamaged(enemy, 'fire');
-    }
-  },
-
-  onPlayerIsWelled: function(data) {
-    var playerInfo = data.playerInfo,
-      enemy = this.getEnemyByPlayerId(playerInfo.id);
-
-    if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
-
-      this.playRecoverParticle(enemy);
-      enemy.animations.play('recover', 10, false, false);
-      this.logOnCreatureIsRecovered(enemy, 'well');
-    }
-  },
-
-  onPlayerIsOverlappedByMonster: function(data) {
+  onPlayerIsDamaged: function(data) {
     var playerInfo = data.playerInfo,
       damageFrom = data.damageFrom,
       enemy = this.getEnemyByPlayerId(playerInfo.id);
@@ -1527,9 +1532,25 @@ Play.prototype = {
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
 
+      // same as `onCreatureIsDamaged`
       this.playDamageParticle(enemy);
       enemy.animations.play('blink', 10, false, false);
       this.logOnCreatureIsDamaged(enemy, damageFrom);
+    }
+  },
+  
+  onPlayerIsRecovered: function(data) {
+    var playerInfo = data.playerInfo,
+      recoveredFrom = data.recoveredFrom,
+      enemy = this.getEnemyByPlayerId(playerInfo.id);
+
+    if (!UTIL.isEmptyObject(enemy)) {
+      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
+
+      // same as `onCreatureIsRecovered`
+      this.playRecoverParticle(enemy);
+      enemy.animations.play('recover', 10, false, false);
+      this.logOnCreatureIsRecovered(enemy, recoveredFrom);
     }
   },
 
@@ -1541,12 +1562,15 @@ Play.prototype = {
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
 
+      // kill (same as `killHero`)
       enemy.blr.label.kill();
       enemy.blr.shadow.kill();
       enemy.blr.weapon.kill();
       enemy.blr.bubble.kill();
       // enemy.blr.bullet.kill();
       enemy.kill();
+
+      // log (same as `killHero`)
       this.logOnCreatureIsDied(enemy, damageFrom);
     }
   },
@@ -1834,67 +1858,29 @@ Play.prototype = {
   },
 
   preRender: function() {
-    // All `sub`(s) should be here
-    // - weapon
-    // - shadow
-    // - particle
-    // - label (just update text, cause it's child)
-    // - bubble 
-
     if (this.isGameReady) {
       // hero - player
       if (this.player.alive) {
-        if (this.isCreatureMove(this.player)) {
-          this.updateCreatureWeapon(this.player);
-          this.updateCreatureShadow(this.player);
-          this.playDashParticle(this.player);
-        }
-
-        if (this.isCreatureRotate(this.player)) {
-          this.updateCreatureWeapon(this.player);
-        }
-
         this.updateCreatureLabelText(this.player);
-        this.updateCreatureBubble(this.player);
       }
 
       // hero - enemy
       this.enemyGroup.forEachAlive(function(hero) {
-        if (this.isCreatureMove(hero)) {
-          this.updateCreatureWeapon(hero);
-          this.updateCreatureShadow(hero);
-          this.playDashParticle(hero);
-        }
         this.updateCreatureLabelText(hero);
-        this.updateCreatureBubble(hero);
       }, this);
 
       // monster - zombie
       this.zombieGroup.forEachAlive(function(monster) {
-        if (this.isCreatureMove(monster)) {
-          this.updateCreatureWeapon(monster);
-          this.updateCreatureShadow(monster);
-        }
         this.updateCreatureLabelText(monster);
       }, this);
 
       // monster - machine
       this.machineGroup.forEachAlive(function(monster) {
-        var newX = monster.x,
-          newY = monster.y,
-          newRotation = GAME.physics.arcade.angleBetween(monster, this.player);
-
-        // this monster can not move
-        this.updateCreatureWeapon(monster, newX, newY, newRotation);
         this.updateCreatureLabelText(monster);
       }, this);
 
       // monster - bat
       this.batGroup.forEachAlive(function(monster) {
-        if (this.isCreatureMove(monster)) {
-          this.updateCreatureWeapon(monster);
-          this.updateCreatureShadow(monster);
-        }
         this.updateCreatureLabelText(monster);
       }, this);
     }

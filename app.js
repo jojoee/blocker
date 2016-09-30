@@ -440,36 +440,25 @@ IO.on('connection', function(socket) {
     }
   });
 
-  // is fired
-  socket.on(EVENT_NAME.player.isFired, function(data) {
+  // is damaged
+  socket.on(EVENT_NAME.player.isDamaged, function(data) {
     var playerInfo = data.playerInfo,
       playerIdx = getPlayerInfoIndexById(playerInfo.id);
 
     if (playerIdx > -1) {
       PLAYER_INFOS[playerIdx] = playerInfo;
-      socket.broadcast.emit(EVENT_NAME.player.isFired, data);
+      socket.broadcast.emit(EVENT_NAME.player.isDamaged, data);
     }
   });
   
-  // is welled
-  socket.on(EVENT_NAME.player.isWelled, function(data) {
+  // is recovered
+  socket.on(EVENT_NAME.player.isRecovered, function(data) {
     var playerInfo = data.playerInfo,
       playerIdx = getPlayerInfoIndexById(playerInfo.id);
 
     if (playerIdx > -1) {
       PLAYER_INFOS[playerIdx] = playerInfo;
-      socket.broadcast.emit(EVENT_NAME.player.isWelled, data);
-    }
-  });
-
-  // is overlapped by monster
-  socket.on(EVENT_NAME.player.isOverlappedByMonster, function(data) {
-    var playerInfo = data.playerInfo,
-      playerIdx = getPlayerInfoIndexById(playerInfo.id);
-
-    if (playerIdx > -1) {
-      PLAYER_INFOS[playerIdx] = playerInfo;
-      socket.broadcast.emit(EVENT_NAME.player.isOverlappedByMonster, data);
+      socket.broadcast.emit(EVENT_NAME.player.isRecovered, data);
     }
   });
 

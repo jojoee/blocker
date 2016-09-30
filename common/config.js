@@ -39,14 +39,11 @@ var commonConfig = {
       // player fire
       fire: eventPlayerPrefix + 'fire',
 
-      // player is fired
-      isFired: eventPlayerPrefix + 'isFired',
+      // player is damaged
+      isDamaged: eventPlayerPrefix + 'isDamaged',
 
-      // player is welled
-      isWelled: eventPlayerPrefix + 'isWelled',
-
-      // player is overlapped (by monster weapon)
-      isOverlappedByMonster: eventPlayerPrefix + 'isOverlappedByMonster',
+      // player is recovered
+      isRecovered: eventPlayerPrefix + 'isRecovered',
 
       // player is died
       isDied: eventPlayerPrefix + 'isDied',
