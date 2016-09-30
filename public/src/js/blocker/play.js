@@ -570,7 +570,7 @@ Play.prototype = {
   spawnPlayer: function(playerInfo) {
     var heroBlr = new Hero(playerInfo);
 
-    this.player = this.spawnHero(heroBlr);
+    this.player = this.spawnHero(heroBlr, heroBlr.info.lastVector);
     this.playerGroup.add(this.player);
     this.playerWeaponGroup.add(this.player.blr.weapon);
     this.playerArrowGroup.add(this.player.blr.bullet);
@@ -590,7 +590,7 @@ Play.prototype = {
   spawnEnemy: function(playerInfo) {
     var heroBlr = new Hero(playerInfo);
 
-    var enemy = this.spawnHero(heroBlr);
+    var enemy = this.spawnHero(heroBlr, heroBlr.info.lastVector);
     this.enemyGroup.add(enemy);
     this.enemyWeaponGroup.add(enemy.blr.weapon);
     this.enemyArrowGroup.add(enemy.blr.bullet);
@@ -603,13 +603,13 @@ Play.prototype = {
    * 
    * @param {Object} heroBlr
    */
-  spawnHero: function(heroBlr) {
-    var startVector = heroBlr.info.startVector,
-      bodyOffset = 8,
+  spawnHero: function(heroBlr, currentVector) {
+    if (typeof currentVector === 'undefined') currentVector = heroBlr.info.startVector;
+    var bodyOffset = 8,
       bodySize = 46 - bodyOffset * 2;
 
     // init & sprite
-    var hero = GAME.add.sprite(startVector.x, startVector.y, 'hero');
+    var hero = GAME.add.sprite(currentVector.x, currentVector.y, 'hero');
     hero.blr = heroBlr;
     hero.anchor.set(0.5);
 
@@ -622,7 +622,7 @@ Play.prototype = {
     hero.body.angularDrag = 50;
 
     // shadow
-    var shadowTmp = GAME.add.sprite(startVector.x, startVector.y, 'shadow');
+    var shadowTmp = GAME.add.sprite(currentVector.x, currentVector.y, 'shadow');
     shadowTmp.anchor.set(0.1);
     shadowTmp.scale.setTo(0.7, 0.7);
     shadowTmp.alpha = .3;
@@ -630,7 +630,7 @@ Play.prototype = {
     this.heroShadowGroup.add(hero.blr.shadow);
 
     // weapon
-    var weaponTmp = GAME.add.sprite(startVector.x, startVector.y, 'bowWeapon');
+    var weaponTmp = GAME.add.sprite(currentVector.x, currentVector.y, 'bowWeapon');
     weaponTmp.animations.add('attack', [0, 1, 2, 3, 4, 5, 0]);
     weaponTmp.anchor.set(0.3, 0.5);
     weaponTmp.scale.setTo(0.5);
