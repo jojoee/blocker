@@ -152,7 +152,7 @@ function initMonsters() {
  */
 
 function getNewZombieInfo() {
-  return getNewCreatureInfo('zombie', 5, 8);
+  return getNewCreatureInfo('zombie', 4, 6);
 }
 
 function getNewMachineInfo() {
@@ -164,7 +164,7 @@ function getNewBatInfo() {
 }
 
 function getNewPlayerInfo() {
-  return getNewCreatureInfo('hero', 8, 8);
+  return getNewCreatureInfo('hero', 6, 8);
 }
 
 /**
