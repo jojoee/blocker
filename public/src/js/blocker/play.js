@@ -1336,13 +1336,12 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      // update info
+      enemy.blr.info.life = playerInfo.life;
+      
       enemy.blr.updateLastMessageTimestamp(playerInfo.lastMessageTimestamp);
       enemy.blr.info.lastMessage = playerInfo.lastMessage;
       enemy.blr.bubble.setText(playerInfo.lastMessage);
       enemy.blr.bubble.visible = true;
-
-      // add message text to log
       this.logCreatureMessage(enemy);
     }
   },
@@ -1352,6 +1351,8 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
+      enemy.blr.info.life = playerInfo.life;
+
       enemy.x = playerInfo.lastVector.x;
       enemy.y = playerInfo.lastVector.y;
       enemy.rotation = playerInfo.lastVector.rotation;
@@ -1364,6 +1365,8 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
+      enemy.blr.info.life = playerInfo.life;
+      
       enemy.x = playerInfo.lastVector.x;
       enemy.y = playerInfo.lastVector.y;
       enemy.rotation = playerInfo.lastVector.rotation;
@@ -1377,6 +1380,7 @@ Play.prototype = {
 
     if (!UTIL.isEmptyObject(enemy)) {
       enemy.blr.info.life = playerInfo.life;
+
       this.playDamageParticle(enemy);
       enemy.animations.play('blink', 10, false, false);
     }
@@ -1388,6 +1392,7 @@ Play.prototype = {
 
     if (!UTIL.isEmptyObject(enemy)) {
       enemy.blr.info.life = playerInfo.life;
+
       this.playRecoverParticle(enemy);
       enemy.animations.play('recover', 10, false, false);
     }
