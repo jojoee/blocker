@@ -1102,9 +1102,11 @@ Play.prototype = {
   },
 
   onMachineLaserOverlapPlayer: function(laser, player) {
+    /*
     this.playDamageParticle(player);
     laser.kill();
     this.onCreatureIsDamaged(player, 'laser');
+    */
   },
 
   onPlayerArrowOverlapStoneGroup: function(arrow, stone) {
@@ -2080,7 +2082,7 @@ Play.prototype = {
       GAME.physics.arcade.overlap(this.playerGroup, this.machineWeaponGroup, this.onPlayerOverlapMachineWeapon, null, this);
       GAME.physics.arcade.overlap(this.playerGroup, this.batWeaponGroup, this.onPlayerOverlapBatWeapon, null, this);
 
-      // overlap - player arrow with monster
+      // overlap - arrow with monster
       GAME.physics.arcade.overlap(this.playerArrowGroup, this.zombieGroup, this.onPlayerArrowOverlapMonster, null, this);
       GAME.physics.arcade.overlap(this.playerArrowGroup, this.machineGroup, this.onPlayerArrowOverlapMonster, null, this);
       GAME.physics.arcade.overlap(this.playerArrowGroup, this.batGroup, this.onPlayerArrowOverlapMonster, null, this);
@@ -2088,7 +2090,7 @@ Play.prototype = {
       GAME.physics.arcade.overlap(this.enemyArrowGroup, this.machineGroup, this.onEnemyArrowOverlapMonster, null, this);
       GAME.physics.arcade.overlap(this.enemyArrowGroup, this.batGroup, this.onEnemyArrowOverlapMonster, null, this);
 
-      // overlap - machine laser overlap player
+      // overlap - machine laser with player
       GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
 
       // reset emiiter
