@@ -1101,13 +1101,13 @@ Play.prototype = {
    */
 
   onCreatureIsRecovered: function(creature, recoveredFrom) {
-    if (creature.blr.info.life < creature.blr.info.maxLife) {
-      var ts = UTIL.getCurrentUtcTimestamp();
+    var ts = UTIL.getCurrentUtcTimestamp();
 
-      if (ts > creature.blr.info.lastRecoverTimestamp + creature.blr.info.immortalDelay) {
-        this.player.blr.updateLastRecoverTimestamp();
-        this.recoverCreature(creature, recoveredFrom);
-      }
+    if (creature.alive &&
+      creature.blr.info.life < creature.blr.info.maxLife &&
+      (ts > creature.blr.info.lastRecoverTimestamp + creature.blr.info.immortalDelay)) {
+      this.player.blr.updateLastRecoverTimestamp();
+      this.recoverCreature(creature, recoveredFrom);
     }
   },
 
