@@ -41,17 +41,18 @@ var commonConfig = {
 
       // player is damaged
       isDamaged: eventPlayerPrefix + 'isDamaged',
+      isDamagedItSelf: eventPlayerPrefix + 'isDamagedItSelf',
 
       // player is recovered
-      isRecovered: eventPlayerPrefix + 'isRecovered',
+      isRecovered: eventPlayerPrefix + 'isRecovered', 
+      isRecoveredItSelf: eventPlayerPrefix + 'isRecoveredItSelf',
 
       // player is died
       isDied: eventPlayerPrefix + 'isDied',
+      isDiedItSelf: eventPlayerPrefix + 'isDiedItSelf',
 
       // player is respawn
       isRespawn: eventPlayerPrefix + 'isRespawn',
-
-      // player is respawn itself
       isRespawnItSelf: eventPlayerPrefix + 'isRespawnItSelf',
     },
     server: {

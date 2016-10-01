@@ -363,7 +363,7 @@ Play.prototype = {
    */
   logOnCreatureIsRecovered: function(creature, recoveredFrom) {
     var logText = '+1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
-      ' (' + (creature.blr.info.life - 1) + ' > ' + creature.blr.info.life + ')  was recovered from ' + recoveredFrom;
+      ' (' + creature.blr.info.life + ')  was recovered from ' + recoveredFrom;
     
     UI.addTextToLogList(logText);
   },
@@ -376,7 +376,7 @@ Play.prototype = {
    */
   logOnCreatureIsDamaged: function(creature, damageFrom) {
     var logText = '-1 life ' + creature.blr.info.type + ' ' + creature.blr.info.id +
-      ' (' + (creature.blr.info.life + 1 ) + ' > ' + creature.blr.info.life + ')  was damaged from ' + damageFrom;
+      ' (' + creature.blr.info.life + ')  was damaged from ' + damageFrom;
     
     UI.addTextToLogList(logText);
   },
@@ -1076,32 +1076,16 @@ Play.prototype = {
 
   },
 
-  /*================================================================ Game event
+  /*================================================================ Damage, Recover, Kill
    */
 
   onCreatureIsRecovered: function(creature, recoveredFrom) {
-    var isWelled = false;
-
     if (creature.blr.info.life < creature.blr.info.maxLife) {
       var ts = UTIL.getCurrentUtcTimestamp();
 
       if (ts > creature.blr.info.lastRecoverTimestamp + creature.blr.info.immortalDelay) {
-        creature.blr.info.life++;
-        isWelled = true;
-        creature.blr.updateLastRecoverTimestamp();
-
-        this.playRecoverParticle(creature);
-        creature.animations.play('recover', 10, false, false);
-        this.logOnCreatureIsRecovered(creature, recoveredFrom);
-
-        // broadcast
-        if (creature.blr.info.type === 'hero') {
-          var data = {
-            playerInfo: creature.blr.info,
-            recoveredFrom: recoveredFrom,
-          };
-          SOCKET.emit(EVENT_NAME.player.isRecovered, data);
-        }
+        this.player.blr.updateLastRecoverTimestamp();
+        this.recoverCreature(creature, recoveredFrom);
       }
     }
   },
@@ -1115,35 +1099,65 @@ Play.prototype = {
   onCreatureIsDamaged: function(creature, damageFrom) {
     var ts = UTIL.getCurrentUtcTimestamp();
 
-    // force kill, just in case
+    // force kill (just in case)
     if (creature <= 0) this.killCreature(creature, damageFrom);
 
     if (creature.alive &&
       creature.blr.info.life > 0 &&
       !creature.blr.misc.isImmortal &&
       (ts > creature.blr.info.lastDamageTimestamp + creature.blr.info.immortalDelay)) {
-      creature.blr.info.life--;
-      creature.blr.updateLastDamageTimestamp();
+      this.player.blr.updateLastDamageTimestamp();
 
-      this.playDamageParticle(creature);
-      creature.animations.play('blink', 10, false, false);
-      this.logOnCreatureIsDamaged(creature, damageFrom);
-
-      // is died
-      if (creature.blr.info.life <= 0) {
+      // if next damage will make creature die
+      if (creature.blr.info.life - 1 <= 0) {
         this.killCreature(creature, damageFrom);
 
       } else {
-        // broadcast
-        if (creature.blr.info.type === 'hero') {
-          var data = {
-            playerInfo: creature.blr.info,
-            damageFrom: damageFrom,
-          }; 
-          SOCKET.emit(EVENT_NAME.player.isDamaged, data);
-        }
+        this.damageCreature(creature, damageFrom);
       }
     }
+  },
+
+  recoverCreature: function(creature, recoveredFrom) {
+    if (creature.blr.info.type === 'hero') {
+      this.recoverHero(creature, recoveredFrom);
+
+    } else {
+      this.recoverMonster(creature, recoveredFrom);
+    }
+  },
+
+  recoverMonster: function(monster, recoveredFrom) {
+    // TODO: complete it
+  },
+
+  recoverHero: function(hero, recoveredFrom) {
+    var data = {
+      playerInfo: hero.blr.info,
+      recoveredFrom: recoveredFrom,
+    };
+    SOCKET.emit(EVENT_NAME.player.isRecovered, data);
+  },
+
+  damageCreature: function(creature, damageFrom) {
+    if (creature.blr.info.type === 'hero') {
+      this.damageHero(creature, damageFrom);
+
+    } else {
+      this.damageMonster(creature, damageFrom);
+    }
+  },
+
+  damageMonster: function(monster, damageFrom) {
+    // TODO: complete it
+  },
+
+  damageHero: function(hero, damageFrom) {
+    var data = {
+      playerInfo: hero.blr.info,
+      damageFrom: damageFrom,
+    }; 
+    SOCKET.emit(EVENT_NAME.player.isDamaged, data);
   },
 
   killCreature: function(creature, damageFrom) {
@@ -1163,31 +1177,10 @@ Play.prototype = {
    * @param {string} damageFrom
    */
   killMonster: function(monster, damageFrom) {
-    /*
-    monster.blr.label.kill();
-    monster.blr.shadow.kill();
-    monster.blr.weapon.kill();
-    // monster.blr.bubble.kill();
-    // monster.blr.bullet.kill();
-    monster.kill();
-
-    this.logOnCreatureIsDied(monster, damageFrom);
-    */
+    
   },
 
   killHero: function(hero, damageFrom) {
-    // kill
-    hero.blr.label.kill();
-    hero.blr.shadow.kill();
-    hero.blr.weapon.kill();
-    hero.blr.bubble.kill();
-    // hero.blr.bullet.kill();
-    hero.kill();
-
-    // log
-    this.logOnCreatureIsDied(hero, damageFrom);
-
-    // broadcast
     var data = {
       playerInfo: hero.blr.info,
       damageFrom: damageFrom,
@@ -1337,11 +1330,16 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.player.fire, this.onPlayerFire.bind(this));
 
     SOCKET.on(EVENT_NAME.player.isDamaged, this.onPlayerIsDamaged.bind(this));
-    SOCKET.on(EVENT_NAME.player.isRecovered, this.onPlayerIsRecovered.bind(this));
+    SOCKET.on(EVENT_NAME.player.isDamagedItSelf, this.onPlayerIsDamagedItSelf.bind(this));
 
+    SOCKET.on(EVENT_NAME.player.isRecovered, this.onPlayerIsRecovered.bind(this));
+    SOCKET.on(EVENT_NAME.player.isRecoveredItSelf, this.onPlayerIsRecoveredItSelf.bind(this));
+    
     SOCKET.on(EVENT_NAME.player.isDied, this.onPlayerIsDied.bind(this));
-    SOCKET.on(EVENT_NAME.player.isRespawnItSelf, this.onPlayerIsRespawnItSelf.bind(this));
+    SOCKET.on(EVENT_NAME.player.isDiedItSelf, this.onPlayerIsDiedItSelf.bind(this));
+    
     SOCKET.on(EVENT_NAME.player.isRespawn, this.onPlayerIsRespawn.bind(this));
+    SOCKET.on(EVENT_NAME.player.isRespawnItSelf, this.onPlayerIsRespawnItSelf.bind(this));
   },
 
   onPlayerReady: function(data) {
@@ -1532,11 +1530,23 @@ Play.prototype = {
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
 
-      // same as `onCreatureIsDamaged`
+      this.player.blr.info.life--;
+
       this.playDamageParticle(enemy);
       enemy.animations.play('blink', 10, false, false);
       this.logOnCreatureIsDamaged(enemy, damageFrom);
     }
+  },
+
+  onPlayerIsDamagedItSelf: function(data) {
+    var damageFrom = data.damageFrom;
+    
+    // same as `onPlayerIsDamaged`
+    this.player.blr.info.life--;
+
+    this.playDamageParticle(this.player);
+    this.player.animations.play('blink', 10, false, false);
+    this.logOnCreatureIsDamaged(this.player, damageFrom);
   },
   
   onPlayerIsRecovered: function(data) {
@@ -1547,11 +1557,23 @@ Play.prototype = {
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
 
-      // same as `onCreatureIsRecovered`
+      enemy.blr.info.life++;
+
       this.playRecoverParticle(enemy);
       enemy.animations.play('recover', 10, false, false);
       this.logOnCreatureIsRecovered(enemy, recoveredFrom);
     }
+  },
+
+  onPlayerIsRecoveredItSelf: function(data) {
+    var recoveredFrom = data.recoveredFrom;
+    
+    // same as `onPlayerIsRecovered`
+    this.player.blr.info.life++;
+
+    this.playRecoverParticle(this.player);
+    this.player.animations.play('recover', 10, false, false);
+    this.logOnCreatureIsRecovered(this.player, recoveredFrom);
   },
 
   onPlayerIsDied: function(data) {
@@ -1562,7 +1584,12 @@ Play.prototype = {
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
 
-      // kill (same as `killHero`)
+      enemy.blr.info.life--;
+      enemy.blr.updateLastDamageTimestamp();
+      
+      this.playDamageParticle(enemy);
+      enemy.animations.play('blink', 10, false, false);
+
       enemy.blr.label.kill();
       enemy.blr.shadow.kill();
       enemy.blr.weapon.kill();
@@ -1570,24 +1597,44 @@ Play.prototype = {
       // enemy.blr.bullet.kill();
       enemy.kill();
 
-      // log (same as `killHero`)
       this.logOnCreatureIsDied(enemy, damageFrom);
     }
   },
 
-  onPlayerIsRespawnItSelf: function(data) {
-    var playerInfo = data.playerInfo;
+  onPlayerIsDiedItSelf: function(data) {
+    var damageFrom = data.damageFrom;
 
-    this.respawnHero(this.player, data.playerInfo);
+    // same as `onPlayerIsDied`
+    this.player.blr.info.life--;
+    this.player.blr.updateLastDamageTimestamp();
+    
+    this.playDamageParticle(this.player);
+    this.player.animations.play('blink', 10, false, false);
+    
+    this.player.blr.label.kill();
+    this.player.blr.shadow.kill();
+    this.player.blr.weapon.kill();
+    this.player.blr.bubble.kill();
+    // this.player.blr.bullet.kill();
+    this.player.kill();
+
+    this.logOnCreatureIsDied(this.player, damageFrom);
   },
 
   onPlayerIsRespawn: function(data) {
     var playerInfo = data.playerInfo;
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
-    if (!UTIL.isEmptyObject(enemy)) {
+    if (!UTIL.isEmptyObject(enemy)) {  
       this.respawnHero(enemy, playerInfo);
     }
+  },
+
+  onPlayerIsRespawnItSelf: function(data) {
+    var playerInfo = data.playerInfo;
+
+    // same as `onPlayerIsRespawn`
+    this.respawnHero(this.player, data.playerInfo);
   },
 
   /**

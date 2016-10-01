@@ -447,6 +447,8 @@ IO.on('connection', function(socket) {
 
     if (playerIdx > -1) {
       PLAYER_INFOS[playerIdx] = playerInfo;
+
+      IO.sockets.connected[socketId].emit(EVENT_NAME.player.isDamagedItSelf, data);
       socket.broadcast.emit(EVENT_NAME.player.isDamaged, data);
     }
   });
@@ -458,6 +460,8 @@ IO.on('connection', function(socket) {
 
     if (playerIdx > -1) {
       PLAYER_INFOS[playerIdx] = playerInfo;
+
+      IO.sockets.connected[socketId].emit(EVENT_NAME.player.isRecoveredItSelf, data);
       socket.broadcast.emit(EVENT_NAME.player.isRecovered, data);
     }
   });
@@ -468,7 +472,8 @@ IO.on('connection', function(socket) {
       playerIdx = getPlayerInfoIndexById(playerInfo.id);
 
     if (playerIdx > -1) {
-      // broadcast
+      // die event
+      IO.sockets.connected[socketId].emit(EVENT_NAME.player.isDiedItSelf, data);
       socket.broadcast.emit(EVENT_NAME.player.isDied, data);
 
       // reset player info
