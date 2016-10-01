@@ -1805,7 +1805,6 @@ Play.prototype = {
       GAME.physics.arcade.collide(this.machineGroup, this.floorGroup);
       GAME.physics.arcade.collide(this.batGroup, this.floorGroup);
       GAME.physics.arcade.collide(this.playerGroup, this.floorGroup);
-      GAME.physics.arcade.collide(this.enemyGroup, this.floorGroup);
 
       // collide - creature with stoneGroup
       GAME.physics.arcade.collide(this.zombieGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
