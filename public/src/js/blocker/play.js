@@ -506,6 +506,7 @@ Play.prototype = {
     this.zombieWeaponGroup.add(monster.blr.weapon);
 
     // optional
+    monster.body.moves = false;
   },
 
   /**
@@ -569,6 +570,7 @@ Play.prototype = {
     this.batWeaponGroup.add(monster.blr.weapon);
 
     // optional
+    monster.body.moves = false;
     monster.scale.setTo(0.7, 0.7);
     monster.blr.shadow.scale.setTo(0.5, 0.5);
     monster.blr.weapon.scale.setTo(0.7, 0.7);
