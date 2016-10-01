@@ -316,8 +316,7 @@ function getUniqueCreatureId() {
  */
 function getPlayerInfoIndexById(playerId) {
   var i = 0;
-    nPlayers = PLAYER_INFOS.length,
-    isFound = false;
+    nPlayers = PLAYER_INFOS.length;
 
   for (i = 0; i < nPlayers; i++) {
     if (PLAYER_INFOS[i].id == playerId) {

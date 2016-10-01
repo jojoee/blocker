@@ -283,7 +283,7 @@ Play.prototype = {
    * @see http://stackoverflow.com/questions/2641347/how-to-short-circuit-array-foreach-like-calling-break
    * 
    * @param {string} playerId
-   * @returns {Object} Phaser sprite object and including with other components
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
    */
   getEnemyByPlayerId: function(playerId) {
     var isFound = false,
@@ -390,7 +390,7 @@ Play.prototype = {
   /**
    * Log on creature is recovered
    * 
-   * @param {Phaser.Sprite} creature - enemy that contain `Creature` object in `blr` property
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
    * @param {string} recoveredFrom - where is the recover come frome
    */
   logOnCreatureIsRecovered: function(creature, recoveredFrom) {
