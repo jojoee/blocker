@@ -38,19 +38,21 @@ for develop the client side, please run - `gulp watch`
 - Class: `PascalCase`
 
 3. Creature
-- Zombie (monster)
-- Machine (monster)
-- Bat (monster)
+- Monster
+  - Zombie
+  - Machine
+  - Bat
 - Hero
+  - Player / Enemy
 
 4. Socket
 - Send to specific client: IO.sockets.connected[socketId].emit(EVENT_NAME, data);
 - Send to all clients: IO.emit(EVENT_NAME, data);
-- Send to all clients except newly created connection: socket.broadcast.emit(EVENT_NAME, data); 
+- Send to all clients except newly created connection: socket.broadcast.emit(EVENT_NAME, data);
 
 5. Event flow
-If it's related with monster life or enemy life,
-then broadcast first and take effect from subsequent request.
+Anything's related with `life`, is need to broadcast first then
+take effect from subsequent request.
 ```
 
 ## TODO
@@ -146,7 +148,7 @@ then broadcast first and take effect from subsequent request.
 - [x] CSS preprocessor
 - [ ] Create own `screen-shake` plugin
 
-## Reference & Tutorial & Plugin && Tool
+## Reference & Tutorial & Plugin & Tool
 - Inspired by [Blocker](http://blockergame.com/)
 - [phaser-multiplayer-game](https://github.com/xicombd/phaser-multiplayer-game)
 - [phaser-screen-shake](https://github.com/dmaslov/phaser-screen-shake)
