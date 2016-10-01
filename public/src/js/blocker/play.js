@@ -1470,9 +1470,9 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.player.attackMachine, this.onPlayerAttackMachine.bind(this));
     SOCKET.on(EVENT_NAME.player.attackBat, this.onPlayerAttackBat.bind(this));
 
-    SOCKET.on(EVENT_NAME.player.killZombie, this.onKillZombie.bind(this));
-    SOCKET.on(EVENT_NAME.player.killMachine, this.onKillMachine.bind(this));
-    SOCKET.on(EVENT_NAME.player.killBat, this.onKillBat.bind(this));
+    SOCKET.on(EVENT_NAME.player.killZombie, this.onPlayerKillZombie.bind(this));
+    SOCKET.on(EVENT_NAME.player.killMachine, this.onPlayerKillMachine.bind(this));
+    SOCKET.on(EVENT_NAME.player.killBat, this.onPlayerKillBat.bind(this));
 
     SOCKET.on(EVENT_NAME.player.respawnZombie, this.onRespawnZombie.bind(this));
     SOCKET.on(EVENT_NAME.player.respawnMachine, this.onRespawnMachine.bind(this));
@@ -1782,7 +1782,7 @@ Play.prototype = {
   },
 
   // TODO: refactor
-  onKillZombie: function(data) {
+  onPlayerKillZombie: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
       monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup);
@@ -1795,7 +1795,7 @@ Play.prototype = {
   },
 
   // TODO: refactor
-  onKillMachine: function(data) {
+  onPlayerKillMachine: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
       monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup);
@@ -1808,7 +1808,7 @@ Play.prototype = {
   },
 
   // TODO: refactor
-  onKillBat: function(data) {
+  onPlayerKillBat: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
       monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup);

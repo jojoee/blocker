@@ -65,7 +65,7 @@ var commonConfig = {
       killMachine: eventPlayerPrefix + 'killMachine',
       killBat: eventPlayerPrefix + 'killBat',
 
-      // monster respawn
+      // respawn monster
       respawnZombie: eventPlayerPrefix + 'respawnZombie',
       respawnMachine: eventPlayerPrefix + 'respawnMachine',
       respawnBat: eventPlayerPrefix + 'respawnBat',
