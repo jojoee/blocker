@@ -648,6 +648,7 @@ Play.prototype = {
 
     UI.addCreatureIdToCreatureList(this.player.blr.info.id, 'player');
 
+    // optional
     if (IS_IMMORTAL) {
       this.player.blr.misc.isImmortal = true;
     }
@@ -661,12 +662,16 @@ Play.prototype = {
   spawnEnemy: function(playerInfo) {
     var heroBlr = new Hero(playerInfo);
 
+    // same as `spawnPlayer`
     var enemy = this.spawnHero(heroBlr, heroBlr.info.lastVector);
     this.enemyGroup.add(enemy);
     this.enemyWeaponGroup.add(enemy.blr.weapon);
     this.enemyArrowGroup.add(enemy.blr.bullet);
 
     UI.addCreatureIdToCreatureList(enemy.blr.info.id, 'enemy');
+
+    // optional
+    enemy.body.moves = false;
   },
 
   /**
@@ -676,7 +681,8 @@ Play.prototype = {
    */
   spawnHero: function(heroBlr, currentVector) {
     if (typeof currentVector === 'undefined') currentVector = heroBlr.info.startVector;
-    var bodyOffset = 8,
+    var bodyMass = heroBlr.phrInfo.bodyMass, 
+      bodyOffset = 8,
       bodySize = 46 - bodyOffset * 2;
 
     // init & sprite
@@ -690,6 +696,7 @@ Play.prototype = {
     hero.body.collideWorldBounds = true;
     hero.body.setSize(bodySize, bodySize, bodyOffset, bodyOffset);
     hero.body.tilePadding.set(bodyOffset, bodyOffset);
+    hero.body.mass = bodyMass;
     hero.body.maxAngular = 500;
     hero.body.angularDrag = 50;
 
@@ -1072,8 +1079,20 @@ Play.prototype = {
 
   },
 
+  onEnemyCollideStoneGroup: function() {
+
+  },
+
   onPlayerCollideMonster: function() {
 
+  },
+
+  onEnemyCollideMonster: function() {
+
+  },
+
+  onPlayerCollideEnemy: function() {
+    
   },
 
   /*================================================================ Damage, Recover, Kill
@@ -1784,17 +1803,27 @@ Play.prototype = {
       GAME.physics.arcade.collide(this.machineGroup, this.floorGroup);
       GAME.physics.arcade.collide(this.batGroup, this.floorGroup);
       GAME.physics.arcade.collide(this.playerGroup, this.floorGroup);
+      GAME.physics.arcade.collide(this.enemyGroup, this.floorGroup);
 
       // collide - creature with stoneGroup
       GAME.physics.arcade.collide(this.zombieGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
       GAME.physics.arcade.collide(this.machineGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
       GAME.physics.arcade.collide(this.batGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
       GAME.physics.arcade.collide(this.playerGroup, this.stoneGroup, this.onPlayerCollideStoneGroup, null, this);
+      GAME.physics.arcade.collide(this.enemyGroup, this.stoneGroup, this.onEnemyCollideStoneGroup, null, this);
 
       // collide - player with monster
       GAME.physics.arcade.collide(this.playerGroup, this.zombieGroup, this.onPlayerCollideMonster, null, this);
       GAME.physics.arcade.collide(this.playerGroup, this.machineGroup, this.onPlayerCollideMonster, null, this);
       GAME.physics.arcade.collide(this.playerGroup, this.batGroup, this.onPlayerCollideMonster, null, this);
+
+      // collide - enemy with monster
+      GAME.physics.arcade.collide(this.enemyGroup, this.zombieGroup, this.onEnemyCollideMonster, null, this);
+      GAME.physics.arcade.collide(this.enemyGroup, this.machineGroup, this.onEnemyCollideMonster, null, this);
+      GAME.physics.arcade.collide(this.enemyGroup, this.batGroup, this.onEnemyCollideMonster, null, this);
+
+      // collide - player with enemy
+      GAME.physics.arcade.collide(this.playerGroup, this.enemyGroup, this.onPlayerCollideEnemy, null, this);
 
       // overlap - player with monster
       GAME.physics.arcade.overlap(this.playerGroup, this.zombieGroup, this.onPlayerOverlapZombie, null, this);

@@ -234,7 +234,7 @@ var Hero = function(creatureInfo) {
       width: 0,
       height: 0,
       bodyOffset: 0,
-      bodyMass: 0,
+      bodyMass: 100,
       velocitySpeed: 200,
     },
     misc = {
