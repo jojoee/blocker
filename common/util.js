@@ -8,6 +8,21 @@ var Util = {
    */
 
   /**
+   * For checking if a
+   * - string is empty
+   * - null
+   * - undefined
+   * 
+   * @see http://stackoverflow.com/questions/154059/how-do-you-check-for-an-empty-string-in-javascript
+   * 
+   * @param {String|Array|null}
+   * @returns {boolean}
+   */
+  isEmpty: function(a) {
+    return (!a || 0 === a.length);
+  },
+
+  /**
    * Check if the object is empty
    * 
    * @see http://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object

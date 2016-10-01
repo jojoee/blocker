@@ -331,6 +331,28 @@ function getPlayerInfoIndexById(playerId) {
 }
 
 /**
+ * Get monsterInfo index
+ * 
+ * @param {string} monsterId
+ * @param {Array} monsterInfos
+ * @returns {number} return integer number when it's found (return -1, if not found)
+ */
+function getMonsterInfoIndex(monsterId, monsterInfos) {
+  var i = 0,
+    nMonsters = monsterInfos.length;
+
+  for (i = 0; i < nMonsters; i++) {
+    if (monsterInfos[i].id == monsterId) {
+      return i;
+    }
+  }
+
+  UTIL.serverBugLog('getMonsterInfoIndex', 'Not found monsterId', monsterId);
+
+  return -1;
+}
+
+/**
  * Check this player is already
  * exists in the server 
  * 
@@ -489,6 +511,48 @@ IO.on('connection', function(socket) {
       };
       IO.sockets.connected[socketId].emit(EVENT_NAME.player.isRespawnItSelf, newData);
       socket.broadcast.emit(EVENT_NAME.player.isRespawn, newData);
+    }
+  });
+
+  // attack - zombie
+  socket.on(EVENT_NAME.player.attackZombie, function(data) {
+    console.log('attackZombie');
+
+    var monsterInfo = data.monsterInfo,
+      monsterIdx = getMonsterInfoIndex(monsterInfo.id, ZOMBIE_INFOS);
+    
+    if (monsterIdx > -1) {
+      ZOMBIE_INFOS[monsterIdx] = monsterInfo;
+
+      IO.emit(EVENT_NAME.player.attackZombie, data);
+    }
+  });
+
+  // attack - machine
+  socket.on(EVENT_NAME.player.attackMachine, function(data) {
+    console.log('attackMachine');
+
+    var monsterInfo = data.monsterInfo,
+      monsterIdx = getMonsterInfoIndex(monsterInfo.id, MACHINE_INFOS);
+    
+    if (monsterIdx > -1) {
+      MACHINE_INFOS[monsterIdx] = monsterInfo;
+
+      IO.emit(EVENT_NAME.player.attackMachine, data);
+    }
+  });
+
+  // attack - bat
+  socket.on(EVENT_NAME.player.attackBat, function(data) {
+    console.log('attackBat');
+
+    var monsterInfo = data.monsterInfo,
+      monsterIdx = getMonsterInfoIndex(monsterInfo.id, BAT_INFOS);
+    
+    if (monsterIdx > -1) {
+      BAT_INFOS[monsterIdx] = monsterInfo;
+
+      IO.emit(EVENT_NAME.player.attackBat, data);
     }
   });
 });

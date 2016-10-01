@@ -54,6 +54,11 @@ var commonConfig = {
       // player is respawn
       isRespawn: eventPlayerPrefix + 'isRespawn',
       isRespawnItSelf: eventPlayerPrefix + 'isRespawnItSelf',
+
+      // player attack monster
+      attackZombie: eventPlayerPrefix + 'attackZombie',
+      attackMachine: eventPlayerPrefix + 'attackMachine',
+      attackBat: eventPlayerPrefix + 'attackBat',
     },
     server: {
       // send new player

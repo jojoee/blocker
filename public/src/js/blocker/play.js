@@ -310,6 +310,38 @@ Play.prototype = {
     return result;
   },
 
+  /**
+   * Get monster object by monsterId and monsterGroup
+   * based on `getEnemyByPlayerId`
+   * 
+   * @param {string} monsterId
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   */
+  getMonsterByMonsterIdAndGroup: function(monsterId, monsterGroup) {
+    var isFound = false,
+      result = {},
+      BreakException = {};
+
+    try {
+      monsterGroup.forEach(function(monster) {
+        if (monster.blr.info.id === monsterId) {
+          isFound = true;
+          result = monster;
+          throw BreakException;
+        }
+      }, this);
+
+    } catch (e) {
+      if (e !== BreakException) throw e;
+    }
+
+    if (!isFound) {
+      UTIL.clientBugLog('getMonsterByMonsterIdAndGroup', 'Not found monsterId', monsterId);
+    }
+
+    return result;
+  },
+
   /*================================================================ Log
    */
 
@@ -1061,9 +1093,15 @@ Play.prototype = {
   },
 
   onPlayerArrowOverlapMonster: function(arrow, monster) {
-    this.playDamageParticle(monster);
     arrow.kill();
+    
     this.onCreatureIsDamaged(monster, 'arrow');
+  },
+
+  onEnemyArrowOverlapMonster: function(arrow, monster) {
+    // just for clear `enemy` event
+    // same as `onPlayerArrowOverlapMonster`
+    arrow.kill();
   },
 
   /*================================================================ Collide
@@ -1170,7 +1208,32 @@ Play.prototype = {
   },
 
   damageMonster: function(monster, damageFrom) {
-    // TODO: complete it
+    console.log('damageMonster');
+
+    var monsterType = monster.blr.info.type,
+      eventName = '';
+
+    switch (monsterType) {
+      case 'zombie':
+        eventName = EVENT_NAME.player.attackZombie;
+        break;
+      case 'machine':
+        eventName = EVENT_NAME.player.attackMachine;
+        break;
+      case 'bat':
+        eventName = EVENT_NAME.player.attackBat;
+        break;
+      default:
+        break;
+    }
+
+    if (!UTIL.isEmpty(eventName)) {
+      var data = {
+        monsterInfo: monster.blr.info,
+        damageFrom: damageFrom 
+      };
+      SOCKET.emit(eventName, data);
+    }
   },
 
   damageHero: function(hero, damageFrom) {
@@ -1361,6 +1424,10 @@ Play.prototype = {
     
     SOCKET.on(EVENT_NAME.player.isRespawn, this.onPlayerIsRespawn.bind(this));
     SOCKET.on(EVENT_NAME.player.isRespawnItSelf, this.onPlayerIsRespawnItSelf.bind(this));
+
+    SOCKET.on(EVENT_NAME.player.attackZombie, this.onPlayerAttackZombie.bind(this));
+    SOCKET.on(EVENT_NAME.player.attackMachine, this.onPlayerAttackMachine.bind(this));
+    SOCKET.on(EVENT_NAME.player.attackBat, this.onPlayerAttackBat.bind(this));
   },
 
   onPlayerReady: function(data) {
@@ -1658,6 +1725,45 @@ Play.prototype = {
     this.respawnHero(this.player, data.playerInfo);
   },
 
+  onPlayerAttackZombie: function(data) {
+    var monsterInfo = data.monsterInfo,
+      damageFrom = data.damageFrom,
+      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup);
+
+    if (!UTIL.isEmptyObject(monster)) {
+      this.damageMonsterAfterGotSubsequentRequest(monster, damageFrom);
+    }
+  },
+
+  onPlayerAttackMachine: function(data) {
+    var monsterInfo = data.monsterInfo,
+      damageFrom = data.damageFrom,
+      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup);
+
+    if (!UTIL.isEmptyObject(monster)) {
+      this.damageMonsterAfterGotSubsequentRequest(monster, damageFrom);
+    }
+  },
+
+  onPlayerAttackBat: function(data) {
+    var monsterInfo = data.monsterInfo,
+      damageFrom = data.damageFrom,
+      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup);
+
+    if (!UTIL.isEmptyObject(monster)) {
+      this.damageMonsterAfterGotSubsequentRequest(monster, damageFrom);
+    }
+  },
+
+  damageMonsterAfterGotSubsequentRequest: function(monster, damageFrom) {
+    // same as `onPlayerIsDamaged`
+    monster.blr.info.life--;
+
+    this.playDamageParticle(monster);
+    monster.animations.play('blink', 10, false, false);
+    this.logOnCreatureIsDamaged(monster, damageFrom);
+  },
+
   /**
    * This function will force update
    * (it's used every time when receive enemy event data from socket event
@@ -1840,6 +1946,9 @@ Play.prototype = {
       GAME.physics.arcade.overlap(this.playerArrowGroup, this.zombieGroup, this.onPlayerArrowOverlapMonster, null, this);
       GAME.physics.arcade.overlap(this.playerArrowGroup, this.machineGroup, this.onPlayerArrowOverlapMonster, null, this);
       GAME.physics.arcade.overlap(this.playerArrowGroup, this.batGroup, this.onPlayerArrowOverlapMonster, null, this);
+      GAME.physics.arcade.overlap(this.enemyArrowGroup, this.zombieGroup, this.onEnemyArrowOverlapMonster, null, this);
+      GAME.physics.arcade.overlap(this.enemyArrowGroup, this.machineGroup, this.onEnemyArrowOverlapMonster, null, this);
+      GAME.physics.arcade.overlap(this.enemyArrowGroup, this.batGroup, this.onEnemyArrowOverlapMonster, null, this);
 
       // overlap - machine laser overlap player
       GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
