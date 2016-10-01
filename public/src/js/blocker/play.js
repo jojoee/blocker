@@ -342,6 +342,16 @@ Play.prototype = {
     return result;
   },
 
+  /**
+   * Check the creature is a player or not
+   * by using creatureId
+   * 
+   * @param {string} creatureId
+   */
+  isPlayer: function(creatureId) {
+    return (this.player.blr.info.id === creatureId);
+  },
+
   /*================================================================ Log
    */
 
@@ -1125,6 +1135,29 @@ Play.prototype = {
     arrow.kill();
   },
 
+  onPlayerArrowOverlapEnemy: function(arrow, hero) {
+    arrow.kill();
+    
+    this.onCreatureIsDamaged(hero, 'arrow');
+  },
+
+  onPlayerArrowOverlapPlayer: function(arrow, hero) {
+    // just in case
+    arrow.kill();
+  },
+
+  onEnemyArrowOverlapPlayer: function(arrow, hero) {
+    // just for clear `enemy` event
+    // same as `onPlayerArrowOverlapEnemy`
+    arrow.kill();
+  },
+
+  onEnemyArrowOverlapEnemy: function(arrow, hero) {
+    // just for clear `enemy` event
+    // same as `onPlayerArrowOverlapEnemy`
+    arrow.kill();
+  },
+
   /*================================================================ Collide
    */
 
@@ -1221,7 +1254,12 @@ Play.prototype = {
 
   damageCreature: function(creature, damageFrom) {
     if (creature.blr.info.type === 'hero') {
-      this.damageHero(creature, damageFrom);
+      if (this.isPlayer(creature)) {
+        this.damagePlayer(creature, damageFrom);
+
+      } else {
+        this.damageEnemy(creature, damageFrom);
+      }
 
     } else {
       this.damageMonster(creature, damageFrom);
@@ -1255,7 +1293,7 @@ Play.prototype = {
     }
   },
 
-  damageHero: function(hero, damageFrom) {
+  damagePlayer: function(hero, damageFrom) {
     var data = {
       playerInfo: hero.blr.info,
       damageFrom: damageFrom,
@@ -1263,9 +1301,22 @@ Play.prototype = {
     SOCKET.emit(EVENT_NAME.player.isDamaged, data);
   },
 
+  damageEnemy: function(enemy, damageFrom) {
+    var data = {
+      playerInfo: enemy.blr.info,
+      damageFrom: damageFrom,
+    }; 
+    SOCKET.emit(EVENT_NAME.player.attackEnemy, data);
+  },
+
   killCreature: function(creature, damageFrom) {
     if (creature.blr.info.type === 'hero') {
-      this.killHero(creature, damageFrom);
+      if (this.isPlayer(creature)) {
+        this.killPlayer(creature, damageFrom);
+        
+      } else {
+        this.killEnemy(creature, damageFrom);
+      }
 
     } else {
       this.killMonster(creature, damageFrom);
@@ -1305,12 +1356,20 @@ Play.prototype = {
     }
   },
 
-  killHero: function(hero, damageFrom) {
+  killPlayer: function(hero, damageFrom) {
     var data = {
       playerInfo: hero.blr.info,
       damageFrom: damageFrom,
     };
     SOCKET.emit(EVENT_NAME.player.isDied, data);
+  },
+
+  killEnemy: function(hero, damageFrom) {
+    var data = {
+      playerInfo: hero.blr.info,
+      damageFrom: damageFrom,
+    };
+    SOCKET.emit(EVENT_NAME.player.killEnemy, data);
   },
 
   /*================================================================ Event
@@ -1367,8 +1426,12 @@ Play.prototype = {
     hero.blr.weapon.animations.play('attack', 14, false, false);
 
     // fire
-    var bullet = hero.blr.bullet.getFirstExists(false);
-    bullet.reset(hero.blr.weapon.x, hero.blr.weapon.y);
+    var r = 40,
+      bullet = hero.blr.bullet.getFirstExists(false);
+    bullet.reset(
+      hero.blr.weapon.x + Math.cos(hero.rotation) * r,
+      hero.blr.weapon.y + Math.sin(hero.rotation) * r
+    );
     bullet.rotation = GAME.physics.arcade.moveToXY(
       bullet,
       targetPos.x,
@@ -1477,6 +1540,10 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.player.respawnZombie, this.onRespawnZombie.bind(this));
     SOCKET.on(EVENT_NAME.player.respawnMachine, this.onRespawnMachine.bind(this));
     SOCKET.on(EVENT_NAME.player.respawnBat, this.onRespawnBat.bind(this));
+
+    SOCKET.on(EVENT_NAME.player.attackEnemy, this.onPlayerAttackEnemy.bind(this));
+    SOCKET.on(EVENT_NAME.player.killEnemy, this.onPlayerKillEnemy.bind(this));
+    SOCKET.on(EVENT_NAME.player.respawnEnemy, this.onRespawnEnemy.bind(this));
   },
 
   onPlayerReady: function(data) {
@@ -1666,24 +1733,14 @@ Play.prototype = {
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
-
-      enemy.blr.info.life--;
-
-      this.playDamageParticle(enemy);
-      enemy.animations.play('blink', 10, false, false);
-      this.logOnCreatureIsDamaged(enemy, damageFrom);
+      this.damageHeroAfterGotSubsequentRequest(enemy, damageFrom);
     }
   },
 
   onPlayerIsDamagedItSelf: function(data) {
     var damageFrom = data.damageFrom;
     
-    // same as `onPlayerIsDamaged`
-    this.player.blr.info.life--;
-
-    this.playDamageParticle(this.player);
-    this.player.animations.play('blink', 10, false, false);
-    this.logOnCreatureIsDamaged(this.player, damageFrom);
+    this.damageHeroAfterGotSubsequentRequest(this.player, damageFrom);
   },
   
   onPlayerIsRecovered: function(data) {
@@ -1853,6 +1910,65 @@ Play.prototype = {
     }
   },
 
+  /**
+   * On player attack enemy
+   * based on `onPlayerIsDamaged`
+   */
+  onPlayerAttackEnemy: function(data) {
+    var playerInfo = data.playerInfo,
+      damageFrom = data.damageFrom;
+    
+    // I am attacked ?
+    if (this.isPlayer(playerInfo.id)) {
+      this.damageHeroAfterGotSubsequentRequest(this.player, damageFrom);
+
+    } else {
+      var enemy = this.getEnemyByPlayerId(playerInfo.id);
+
+      this.damageHeroAfterGotSubsequentRequest(enemy, damageFrom);
+    }
+  },
+
+  /**
+   * On player kill enemy
+   * based on `onPlayerIsDied`
+   */
+  onPlayerKillEnemy: function(data) {
+    var playerInfo = data.playerInfo,
+      damageFrom = data.damageFrom;
+    
+    // I am died ?
+    if (this.isPlayer(playerInfo.id)) {
+      this.killHeroAfterGotSubsequentRequest(this.player, damageFrom);
+      this.logOnCreatureIsDied(this.player, damageFrom);
+
+    } else {
+      var enemy = this.getEnemyByPlayerId(playerInfo.id);
+
+      this.killHeroAfterGotSubsequentRequest(enemy, damageFrom);
+      this.logOnCreatureIsDied(enemy, damageFrom);
+    }
+  },
+
+  /**
+   * On respawn enemy
+   * based on onPlayerIsRespawn
+   */
+  onRespawnEnemy: function(data) {
+    var playerInfo = data.playerInfo,
+      damageFrom = data.damageFrom;
+    
+    // I am respawn ?
+    if (this.isPlayer(playerInfo.id)) {
+      this.respawnHero(this.player, playerInfo);
+
+    } else {
+      var enemy = this.getEnemyByPlayerId(playerInfo.id);
+
+      this.respawnHero(enemy, playerInfo);
+    }
+  },
+
   killHeroAfterGotSubsequentRequest: function(hero, damageFrom) {
     hero.blr.info.life--;
     hero.blr.updateLastDamageTimestamp();
@@ -1887,8 +2003,16 @@ Play.prototype = {
     monster.kill();
   },
 
+  damageHeroAfterGotSubsequentRequest: function(hero, damageFrom) {
+    hero.blr.info.life--;
+
+    this.playDamageParticle(hero);
+    hero.animations.play('blink', 10, false, false);
+    this.logOnCreatureIsDamaged(hero, damageFrom);
+  },
+
   damageMonsterAfterGotSubsequentRequest: function(monster, damageFrom) {
-    // same as `onPlayerIsDamaged`
+    // same as `damageHeroAfterGotSubsequentRequest`
     monster.blr.info.life--;
 
     this.playDamageParticle(monster);
@@ -2089,6 +2213,12 @@ Play.prototype = {
       GAME.physics.arcade.overlap(this.enemyArrowGroup, this.zombieGroup, this.onEnemyArrowOverlapMonster, null, this);
       GAME.physics.arcade.overlap(this.enemyArrowGroup, this.machineGroup, this.onEnemyArrowOverlapMonster, null, this);
       GAME.physics.arcade.overlap(this.enemyArrowGroup, this.batGroup, this.onEnemyArrowOverlapMonster, null, this);
+
+      // overlap - arrow with hero
+      GAME.physics.arcade.overlap(this.playerArrowGroup, this.enemyGroup, this.onPlayerArrowOverlapEnemy  , null, this);
+      GAME.physics.arcade.overlap(this.playerArrowGroup, this.playerGroup, this.onPlayerArrowOverlapPlayer  , null, this);
+      GAME.physics.arcade.overlap(this.enemyArrowGroup, this.playerGroup, this.onEnemyArrowOverlapPlayer, null, this);
+      GAME.physics.arcade.overlap(this.enemyArrowGroup, this.enemyGroup, this.onEnemyArrowOverlapEnemy, null, this);
 
       // overlap - machine laser with player
       // GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);

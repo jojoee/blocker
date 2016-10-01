@@ -626,6 +626,43 @@ IO.on('connection', function(socket) {
       IO.emit(EVENT_NAME.player.respawnBat, data);
     }
   });
+  
+  // attack - enemy
+  socket.on(EVENT_NAME.player.attackEnemy, function(data) {
+    var playerInfo = data.playerInfo,
+      playerIdx = getPlayerInfoIndexById(playerInfo.id);
+
+    if (playerIdx > -1) {
+      PLAYER_INFOS[playerIdx] = playerInfo;
+
+      IO.emit(EVENT_NAME.player.attackEnemy, data);
+    }
+  });
+
+  // kill - enemy
+  // is died
+  socket.on(EVENT_NAME.player.killEnemy, function(data) {
+    var playerInfo = data.playerInfo,
+      playerIdx = getPlayerInfoIndexById(playerInfo.id);
+
+    if (playerIdx > -1) {
+      // die event
+      IO.emit(EVENT_NAME.player.killEnemy, data);
+
+      // reset player info
+      var newStartVector = getRandomStartCreatureVector();
+      playerInfo = resetCreatureInfo(playerInfo, newStartVector);
+
+      // update server data
+      PLAYER_INFOS[playerIdx] = playerInfo;
+
+      // send data
+      var newData = {
+        playerInfo: playerInfo,
+      };
+      IO.emit(EVENT_NAME.player.respawnEnemy, data);
+    }
+  });
 });
 
 /*================================================================ Log / Report

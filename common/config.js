@@ -69,6 +69,15 @@ var commonConfig = {
       respawnZombie: eventPlayerPrefix + 'respawnZombie',
       respawnMachine: eventPlayerPrefix + 'respawnMachine',
       respawnBat: eventPlayerPrefix + 'respawnBat',
+
+      // player attack enemy
+      attackEnemy: eventPlayerPrefix + 'attackEnemy',
+
+      // player kill enemy
+      killEnemy: eventPlayerPrefix + 'killEnemy',
+
+      // respawn enemy
+      respawnEnemy: eventPlayerPrefix + 'respawnEnemy',
     },
     server: {
       // send new player
