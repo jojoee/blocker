@@ -778,13 +778,32 @@ Play.prototype = {
   },
 
   /**
-   * Respawn creature
-   * TODO: complete it
-   * 
-   * @param {Creature} creature
+   * Respawn monster
+   * base on `respawnHero`
    */
-  respawnCreature: function(creature) {
+  respawnMonster: function(monster, monsterInfo) {
+    // revive
+    monster.blr.label.revive();
+    monster.blr.shadow.revive();
+    monster.blr.weapon.revive();
+    // monster.blr.bubble.revive();
+    // monster.blr.bullet.revive();
+    monster.revive();
+    
+    // set position
+    monster.blr.info = monsterInfo;
+    monster.x = monsterInfo.startVector.x;
+    monster.y = monsterInfo.startVector.y;
+    monster.rotation = monsterInfo.startVector.rotation;
+    
+    // set position - sub
+    this.updateCreatureWeapon(monster);
+    this.updateCreatureShadow(monster);
+    this.updateCreatureBubblePosition(monster);
 
+    // misc
+    monster.blr.reset();
+    this.logCreatureRespawning(monster);
   },
 
   respawnHero: function(hero, playerInfo) {
@@ -796,7 +815,7 @@ Play.prototype = {
     // hero.blr.bullet.revive();
     hero.revive();
     
-    // set position - player
+    // set position
     hero.blr.info = playerInfo;
     hero.x = playerInfo.startVector.x;
     hero.y = playerInfo.startVector.y;
@@ -1208,8 +1227,6 @@ Play.prototype = {
   },
 
   damageMonster: function(monster, damageFrom) {
-    console.log('damageMonster');
-
     var monsterType = monster.blr.info.type,
       eventName = '';
 
@@ -1255,13 +1272,35 @@ Play.prototype = {
 
   /**
    * Kill monster
-   * TODO: complete it
    * 
    * @param {Phaser.Sprite} monster - Phaser.Sprite that contain `Creature` object in `blr` property
    * @param {string} damageFrom
    */
   killMonster: function(monster, damageFrom) {
-    
+    var monsterType = monster.blr.info.type,
+      eventName = '';
+
+    switch (monsterType) {
+      case 'zombie':
+        eventName = EVENT_NAME.player.killZombie;
+        break;
+      case 'machine':
+        eventName = EVENT_NAME.player.killMachine;
+        break;
+      case 'bat':
+        eventName = EVENT_NAME.player.killBat;
+        break;
+      default:
+        break;
+    }
+
+    if (!UTIL.isEmpty(eventName)) {
+      var data = {
+        monsterInfo: monster.blr.info,
+        damageFrom: damageFrom 
+      };
+      SOCKET.emit(eventName, data);
+    }
   },
 
   killHero: function(hero, damageFrom) {
@@ -1428,6 +1467,14 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.player.attackZombie, this.onPlayerAttackZombie.bind(this));
     SOCKET.on(EVENT_NAME.player.attackMachine, this.onPlayerAttackMachine.bind(this));
     SOCKET.on(EVENT_NAME.player.attackBat, this.onPlayerAttackBat.bind(this));
+
+    SOCKET.on(EVENT_NAME.player.killZombie, this.onKillZombie.bind(this));
+    SOCKET.on(EVENT_NAME.player.killMachine, this.onKillMachine.bind(this));
+    SOCKET.on(EVENT_NAME.player.killBat, this.onKillBat.bind(this));
+
+    SOCKET.on(EVENT_NAME.player.respawnZombie, this.onRespawnZombie.bind(this));
+    SOCKET.on(EVENT_NAME.player.respawnMachine, this.onRespawnMachine.bind(this));
+    SOCKET.on(EVENT_NAME.player.respawnBat, this.onRespawnBat.bind(this));
   },
 
   onPlayerReady: function(data) {
@@ -1671,20 +1718,7 @@ Play.prototype = {
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
-
-      enemy.blr.info.life--;
-      enemy.blr.updateLastDamageTimestamp();
-      
-      this.playDamageParticle(enemy);
-      enemy.animations.play('blink', 10, false, false);
-
-      enemy.blr.label.kill();
-      enemy.blr.shadow.kill();
-      enemy.blr.weapon.kill();
-      enemy.blr.bubble.kill();
-      // enemy.blr.bullet.kill();
-      enemy.kill();
-
+      this.killHeroAfterGotSubsequentRequest(enemy, damageFrom);
       this.logOnCreatureIsDied(enemy, damageFrom);
     }
   },
@@ -1692,20 +1726,7 @@ Play.prototype = {
   onPlayerIsDiedItSelf: function(data) {
     var damageFrom = data.damageFrom;
 
-    // same as `onPlayerIsDied`
-    this.player.blr.info.life--;
-    this.player.blr.updateLastDamageTimestamp();
-    
-    this.playDamageParticle(this.player);
-    this.player.animations.play('blink', 10, false, false);
-    
-    this.player.blr.label.kill();
-    this.player.blr.shadow.kill();
-    this.player.blr.weapon.kill();
-    this.player.blr.bubble.kill();
-    // this.player.blr.bullet.kill();
-    this.player.kill();
-
+    this.killHeroAfterGotSubsequentRequest(this.player, damageFrom);
     this.logOnCreatureIsDied(this.player, damageFrom);
   },
 
@@ -1725,6 +1746,7 @@ Play.prototype = {
     this.respawnHero(this.player, data.playerInfo);
   },
 
+  // TODO: refactor
   onPlayerAttackZombie: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1735,6 +1757,7 @@ Play.prototype = {
     }
   },
 
+  // TODO: refactor
   onPlayerAttackMachine: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1745,6 +1768,7 @@ Play.prototype = {
     }
   },
 
+  // TODO: refactor
   onPlayerAttackBat: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1753,6 +1777,112 @@ Play.prototype = {
     if (!UTIL.isEmptyObject(monster)) {
       this.damageMonsterAfterGotSubsequentRequest(monster, damageFrom);
     }
+  },
+
+  // TODO: refactor
+  onKillZombie: function(data) {
+    var monsterInfo = data.monsterInfo,
+      damageFrom = data.damageFrom,
+      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup);
+
+    if (!UTIL.isEmptyObject(monster)) {
+      this.forceUpdateMonsterFromSocketEvent(monster, monsterInfo.life, monsterInfo.lastVector);
+      this.killMonsterAfterGotSubsequentRequest(monster, damageFrom);
+      this.logOnCreatureIsDied(monster, damageFrom);
+    }
+  },
+
+  // TODO: refactor
+  onKillMachine: function(data) {
+    var monsterInfo = data.monsterInfo,
+      damageFrom = data.damageFrom,
+      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup);
+
+    if (!UTIL.isEmptyObject(monster)) {
+      this.forceUpdateMonsterFromSocketEvent(monster, monsterInfo.life, monsterInfo.lastVector);
+      this.killMonsterAfterGotSubsequentRequest(monster, damageFrom);
+      this.logOnCreatureIsDied(monster, damageFrom);
+    }
+  },
+
+  // TODO: refactor
+  onKillBat: function(data) {
+    var monsterInfo = data.monsterInfo,
+      damageFrom = data.damageFrom,
+      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup);
+
+    if (!UTIL.isEmptyObject(monster)) {
+      this.forceUpdateMonsterFromSocketEvent(monster, monsterInfo.life, monsterInfo.lastVector);
+      this.killMonsterAfterGotSubsequentRequest(monster, damageFrom);
+      this.logOnCreatureIsDied(monster, damageFrom);
+    }
+  },
+
+  // TODO: refactor
+  onRespawnZombie: function(data) {
+    var monsterInfo = data.monsterInfo,
+      damageFrom = data.damageFrom,
+      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup);
+
+    if (!UTIL.isEmptyObject(monster)) {
+      this.respawnMonster(monster, monsterInfo);
+    }
+  },
+
+  // TODO: refactor
+  onRespawnMachine: function(data) {
+    var monsterInfo = data.monsterInfo,
+      damageFrom = data.damageFrom,
+      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup);
+
+    if (!UTIL.isEmptyObject(monster)) {
+      this.respawnMonster(monster, monsterInfo);
+    }
+  },
+
+  // TODO: refactor
+  onRespawnBat: function(data) {
+    var monsterInfo = data.monsterInfo,
+      damageFrom = data.damageFrom,
+      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup);
+
+    if (!UTIL.isEmptyObject(monster)) {
+      this.respawnMonster(monster, monsterInfo);
+    }
+  },
+
+  killHeroAfterGotSubsequentRequest: function(hero, damageFrom) {
+    hero.blr.info.life--;
+    hero.blr.updateLastDamageTimestamp();
+    
+    this.playDamageParticle(hero);
+    hero.animations.play('blink', 10, false, false);
+
+    hero.blr.label.kill();
+    hero.blr.shadow.kill();
+    hero.blr.weapon.kill();
+    hero.blr.bubble.kill();
+    // hero.blr.bullet.kill();
+    hero.kill();
+  },
+
+  /**
+   * Kill monster after got subsequent request
+   * based on `killHeroAfterGotSubsequentRequest`
+   */
+  killMonsterAfterGotSubsequentRequest: function(monster, damageFrom) {
+    monster.blr.info.life--;
+    monster.blr.updateLastDamageTimestamp();
+    
+    this.playDamageParticle(monster);
+    monster.animations.play('blink', 10, false, false);
+
+    monster.blr.label.kill();
+    monster.blr.shadow.kill();
+    monster.blr.weapon.kill();
+    // monster.blr.bubble.kill();
+    // monster.blr.bullet.kill();
+    monster.kill();
   },
 
   damageMonsterAfterGotSubsequentRequest: function(monster, damageFrom) {
@@ -1778,10 +1908,18 @@ Play.prototype = {
    * @param {Vector} currentVector
    */
   forceUpdateEnemyFromSocketEvent: function(enemy, life, currentVector) {
-    enemy.blr.info.life = life;
-    enemy.x = currentVector.x;
-    enemy.y = currentVector.y;
-    enemy.rotation = currentVector.rotation;
+    this.forceUpdateCreatureFromSocketEvent(enemy, life, currentVector);
+  },
+
+  forceUpdateMonsterFromSocketEvent: function(monster, life, currentVector) {
+    this.forceUpdateCreatureFromSocketEvent(monster, life, currentVector);
+  },
+
+  forceUpdateCreatureFromSocketEvent: function(creature, life, currentVector) {
+    creature.blr.info.life = life;
+    creature.x = currentVector.x;
+    creature.y = currentVector.y;
+    creature.rotation = currentVector.rotation;
   },
 
   /*================================================================ Stage

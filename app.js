@@ -514,9 +514,8 @@ IO.on('connection', function(socket) {
   });
 
   // attack - zombie
+  // TODO: refactor
   socket.on(EVENT_NAME.player.attackZombie, function(data) {
-    console.log('attackZombie');
-
     var monsterInfo = data.monsterInfo,
       monsterIdx = getMonsterInfoIndex(monsterInfo.id, ZOMBIE_INFOS);
     
@@ -528,9 +527,8 @@ IO.on('connection', function(socket) {
   });
 
   // attack - machine
+  // TODO: refactor
   socket.on(EVENT_NAME.player.attackMachine, function(data) {
-    console.log('attackMachine');
-
     var monsterInfo = data.monsterInfo,
       monsterIdx = getMonsterInfoIndex(monsterInfo.id, MACHINE_INFOS);
     
@@ -542,9 +540,8 @@ IO.on('connection', function(socket) {
   });
 
   // attack - bat
+  // TODO: refactor
   socket.on(EVENT_NAME.player.attackBat, function(data) {
-    console.log('attackBat');
-
     var monsterInfo = data.monsterInfo,
       monsterIdx = getMonsterInfoIndex(monsterInfo.id, BAT_INFOS);
     
@@ -552,6 +549,81 @@ IO.on('connection', function(socket) {
       BAT_INFOS[monsterIdx] = monsterInfo;
 
       IO.emit(EVENT_NAME.player.attackBat, data);
+    }
+  });
+
+  // kill - zombie
+  // TODO: refactor
+  socket.on(EVENT_NAME.player.killZombie, function(data) {
+    var monsterInfo = data.monsterInfo,
+      monsterIdx = getMonsterInfoIndex(monsterInfo.id, ZOMBIE_INFOS);
+    
+    if (monsterIdx > -1) {
+      // die event
+      IO.emit(EVENT_NAME.player.killZombie, data);
+
+      // reset monster info
+      var newStartVector = getRandomStartCreatureVector();
+      monsterInfo = resetCreatureInfo(monsterInfo, newStartVector);
+
+      // update server data
+      ZOMBIE_INFOS[monsterIdx] = monsterInfo;
+
+      // send data
+      var newData = {
+        monsterInfo: monsterInfo,
+      };
+      IO.emit(EVENT_NAME.player.respawnZombie, data);
+    }
+  });
+
+  // kill - machine
+  // TODO: refactor
+  socket.on(EVENT_NAME.player.killMachine, function(data) {
+    var monsterInfo = data.monsterInfo,
+      monsterIdx = getMonsterInfoIndex(monsterInfo.id, MACHINE_INFOS);
+    
+    if (monsterIdx > -1) {
+      // die event
+      IO.emit(EVENT_NAME.player.killMachine, data);
+
+      // reset monster info
+      var newStartVector = getRandomStartCreatureVector();
+      monsterInfo = resetCreatureInfo(monsterInfo, newStartVector);
+
+      // update server data
+      MACHINE_INFOS[monsterIdx] = monsterInfo;
+
+      // send data
+      var newData = {
+        monsterInfo: monsterInfo,
+      };
+      IO.emit(EVENT_NAME.player.respawnMachine, data);
+    }
+  });
+
+  // kill - bat
+  // TODO: refactor
+  socket.on(EVENT_NAME.player.killBat, function(data) {
+    var monsterInfo = data.monsterInfo,
+      monsterIdx = getMonsterInfoIndex(monsterInfo.id, BAT_INFOS);
+    
+    if (monsterIdx > -1) {
+      // die event
+      IO.emit(EVENT_NAME.player.kilLBat, data);
+
+      // reset monster info
+      var newStartVector = getRandomStartCreatureVector();
+      monsterInfo = resetCreatureInfo(monsterInfo, newStartVector);
+
+      // update server data
+      BAT_INFOS[monsterIdx] = monsterInfo;
+
+      // send data
+      var newData = {
+        monsterInfo: monsterInfo,
+      };
+      IO.emit(EVENT_NAME.player.respawnBat, data);
     }
   });
 });
