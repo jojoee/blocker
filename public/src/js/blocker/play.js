@@ -304,7 +304,7 @@ Play.prototype = {
     }
 
     if (!isFound) {
-      UTIL.serverBugLog('getEnemyByPlayerId', 'Not found playerId', playerId);
+      UTIL.clientBugLog('getEnemyByPlayerId', 'Not found playerId', playerId);
     }
 
     return result;
@@ -1551,7 +1551,7 @@ Play.prototype = {
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
 
-      this.player.blr.info.life--;
+      enemy.blr.info.life--;
 
       this.playDamageParticle(enemy);
       enemy.animations.play('blink', 10, false, false);
