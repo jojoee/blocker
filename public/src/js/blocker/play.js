@@ -2091,7 +2091,7 @@ Play.prototype = {
       GAME.physics.arcade.overlap(this.enemyArrowGroup, this.batGroup, this.onEnemyArrowOverlapMonster, null, this);
 
       // overlap - machine laser with player
-      GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
+      // GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
 
       // reset emiiter
       this.fadeAllEmitters();
