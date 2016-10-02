@@ -673,12 +673,53 @@ function reportNumberOfConnections() {
   UTIL.serverLog('Players (n)', n);
 }
 
+/*================================================================ Update
+ */
+
+function updateMachineFire() {
+  var visibleRange = 336,
+    nMachines = MACHINE_INFOS.length,
+    nPlayers = PLAYER_INFOS.length,
+    dataArr = [],
+    i = 0,
+    j = 0;
+  
+  if (nPlayers > 0) {
+    for (i = 0; i < nMachines; i++) {
+      var machineInfo = MACHINE_INFOS[i],
+        nearestPlayerDistance = 9000, // hack
+        nearestPlayerVector = {};
+      
+      for (j = 0; j < nPlayers; j++) {
+        var playerInfo = PLAYER_INFOS[j],
+          distance = UTIL.getDistanceBetween(machineInfo.lastVector, playerInfo.lastVector);
+          
+        if (distance <= visibleRange && distance < nearestPlayerDistance) {
+          nearestPlayerDistance = distance;
+          nearestPlayerVector = playerInfo.lastVector;
+        }
+      }
+
+      if (!UTIL.isEmptyObject(nearestPlayerVector)) {
+        var data = {
+          machineInfo: machineInfo,
+          targetVector: nearestPlayerVector,
+        } 
+        dataArr.push(data);
+      }
+    }
+  }
+
+  if (!UTIL.isEmpty(dataArr)) {
+    IO.emit(EVENT_NAME.server.machineFire, dataArr);
+  }
+}
+
 /*================================================================ Interval
  */
 
-/*
 setInterval(function() {
-  reportNumberOfConnections();
+  // reportNumberOfConnections();
+  updateMachineFire();
 
 }, SERVER_HEARTBEAT);
-*/

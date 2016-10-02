@@ -239,7 +239,6 @@ var Hero = function(creatureInfo) {
     },
     misc = {
       isImmortal: false,
-      visibleRange: 300,
 
       // bullet
       fireRate: 500, // 2 fire/sec 
@@ -281,7 +280,6 @@ var Zombie = function(creatureInfo) {
     },
     misc = {
       isImmortal: false,
-      visibleRange: 200,
 
       // automove
       isAutomove: false,
@@ -317,7 +315,6 @@ var Machine = function(creatureInfo) {
     },
     misc = {
       isImmortal: false,
-      visibleRange: 300,
 
       // bullet
       fireRate: 1000, // 1 fire/sec
@@ -359,7 +356,6 @@ var Bat = function(creatureInfo) {
     },
     misc = {
       isImmortal: false,
-      visibleRange: 240,
       
       // automove
       isAutomove: false,

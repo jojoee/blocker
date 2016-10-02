@@ -1133,12 +1133,16 @@ Play.prototype = {
     this.onCreatureIsDamaged(player, 'bat wings');
   },
 
-  onMachineLaserOverlapPlayer: function(laser, player) {
-    /*
-    this.playDamageParticle(player);
+  onMachineLaserOverlapPlayer: function(laser, hero) {
     laser.kill();
-    this.onCreatureIsDamaged(player, 'laser');
-    */
+
+    this.onCreatureIsDamaged(hero, 'laser');
+  },
+
+  onMachineLaserOverlapEnemy: function(laser, hero) {
+    // just for clear `enemy` event
+    // same as `onMachineLaserOverlapPlayer`
+    laser.kill();
   },
 
   onPlayerArrowOverlapStoneGroup: function(arrow, stone) {
@@ -1570,6 +1574,8 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.player.attackEnemy, this.onPlayerAttackEnemy.bind(this));
     SOCKET.on(EVENT_NAME.player.killEnemy, this.onPlayerKillEnemy.bind(this));
     SOCKET.on(EVENT_NAME.player.respawnEnemy, this.onRespawnEnemy.bind(this));
+
+    SOCKET.on(EVENT_NAME.server.machineFire, this.onMachineFire.bind(this));
   },
 
   onPlayerReady: function(data) {
@@ -1980,6 +1986,36 @@ Play.prototype = {
     }
   },
 
+  onMachineFire: function(dataArr) {
+    var nData = dataArr.length,
+      i = 0;
+
+    for (i = 0; i < nData; i++) {
+      var data = dataArr[i],
+        machineInfo = data.machineInfo,
+        targetVector = data.targetVector,
+        monster = this.getMonsterByMonsterIdAndGroup(machineInfo.id, this.machineGroup);
+
+      if (!UTIL.isEmptyObject(monster)) {
+        var ts = UTIL.getCurrentUtcTimestamp();
+
+        if (ts > monster.blr.misc.nextFireTimestamp &&
+          monster.blr.bullet.countDead() > 0) {
+          monster.blr.misc.nextFireTimestamp = ts + monster.blr.misc.fireRate;
+
+          var bullet = monster.blr.bullet.getFirstDead();
+          bullet.reset(monster.blr.weapon.x, monster.blr.weapon.y);
+          bullet.rotation = GAME.physics.arcade.moveToXY(
+            bullet,
+            targetVector.x,
+            targetVector.y,
+            monster.blr.misc.bulletSpeed
+          );
+        }
+      }
+    }
+  },
+
   /*================================================================ Socket subsequent request
    */
 
@@ -2250,8 +2286,9 @@ Play.prototype = {
       GAME.physics.arcade.overlap(this.enemyArrowGroup, this.playerGroup, this.onEnemyArrowOverlapPlayer, null, this);
       GAME.physics.arcade.overlap(this.enemyArrowGroup, this.enemyGroup, this.onEnemyArrowOverlapEnemy, null, this);
 
-      // overlap - machine laser with player
-      // GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
+      // overlap - machine laser with hero
+      GAME.physics.arcade.overlap(this.machineLaserGroup, this.playerGroup, this.onMachineLaserOverlapPlayer, null, this);
+      GAME.physics.arcade.overlap(this.machineLaserGroup, this.enemyGroup, this.onMachineLaserOverlapEnemy, null, this);
 
       // reset emiiter
       this.fadeAllEmitters();

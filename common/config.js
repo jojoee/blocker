@@ -82,6 +82,9 @@ var commonConfig = {
 
       // send disconnected player
       disconnectedPlayer: eventServerPrefix + 'disconnected player',
+
+      // machine fire
+      machineFire: eventPlayerPrefix + 'machineFire',
     }
   }
 };
