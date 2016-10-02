@@ -15,11 +15,9 @@ Multiplayer online game using Phaser + WebSocket (Socket.IO).
 
 ## Gifshot
 
-[![Blocker - Game play 1](https://raw.githubusercontent.com/jojoee/blocker/gh-pages/screenshot/play1.jpg "Blocker - Game play 1")](http://blocker.jojoee.com/)
+[![Blocker - Game play 1](https://raw.githubusercontent.com/jojoee/blocker/master/screenshot/play1.jpg "Blocker - Game play 1")](http://blocker.jojoee.com/)
 
-[![Blocker - Game play 2](https://raw.githubusercontent.com/jojoee/blocker/gh-pages/screenshot/play2.jpg "Blocker - Game play 2")](http://blocker.jojoee.com/)
-
-[![Blocker - Debug](https://raw.githubusercontent.com/jojoee/blocker/gh-pages/screenshot/debug.jpg "Blocker - Debug")](http://blocker.jojoee.com/)
+[![Blocker - Debug](https://raw.githubusercontent.com/jojoee/blocker/master/screenshot/debug.jpg "Blocker - Debug")](http://blocker.jojoee.com/)
 
 ## Getting Started
 1. Install [Node.js](https://nodejs.org/en/)
