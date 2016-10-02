@@ -11,10 +11,10 @@ var eventPlayerPrefix = 'player.',
 
 var commonConfig = {
   // prod
-  isProd: false,
+  isProd: true,
 
   // dev
-  isDebug: true,
+  isDebug: false,
 
   // others
   serverPort: 8001,
