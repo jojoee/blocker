@@ -357,6 +357,28 @@ Play.prototype = {
     return (this.player.blr.info.id === creatureId);
   },
 
+  /**
+   * Get nearest hero
+   * default: player
+   * 
+   * @param {Position|Vector} position
+   */
+  getNearestHero: function(position) {
+    var nearestHero = this.player,
+      nearestDistance = UTIL.getDistanceBetween(position, this.player.blr.info.lastVector); 
+
+    this.enemyGroup.forEachAlive(function(hero) {
+      var distance = UTIL.getDistanceBetween(position, hero.blr.info.lastVector);
+
+      if (distance < nearestDistance) {
+        nearestHero = hero;
+        nearestDistance = distance;
+      }
+    }, this);
+
+    return nearestHero;
+  },
+
   /*================================================================ Log
    */
 
@@ -1707,11 +1729,16 @@ Play.prototype = {
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector);
 
-      // update sub (same as `playerMove`)
+      // same as `playerMove`
+
+      // update sub
       this.updateCreatureWeapon(enemy);
       this.updateCreatureShadow(enemy);
       this.playDashParticle(enemy);
       this.updateCreatureBubblePosition(enemy);
+
+      // update info
+      this.updateCreatureLastVector(enemy);
     }
   },
 
@@ -2283,18 +2310,6 @@ Play.prototype = {
           monster.body.velocity.y = 0;
           monster.body.velocity.x = 0;
           monster.body.angularVelocity = 0;
-
-          // bullet
-          if (!IS_INVISIBLE && GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
-            if (ts > monster.blr.misc.nextFireTimestamp &&
-              monster.blr.bullet.countDead() > 0) {
-              monster.blr.misc.nextFireTimestamp = UTIL.getCurrentUtcTimestamp() + monster.blr.misc.fireRate;
-
-              var bullet = monster.blr.bullet.getFirstDead();
-              bullet.reset(monster.blr.weapon.x, monster.blr.weapon.y);
-              bullet.rotation = GAME.physics.arcade.moveToObject(bullet, this.player, monster.blr.misc.bulletSpeed);
-            }
-          }
         }
       }, this);
 
@@ -2335,6 +2350,10 @@ Play.prototype = {
 
       // monster - machine
       this.machineGroup.forEachAlive(function(monster) {
+        var nearestHero = this.getNearestHero(monster.blr.info.lastVector),
+          newWeaponRotation = GAME.physics.arcade.angleBetween(monster, nearestHero);
+        
+        this.updateCreatureWeapon(monster, monster.x, monster.y, newWeaponRotation);
         this.updateCreatureLabelText(monster);
       }, this);
 

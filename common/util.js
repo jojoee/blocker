@@ -107,6 +107,17 @@ var Util = {
   },
 
   /**
+   * Get distance between
+   * 
+   * @param {Position|Vector} p1
+   * @param {Position|Vector} p2
+   * @returns {number}
+   */
+  getDistanceBetween: function(p1, p2) {
+    return this.getDistance(p1.x, p1.y, p2.x, p2.y);
+  },
+
+  /**
    * Creature 2D array
    * 
    * @see http://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript
