@@ -817,7 +817,7 @@ Play.prototype = {
   },
 
   respawnHero: function(hero, playerInfo) {
-      // revive
+    // revive
     hero.blr.label.revive();
     hero.blr.shadow.revive();
     hero.blr.weapon.revive();
@@ -1291,7 +1291,7 @@ Play.prototype = {
     if (!UTIL.isEmpty(eventName)) {
       var data = {
         monsterInfo: monster.blr.info,
-        damageFrom: damageFrom 
+        damageFrom: damageFrom,
       };
       SOCKET.emit(eventName, data);
     }
@@ -1354,7 +1354,7 @@ Play.prototype = {
     if (!UTIL.isEmpty(eventName)) {
       var data = {
         monsterInfo: monster.blr.info,
-        damageFrom: damageFrom 
+        damageFrom: damageFrom,
       };
       SOCKET.emit(eventName, data);
     }
@@ -1687,7 +1687,7 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector);
 
       // set message (same as `playerSendMessage`)
       enemy.blr.updateLastMessageTimestamp(playerInfo.lastMessageTimestamp);
@@ -1705,7 +1705,7 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector);
 
       // update sub (same as `playerMove`)
       this.updateCreatureWeapon(enemy);
@@ -1721,7 +1721,7 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector);
 
       // update sub (same as `playerFireArrow`)
       this.updateCreatureWeapon(enemy);
@@ -1736,7 +1736,7 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector);
       this.damageHeroAfterGotSubsequentRequest(enemy, damageFrom);
     }
   },
@@ -1753,7 +1753,7 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector);
       this.recoverHeroAfterGotSubsequentRequest(enemy, recoveredFrom);
     }
   },
@@ -1770,7 +1770,7 @@ Play.prototype = {
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector);
       this.killHeroAfterGotSubsequentRequest(enemy, damageFrom);
     }
   },
@@ -1782,7 +1782,7 @@ Play.prototype = {
   },
 
   onPlayerIsRespawn: function(data) {
-    var playerInfo = data.playerInfo;
+    var playerInfo = data.playerInfo,
       enemy = this.getEnemyByPlayerId(playerInfo.id);
 
     if (!UTIL.isEmptyObject(enemy)) {  
@@ -1953,6 +1953,9 @@ Play.prototype = {
     }
   },
 
+  /*================================================================ Socket subsequent request
+   */
+
   killHeroAfterGotSubsequentRequest: function(hero, damageFrom) {
     hero.blr.info.life--;
     hero.blr.updateLastDamageTimestamp();
@@ -2016,8 +2019,8 @@ Play.prototype = {
     this.logOnCreatureIsDamaged(monster, damageFrom);
   },
 
-  forceUpdateEnemyFromSocketEvent: function(enemy, life, currentVector) {
-    this.forceUpdateCreatureFromSocketEvent(enemy, life, currentVector);
+  forceUpdateEnemyAfterGotSubsequentRequest: function(enemy, life, currentVector) {
+    this.forceUpdateCreatureAfterGotSubsequentRequest(enemy, life, currentVector);
   },
 
   /**
@@ -2041,7 +2044,7 @@ Play.prototype = {
    * @param {number} life
    * @param {Vector} currentVector
    */
-  forceUpdateCreatureFromSocketEvent: function(creature, life, currentVector) {
+  forceUpdateCreatureAfterGotSubsequentRequest: function(creature, life, currentVector) {
     creature.blr.info.life = life;
     creature.x = currentVector.x;
     creature.y = currentVector.y;
@@ -2215,8 +2218,8 @@ Play.prototype = {
       GAME.physics.arcade.overlap(this.enemyArrowGroup, this.batGroup, this.onEnemyArrowOverlapMonster, null, this);
 
       // overlap - arrow with hero
-      GAME.physics.arcade.overlap(this.playerArrowGroup, this.enemyGroup, this.onPlayerArrowOverlapEnemy  , null, this);
-      GAME.physics.arcade.overlap(this.playerArrowGroup, this.playerGroup, this.onPlayerArrowOverlapPlayer  , null, this);
+      GAME.physics.arcade.overlap(this.playerArrowGroup, this.enemyGroup, this.onPlayerArrowOverlapEnemy, null, this);
+      GAME.physics.arcade.overlap(this.playerArrowGroup, this.playerGroup, this.onPlayerArrowOverlapPlayer, null, this);
       GAME.physics.arcade.overlap(this.enemyArrowGroup, this.playerGroup, this.onEnemyArrowOverlapPlayer, null, this);
       GAME.physics.arcade.overlap(this.enemyArrowGroup, this.enemyGroup, this.onEnemyArrowOverlapEnemy, null, this);
 
