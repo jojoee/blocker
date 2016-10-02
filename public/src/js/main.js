@@ -17,9 +17,6 @@ window.UTIL = require('./../../../common/util');
 window.EVENT_NAME = config.eventName;
 window.IS_PROD = config.isProd;
 window.IS_DEBUG = config.isDebug;
-window.IS_ONLINE = config.isOnline;
-window.IS_IMMORTAL = config.isImmortal;
-window.IS_INVISIBLE = config.isInvisible;
 window.GAME_WORLD_WIDTH = config.game.worldWidth;
 window.GAME_WORLD_HEIGHT = config.game.worldHeight;
 window.SOCKET = io(socketUrl);
@@ -30,7 +27,6 @@ window.GAME = new Phaser.Game(WINDOW_WIDTH, WINDOW_HEIGHT, Phaser.CANVAS, 'game-
 
 if (IS_DEBUG) {
   console.log('IS_PROD', IS_PROD);
-  console.log('IS_ONLINE', IS_ONLINE);
   console.log('IS_DEBUG', IS_DEBUG);
   console.log('IS_IMMORTAL', IS_IMMORTAL);
 }

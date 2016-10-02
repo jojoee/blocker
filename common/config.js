@@ -11,13 +11,10 @@ var eventPlayerPrefix = 'player.',
 
 var commonConfig = {
   // prod
-  isOnline: false,
   isProd: false,
 
   // dev
   isDebug: true,
-  isImmortal: false,
-  isInvisible: false,
 
   // others
   serverPort: 8001,

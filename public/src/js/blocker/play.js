@@ -691,11 +691,6 @@ Play.prototype = {
     this.playerArrowGroup.add(this.player.blr.bullet);
 
     UI.addCreatureIdToCreatureList(this.player.blr.info.id, 'player');
-
-    // optional
-    if (IS_IMMORTAL) {
-      this.player.blr.misc.isImmortal = true;
-    }
   },
 
   /**
