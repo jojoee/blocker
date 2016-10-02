@@ -51,9 +51,18 @@ for develop the client side, please run - `gulp watch`
 - Send to all clients except newly created connection: socket.broadcast.emit(EVENT_NAME, data);
 
 5. Event flow
-Anything's related with `life`, is need to broadcast first then
-take effect from subsequent request.
+Anything's related with `life` directly, is need to broadcast first then
+take effect from subsequent request. (currently, there are only 2 events
+(move / fire) that can execute on client before broadcasting)
 ```
+
+## Gifshot
+
+Hit very HARD!
+
+Burnnnnn! ... die
+
+We are debugging
 
 ## TODO
 - [x] `spacebar` can fire arrow
@@ -121,12 +130,14 @@ take effect from subsequent request.
 - [ ] Log filter
 - [x] Set emitter
 - [x] Using [pm2](https://github.com/Unitech/pm2) for deploy
+- [ ] Tween: player move 
+- [ ] Tween: monster move
+- [ ] Fix - Creature is damaged and welled in the same time
 + [x] Global chat
-+ [ ] Phaser server side
-+ [ ] Make it online
++ [x] Make it online
 + [ ] Typing status
 + [ ] Private chat
-+ [ ] Online player
++ [x] Online player
 + [ ] Chat log (256 messages)
 + [ ] GM mode / id
 + [ ] Command (that used by player e.g. list all players)
