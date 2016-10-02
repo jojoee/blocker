@@ -88,6 +88,10 @@ var commonConfig = {
 
       // machine fire
       machineFire: eventPlayerPrefix + 'machineFire',
+
+      // monster move
+      zombieMove: eventPlayerPrefix + 'zombieMove',
+      batMove: eventPlayerPrefix + 'batMove',
     }
   }
 };

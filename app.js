@@ -152,19 +152,19 @@ function initMonsters() {
  */
 
 function getNewZombieInfo() {
-  return getNewCreatureInfo('zombie', 4, 6);
+  return getNewCreatureInfo('zombie', 100, 4, 6);
 }
 
 function getNewMachineInfo() {
-  return getNewCreatureInfo('machine', 5, 5);
+  return getNewCreatureInfo('machine', 0, 5, 5);
 }
 
 function getNewBatInfo() {
-  return getNewCreatureInfo('bat', 3, 3);
+  return getNewCreatureInfo('bat', 120, 3, 3);
 }
 
 function getNewPlayerInfo() {
-  return getNewCreatureInfo('hero', 6, 8);
+  return getNewCreatureInfo('hero', 200, 3, 8);
 }
 
 /**
@@ -175,12 +175,37 @@ function getNewPlayerInfo() {
  * @param {number} maxLife
  * @returns {CreatureInfo}
  */
-function getNewCreatureInfo(type, life, maxLife) {
+function getNewCreatureInfo(type, velocitySpeed, life, maxLife) {
   var creatureId = getUniqueCreatureId(), 
     startVector = getRandomStartCreatureVector(),
-    creatureInfo = new CreatureInfo(creatureId, type, startVector, life, maxLife);
+    creatureInfo = new CreatureInfo(creatureId, type, startVector, velocitySpeed, life, maxLife);
 
   return creatureInfo;
+}
+
+/**
+ * Get random walkable creature position
+ * 
+ * @param {Position|Vector} currentPos
+ * @param {number} minimumDistance
+ * @returns {Position}
+ */
+function getRandomWalkableCreaturePosition(currentPos, minimumDistance) {
+  if (typeof minimumDistance === 'undefined') minimumDistance = 0;
+  var targetPos = {},
+    distance = 0;
+    isNotOk = true;
+  
+  while (isNotOk) {
+    targetPos = getCreaturePositionByExclusion([1, 3, 5, 6]);
+    distance = UTIL.getDistanceBetween(currentPos, targetPos);
+    
+    if (distance >= minimumDistance) {
+      isNotOk = false;
+    }
+  }
+
+  return targetPos;
 }
 
 /**
@@ -264,6 +289,7 @@ function resetCreatureInfo(creatureInfo, startVector) {
   creatureInfo.life = creatureInfo.initialLife;
   creatureInfo.startVector = startVector;
   creatureInfo.lastVector = startVector;
+  creatureInfo.autoMove = {};
 
   return creatureInfo;
 }
@@ -687,35 +713,61 @@ function reportNumberOfConnections() {
 /*================================================================ Update
  */
 
-function updateMachineFire() {
+function getNearestPlayer(monsterInfo, visibleRange) {
+  var nPlayers = PLAYER_INFOS.length,
+    nearestPlayerDistance = 9000, // hack (must to bigger more than map size)
+    nearestPlayerVector = {},
+    data = {},
+    i = 0;
+    
+  for (i = 0; i < nPlayers; i++) {
+    var playerInfo = PLAYER_INFOS[i],
+      distance = UTIL.getDistanceBetween(monsterInfo.lastVector, playerInfo.lastVector);
+      
+    if (distance <= visibleRange && distance < nearestPlayerDistance) {
+      nearestPlayerDistance = distance;
+      nearestPlayerVector = playerInfo.lastVector;
+    }
+  }
+
+  if (!UTIL.isEmptyObject(nearestPlayerVector)) {
+    data = {
+      monsterInfo: monsterInfo,
+      targetCreatureId: playerInfo.id,
+      targetVector: nearestPlayerVector,
+    } 
+  }
+
+  return data;
+}
+
+/**
+ * Update zombie position
+ * TODO: complete it
+ */
+function updateZombie() {
+  
+}
+
+/**
+ * Update machine monster event
+ * due to machine cannot move
+ * so, it will fire `fire` event only
+ */
+function updateMachine() {
   var visibleRange = 336,
     nMachines = MACHINE_INFOS.length,
     nPlayers = PLAYER_INFOS.length,
     dataArr = [],
-    i = 0,
-    j = 0;
+    i = 0;
   
   if (nPlayers > 0) {
+    // TODO: refactor
     for (i = 0; i < nMachines; i++) {
-      var machineInfo = MACHINE_INFOS[i],
-        nearestPlayerDistance = 9000, // hack
-        nearestPlayerVector = {};
+      var monsterInfo = MACHINE_INFOS[i],
+        data = getNearestPlayer(monsterInfo, visibleRange);
       
-      for (j = 0; j < nPlayers; j++) {
-        var playerInfo = PLAYER_INFOS[j],
-          distance = UTIL.getDistanceBetween(machineInfo.lastVector, playerInfo.lastVector);
-          
-        if (distance <= visibleRange && distance < nearestPlayerDistance) {
-          nearestPlayerDistance = distance;
-          nearestPlayerVector = playerInfo.lastVector;
-        }
-      }
-
-      if (!UTIL.isEmptyObject(nearestPlayerVector)) {
-        var data = {
-          machineInfo: machineInfo,
-          targetVector: nearestPlayerVector,
-        } 
+      if (!UTIL.isEmptyObject(data)) {
         dataArr.push(data);
       }
     }
@@ -726,11 +778,23 @@ function updateMachineFire() {
   }
 }
 
+/**
+ * Update bat
+ * based on `updateZombie`
+ * TODO: complete it
+ */
+function updateBat() {
+
+}
+
 /*================================================================ Interval
  */
 
 setInterval(function() {
   // reportNumberOfConnections();
-  updateMachineFire();
+  
+  updateZombie();
+  updateMachine();
+  updateBat();
 
 }, SERVER_HEARTBEAT);

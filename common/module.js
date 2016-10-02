@@ -61,20 +61,6 @@ Vector.prototype.updateByJson = function(obj) {
 };
 
 /**
- * Message object
- * unused
- * 
- * @param {string} playerId
- * @param {string} text
- * @param {number} utcTimestamp
- */
-var Message = function(playerId, text, utcTimestamp) {
-  this.id = playerId;
-  this.text = text
-  this.utcTimestamp = utcTimestamp;
-};
-
-/**
  * CreatureInfo
  * 
  * @param {string} id
@@ -83,7 +69,7 @@ var Message = function(playerId, text, utcTimestamp) {
  * @param {number} life
  * @param {number} maxLife
  */
-var CreatureInfo = function(id, type, startVector, life, maxLife) {
+var CreatureInfo = function(id, type, startVector, velocitySpeed, life, maxLife) {
   /** @type {string} */
   this.id = id;
 
@@ -98,6 +84,9 @@ var CreatureInfo = function(id, type, startVector, life, maxLife) {
 
   /** @type {number} immortal delay (milliseconds) */
   this.immortalDelay = 800;
+
+  /** @type {number} */
+  this.velocitySpeed = velocitySpeed;
 
   /*---------------------------------------------------------------- Updatable on respawn
    */
@@ -125,6 +114,8 @@ var CreatureInfo = function(id, type, startVector, life, maxLife) {
 
   /** @type {number} last recover timestamp */
   this.lastRecoverTimestamp = 0;
+
+  this.autoMove = {};
 };
 
 /**
@@ -170,13 +161,6 @@ Creature.prototype.updateLastRecoverTimestamp = function() {
  */
 Creature.prototype.reset = function() {
   this.misc.isImmortal = false;
-  
-  // automove
-  this.misc.isAutomove = false;
-  this.misc.autoMoveTargetPos = {};
-  this.misc.autoMoveTimestamp = 0;
-  this.misc.isIdle = false;
-  this.misc.lastIdleTimestamp = 0;
 
   // bubble
   this.misc.isTyping = false;
@@ -213,16 +197,6 @@ Creature.prototype.updateLastEnterTimestamp = function(ts) {
 };
 
 /**
- * Update lastIdleTimestamp
- * 
- * @param {number} [ts] - last idle timestamp
- */
-Creature.prototype.updateLastIdleTimestamp = function(ts) {
-  if (typeof ts === 'undefined') ts = UTIL.getCurrentUtcTimestamp(); 
-  this.misc.lastIdleTimestamp = ts;
-};
-
-/**
  * Hero
  * 
  * @param {CreatureInfo} creatureInfo
@@ -235,7 +209,6 @@ var Hero = function(creatureInfo) {
       height: 0,
       bodyOffset: 0,
       bodyMass: 100,
-      velocitySpeed: 200,
     },
     misc = {
       isImmortal: false,
@@ -245,13 +218,6 @@ var Hero = function(creatureInfo) {
       nextFireTimestamp: 0,
       nBullets: 40,
       bulletSpeed: 500,
-      
-      // automove
-      isAutomove: false,
-      autoMoveTargetPos: {},
-      autoMoveTimestamp: 0,
-      isIdle: false,
-      lastIdleTimestamp: 0,
 
       // bubble
       isTyping: false,
@@ -276,17 +242,9 @@ var Zombie = function(creatureInfo) {
       height: 46,
       bodyOffset: 6,
       bodyMass: 0,
-      velocitySpeed: 100,
     },
     misc = {
       isImmortal: false,
-
-      // automove
-      isAutomove: false,
-      autoMoveTargetPos: {},
-      autoMoveTimestamp: 0,
-      isIdle: false,
-      lastIdleTimestamp: 0,
 
       // bubble
       isTyping: false,
@@ -311,7 +269,6 @@ var Machine = function(creatureInfo) {
       height: 46,
       bodyOffset: 6,
       bodyMass: 20,
-      velocitySpeed: 120,
     },
     misc = {
       isImmortal: false,
@@ -321,13 +278,6 @@ var Machine = function(creatureInfo) {
       nextFireTimestamp: 0,
       nBullets: 40,
       bulletSpeed: 500,
-      
-      // automove
-      isAutomove: false,
-      autoMoveTargetPos: {},
-      autoMoveTimestamp: 0,
-      isIdle: false,
-      lastIdleTimestamp: 0,
 
       // bubble
       isTyping: false,
@@ -352,17 +302,9 @@ var Bat = function(creatureInfo) {
       height: 46,
       bodyOffset: 8,
       bodyMass: 0,
-      velocitySpeed: 120,
     },
     misc = {
       isImmortal: false,
-      
-      // automove
-      isAutomove: false,
-      autoMoveTargetPos: {},
-      autoMoveTimestamp: 0,
-      isIdle: false,
-      lastIdleTimestamp: 0,
 
       // bubble
       isTyping: false,
@@ -377,7 +319,6 @@ Bat.prototype.constructor = Bat;
 module.exports = {
   Position: Position,
   Vector: Vector,
-  Message: Message,
   CreatureInfo: CreatureInfo,
   // Creature: Creature,
   Hero: Hero,

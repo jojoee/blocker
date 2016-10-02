@@ -28,7 +28,6 @@ window.GAME = new Phaser.Game(WINDOW_WIDTH, WINDOW_HEIGHT, Phaser.CANVAS, 'game-
 if (IS_DEBUG) {
   console.log('IS_PROD', IS_PROD);
   console.log('IS_DEBUG', IS_DEBUG);
-  console.log('IS_IMMORTAL', IS_IMMORTAL);
 }
 
 UI.init();

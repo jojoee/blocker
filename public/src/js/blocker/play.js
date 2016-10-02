@@ -18,7 +18,6 @@ Play = function(GAME) {
 
   this.enterKeyDelay = 200;
   this.bubbleDelay = 3000;
-  this.automoveDelay = 1000;
 
   /** @type {Object} virtual map, used for calculating */
   this.VTMap = {};
@@ -126,79 +125,6 @@ Play.prototype = {
   },
 
   /**
-   * Force restart automove
-   * unused 
-   */
-  forceRestartAutomove: function(monster) {
-    var ts = UTIL.getCurrentUtcTimestamp();
-
-    // hacky
-    monster.blr.misc.autoMoveTimestamp = ts - 7000;
-    this.monsterAutoMove(monster);
-  },
-
-  /**
-   * Start autoMove mode
-   * used by monster only
-   * unused
-   * 
-   * @param {Object} monster - monster object
-   */
-  monsterAutoMove: function(monster) {
-    var ts = UTIL.getCurrentUtcTimestamp();
-
-    monster.body.velocity.x = 0;
-    monster.body.velocity.y = 0;
-
-    // if near hero, then  follow the hero
-    // if not, then autoMove
-    if (!IS_INVISIBLE && GAME.physics.arcade.distanceBetween(monster, this.player) < monster.blr.misc.visibleRange) {
-      monster.blr.misc.isAutomove = false; // unused
-      monster.rotation = GAME.physics.arcade.moveToObject(
-        monster,
-        this.player,
-        monster.blr.phrInfo.velocitySpeed
-      );
-
-    } else {
-      // update isIdle
-      if (monster.blr.misc.isIdle &&
-        ts - monster.blr.misc.lastIdleTimestamp > this.automoveDelay) {
-        monster.blr.misc.isIdle = false;
-      }
-
-      if (!monster.blr.misc.isIdle) {
-        var distance = GAME.physics.arcade.distanceToXY(
-          monster,
-          monster.blr.misc.autoMoveTargetPos.x,
-          monster.blr.misc.autoMoveTargetPos.y
-        );
-
-        // first time, auto move mode
-        // if monster
-        // 1. start autoMove or keep autoMove if it autoMove less than 6sec or
-        // 2. the monster is to close with the target (prevent monster is spinning around the targetPos)
-        if ((ts - monster.blr.misc.autoMoveTimestamp > 6000) ||
-          distance < 200) {
-          var targetPos = this.getRandomAutoMovePosition(monster);
-
-          monster.blr.misc.isAutomove = true; // unused
-          monster.blr.misc.autoMoveTargetPos = targetPos;
-          monster.blr.misc.autoMoveTimestamp = UTIL.getCurrentUtcTimestamp();
-        }
-
-        // keep moving to the existing target position
-        monster.rotation = GAME.physics.arcade.moveToXY(
-          monster,
-          monster.blr.misc.autoMoveTargetPos.x,
-          monster.blr.misc.autoMoveTargetPos.y,
-          monster.blr.phrInfo.velocitySpeed
-        );
-      }
-    }
-  },
-
-  /**
    * get rotation between creature and mouse
    * 
    * @param {[type]} creature
@@ -230,7 +156,6 @@ Play.prototype = {
 
   /**
    * Check is creature move
-   * unused
    * 
    * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    */
@@ -240,7 +165,6 @@ Play.prototype = {
 
   /**
    * Check is creature rotate
-   * unused
    * 
    * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    */
@@ -700,7 +624,6 @@ Play.prototype = {
 
     // misc
     this.logCreatureRespawning(monster);
-    monster.blr.misc.autoMoveTargetPos = new Position(monster.x, monster.y);
     UI.addCreatureIdToCreatureList(monster.blr.info.id, 'monster');
 
     return monster;
@@ -1189,16 +1112,8 @@ Play.prototype = {
   /*================================================================ Collide
    */
 
-  /**
-   * On monster collide stoneGroup
-   * unused
-   */
-  onMonsterCollideStoneGroup: function(monster, stone) {
-    var ts = UTIL.getCurrentUtcTimestamp();
-    monster.blr.updateLastIdleTimestamp(ts);
-    monster.blr.misc.isIdle = true;
+  onMonsterCollideStoneGroup: function() {
 
-    this.forceRestartAutomove(monster);
   },
 
   onPlayerCollideStoneGroup: function() {
@@ -1210,11 +1125,11 @@ Play.prototype = {
   },
 
   onPlayerCollideMonster: function() {
-
+    // TODO: when monster push hero
   },
 
   onEnemyCollideMonster: function() {
-
+    // TODO: when monster push hero
   },
 
   onPlayerCollideEnemy: function() {
@@ -1507,7 +1422,7 @@ Play.prototype = {
 
   playerMove: function() {
     // move
-    GAME.physics.arcade.moveToPointer(this.player, this.player.blr.phrInfo.velocitySpeed);
+    GAME.physics.arcade.moveToPointer(this.player, this.player.blr.info.velocitySpeed);
 
     //  if it's overlapping the mouse, don't move any more
     if (Phaser.Rectangle.contains(this.player.body, GAME.input.x, GAME.input.y)) {
@@ -1541,7 +1456,7 @@ Play.prototype = {
   playerMoveByKeyboard: function() {
     GAME.physics.arcade.velocityFromAngle(
       this.player.angle,
-      this.player.blr.phrInfo.velocitySpeed,
+      this.player.blr.info.velocitySpeed,
       this.player.body.velocity
     );
 
@@ -1614,6 +1529,14 @@ Play.prototype = {
     }
   },
 
+  /**
+   * AutoMove feature for monster
+   * TODO: complete it
+   */
+  autoMove: function() {
+
+  },
+
   /*================================================================ Socket
    */
 
@@ -1655,6 +1578,9 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.player.respawnEnemy, this.onRespawnEnemy.bind(this));
 
     SOCKET.on(EVENT_NAME.server.machineFire, this.onMachineFire.bind(this));
+
+    SOCKET.on(EVENT_NAME.server.zombieMove, this.onZombieMove.bind(this));
+    SOCKET.on(EVENT_NAME.server.batMove, this.onBatMove.bind(this));
   },
 
   onPlayerReady: function(data) {
@@ -2082,15 +2008,19 @@ Play.prototype = {
     }
   },
 
+  onZombieMove: function(dataArr) {
+    
+  },
+
   onMachineFire: function(dataArr) {
     var nData = dataArr.length,
       i = 0;
 
     for (i = 0; i < nData; i++) {
       var data = dataArr[i],
-        machineInfo = data.machineInfo,
+        monsterInfo = data.monsterInfo,
         targetVector = data.targetVector,
-        monster = this.getMonsterByMonsterIdAndGroup(machineInfo.id, this.machineGroup);
+        monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup);
 
       if (!UTIL.isEmptyObject(monster)) {
         var ts = UTIL.getCurrentUtcTimestamp();
@@ -2111,6 +2041,14 @@ Play.prototype = {
         }
       }
     }
+  },
+
+  /**
+   * On bat move
+   * TODO: complete it
+   */
+  onBatMove: function(dataArr) {
+
   },
 
   /*================================================================ Socket subsequent request
@@ -2449,44 +2387,25 @@ Play.prototype = {
           this.playerSendMessage();
         }
       }
-
-      /*
+      
       // monster - zombie
       this.zombieGroup.forEachAlive(function(monster) {
-        if (monster.alive) {
-          // reset
-          monster.body.velocity.y = 0;
-          monster.body.velocity.x = 0;
-          monster.body.angularVelocity = 0;
-
-          // autoMove
-          this.monsterAutoMove(monster);
-        }
+        this.autoMove(monster);
       }, this);
 
       // monster - machine
       this.machineGroup.forEachAlive(function(monster) {
-        if (monster.alive) {
-          // reset
-          monster.body.velocity.y = 0;
-          monster.body.velocity.x = 0;
-          monster.body.angularVelocity = 0;
-        }
+        // fire
+        var nearestHero = this.getNearestHero(monster.blr.info.lastVector),
+          newWeaponRotation = GAME.physics.arcade.angleBetween(monster, nearestHero);
+        
+        this.updateCreatureWeapon(monster, monster.x, monster.y, newWeaponRotation);
       }, this);
 
       // monster - bat
       this.batGroup.forEachAlive(function(monster) {
-        if (monster.alive) {
-          // reset
-          monster.body.velocity.y = 0;
-          monster.body.velocity.x = 0;
-          monster.body.angularVelocity = 0;
-
-          // autoMove
-          this.monsterAutoMove(monster);
-        }
+        this.autoMove(monster);
       }, this);
-      */
 
       this.updateMinimap();
     }
@@ -2511,10 +2430,6 @@ Play.prototype = {
 
       // monster - machine
       this.machineGroup.forEachAlive(function(monster) {
-        var nearestHero = this.getNearestHero(monster.blr.info.lastVector),
-          newWeaponRotation = GAME.physics.arcade.angleBetween(monster, nearestHero);
-        
-        this.updateCreatureWeapon(monster, monster.x, monster.y, newWeaponRotation);
         this.updateCreatureLabelText(monster);
       }, this);
 

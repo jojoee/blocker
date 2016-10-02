@@ -118,6 +118,23 @@ var Util = {
   },
 
   /**
+   * Get rotation between
+   * 
+   * @see https://gist.github.com/conorbuck/2606166
+   * 
+   * @param {Position|Vector} p1
+   * @param {Position|Vector} p2
+   * @returns {number}
+   */
+  getRotationBetween: function(p1, p2) {
+    return Math.atan2(p2.y - p1.y, p2.x - p1.x);
+  },
+
+  getDegreeBetween: function(p1, p2) {
+    return this.getRotationBetween(p1, p2) * 180 / Math.PI;
+  },
+
+  /**
    * Creature 2D array
    * 
    * @see http://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript
