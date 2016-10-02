@@ -1426,7 +1426,40 @@ Play.prototype = {
       hero.blr.misc.nextFireTimestamp = ts + hero.blr.misc.fireRate;
 
       // fire
-      var targetPos = new Position(GAME.input.activePointer.worldX, GAME.input.activePointer.worldY);
+      var targetPos = new Position(
+        GAME.input.activePointer.worldX,
+        GAME.input.activePointer.worldY
+      );
+      this.heroFireArrow(hero, targetPos);
+
+      // broadcast `fire` event
+      var data = {
+        playerInfo: this.player.blr.info,
+        targetPos: targetPos,
+      };
+      SOCKET.emit(EVENT_NAME.player.fire, data);
+    }
+  },
+
+  /**
+   * Player fire arrow by keyboard
+   * based on `playerFireArrow`
+   */
+  playerFireArrowByKeyboard: function(hero) {
+    var ts = UTIL.getCurrentUtcTimestamp();
+
+    if (ts > hero.blr.misc.nextFireTimestamp &&
+      hero.blr.bullet.countDead() > 0) {
+
+      // update next fire
+      hero.blr.misc.nextFireTimestamp = ts + hero.blr.misc.fireRate;
+
+      // fire
+      var r = 400;
+      var targetPos = new Position(
+        this.player.x + Math.cos(this.player.rotation) * r,
+        this.player.y + Math.sin(this.player.rotation) * r
+      );
       this.heroFireArrow(hero, targetPos);
 
       // broadcast `fire` event
@@ -1458,8 +1491,8 @@ Play.prototype = {
     hero.blr.weapon.animations.play('attack', 14, false, false);
 
     // fire
-    var r = 40,
-      bullet = hero.blr.bullet.getFirstExists(false);
+    var r = 40;
+    var bullet = hero.blr.bullet.getFirstExists(false);
     bullet.reset(
       hero.blr.weapon.x + Math.cos(hero.rotation) * r,
       hero.blr.weapon.y + Math.sin(hero.rotation) * r
@@ -1528,7 +1561,7 @@ Play.prototype = {
     SOCKET.emit(EVENT_NAME.player.move, data);
   },
 
-  playerRotate: function(angularVelocity) {
+  playerRotateByKeyboard: function(angularVelocity) {
     this.player.body.angularVelocity = angularVelocity;
 
     // update sub
@@ -2372,8 +2405,10 @@ Play.prototype = {
         // reset - bubble
         this.updateCreatureBubbleVisibility(this.player);
 
-        // input - left click (mouse over keyboard)
-        // input - left || right
+        // move & rotate (mouse over keyboard)
+        // input - left click (move follow mouse)
+        // input - left || right (rotate) 
+        // input - up (move follow rotation)
         if (GAME.input.activePointer.leftButton.isDown) {
           this.playerMove();
 
@@ -2388,18 +2423,23 @@ Play.prototype = {
           }
 
           if (angularVelocity !== 0) {
-            this.playerRotate(angularVelocity);
+            this.playerRotateByKeyboard(angularVelocity);
           }
 
+          // move
           if (this.cursors.up.isDown) {
             this.playerMoveByKeyboard();
           }
         }
 
-        // input -  right click || spacebar
-        if (GAME.input.activePointer.rightButton.isDown || this.spaceKey.isDown) {
-          // fire arrow
+        // fire (mouse over keyboard)
+        // input - right click (fire follow mouse)
+        // input - spacebar (fire follow rotation)
+        if (GAME.input.activePointer.rightButton.isDown) {
           this.playerFireArrow(this.player);
+
+        } else if (this.spaceKey.isDown) {
+          this.playerFireArrowByKeyboard(this.player);
         }
 
         // message
