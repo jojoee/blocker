@@ -123,6 +123,10 @@ Play.prototype = {
     };
   },
 
+  /**
+   * Force restart automove
+   * unused 
+   */
   forceRestartAutomove: function(monster) {
     var ts = UTIL.getCurrentUtcTimestamp();
 
@@ -134,6 +138,7 @@ Play.prototype = {
   /**
    * Start autoMove mode
    * used by monster only
+   * unused
    * 
    * @param {Object} monster - monster object
    */
@@ -1156,6 +1161,10 @@ Play.prototype = {
   /*================================================================ Collide
    */
 
+  /**
+   * On monster collide stoneGroup
+   * unused
+   */
   onMonsterCollideStoneGroup: function(monster, stone) {
     var ts = UTIL.getCurrentUtcTimestamp();
     monster.blr.updateLastIdleTimestamp(ts);
@@ -2162,15 +2171,15 @@ Play.prototype = {
       var ts = UTIL.getCurrentUtcTimestamp();
 
       // collide - creature with floorGroup
-      GAME.physics.arcade.collide(this.zombieGroup, this.floorGroup);
-      GAME.physics.arcade.collide(this.machineGroup, this.floorGroup);
-      GAME.physics.arcade.collide(this.batGroup, this.floorGroup);
+      // GAME.physics.arcade.collide(this.zombieGroup, this.floorGroup);
+      // GAME.physics.arcade.collide(this.machineGroup, this.floorGroup);
+      // GAME.physics.arcade.collide(this.batGroup, this.floorGroup);
       GAME.physics.arcade.collide(this.playerGroup, this.floorGroup);
 
       // collide - creature with stoneGroup
-      GAME.physics.arcade.collide(this.zombieGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
-      GAME.physics.arcade.collide(this.machineGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
-      GAME.physics.arcade.collide(this.batGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
+      // GAME.physics.arcade.collide(this.zombieGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
+      // GAME.physics.arcade.collide(this.machineGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
+      // GAME.physics.arcade.collide(this.batGroup, this.stoneGroup, this.onMonsterCollideStoneGroup, null, this);
       GAME.physics.arcade.collide(this.playerGroup, this.stoneGroup, this.onPlayerCollideStoneGroup, null, this);
       GAME.physics.arcade.collide(this.enemyGroup, this.stoneGroup, this.onEnemyCollideStoneGroup, null, this);
 
