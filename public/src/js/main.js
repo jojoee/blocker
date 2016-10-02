@@ -15,7 +15,6 @@ window.COMMON_MODULE = require('./../../../common/module');
 window.UI = require('./ui');
 window.UTIL = require('./../../../common/util');
 window.EVENT_NAME = config.eventName;
-window.IS_PROD = config.isProd;
 window.IS_DEBUG = config.isDebug;
 window.GAME_WORLD_WIDTH = config.game.worldWidth;
 window.GAME_WORLD_HEIGHT = config.game.worldHeight;
@@ -24,11 +23,6 @@ window.WINDOW_WIDTH = window.innerWidth;
 window.WINDOW_HEIGHT = window.innerHeight;
 window.CLIENT_HEARTHBEAT = 1000;
 window.GAME = new Phaser.Game(WINDOW_WIDTH, WINDOW_HEIGHT, Phaser.CANVAS, 'game-wrap');
-
-if (IS_DEBUG) {
-  console.log('IS_PROD', IS_PROD);
-  console.log('IS_DEBUG', IS_DEBUG);
-}
 
 UI.init();
 GAME.state.add('Boot', blocker.Boot);

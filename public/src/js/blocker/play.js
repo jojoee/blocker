@@ -1873,7 +1873,6 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerReady: function(data) {
-    if (IS_DEBUG) UTIL.clientLog('Init data', data);
     var zombieInfos = data.zombieInfos,
       machineInfos = data.machineInfos,
       playerInfo = data.playerInfo,
@@ -1973,7 +1972,7 @@ Play.prototype = {
    */
   onPlayerConnect: function(data) {
     var playerInfo = data.playerInfo;
-    UTIL.clientLog('New player is connected', playerInfo);
+    UTIL.clientLog('Enemy is connected', playerInfo);
     this.logOnPlayerConnect(playerInfo);
 
     // enemy
@@ -1987,7 +1986,7 @@ Play.prototype = {
    */
   onPlayerDisconnect: function(data) {
     var playerInfo = data.playerInfo;
-    UTIL.clientLog('Player is disconnected', playerInfo);
+    UTIL.clientLog('Enemy is disconnected', playerInfo);
     this.logOnPlayerDisconnect(playerInfo);
 
     // remove enemy
@@ -2003,7 +2002,6 @@ Play.prototype = {
         enemy.destroy();
 
         // misc
-        console.log('enemy ' + enemy.blr.info.id + ' is removed');
         isFound = true;
         UI.removeCreatureIdFromCreatureList(enemy.blr.info.id);
       }
