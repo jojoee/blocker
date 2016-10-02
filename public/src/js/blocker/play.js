@@ -1501,6 +1501,33 @@ Play.prototype = {
     }
   },
 
+  /**
+   * Move player using keyboard (up cursor)
+   * based on `playerMove
+   */
+  playerMoveByKeyboard: function() {
+    GAME.physics.arcade.velocityFromAngle(
+      this.player.angle,
+      this.player.blr.phrInfo.velocitySpeed,
+      this.player.body.velocity
+    );
+
+    // update sub
+    this.updateCreatureWeapon(this.player);
+    this.updateCreatureShadow(this.player);
+    this.playDashParticle(this.player);
+    this.updateCreatureBubblePosition(this.player);
+
+    // update info
+    this.updateCreatureLastVector(this.player);
+
+    // broadcast `move` event
+    var data = {
+      playerInfo: this.player.blr.info,
+    };
+    SOCKET.emit(EVENT_NAME.player.move, data);
+  },
+
   playerRotate: function(angularVelocity) {
     this.player.body.angularVelocity = angularVelocity;
 
@@ -2362,6 +2389,10 @@ Play.prototype = {
 
           if (angularVelocity !== 0) {
             this.playerRotate(angularVelocity);
+          }
+
+          if (this.cursors.up.isDown) {
+            this.playerMoveByKeyboard();
           }
         }
 
