@@ -450,6 +450,17 @@ IO.on('connection', function(socket) {
     }
   });
 
+  // rotate
+  socket.on(EVENT_NAME.player.rotate, function(data) {
+    var playerInfo = data.playerInfo,
+      playerIdx = getPlayerInfoIndexById(playerInfo.id);
+
+    if (playerIdx > -1) {
+      PLAYER_INFOS[playerIdx] = playerInfo;
+      socket.broadcast.emit(EVENT_NAME.player.rotate, data);
+    }
+  });
+
   // fire
   socket.on(EVENT_NAME.player.fire, function(data) {
     var playerInfo = data.playerInfo,

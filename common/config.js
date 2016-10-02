@@ -33,6 +33,9 @@ var commonConfig = {
       // player move
       move: eventPlayerPrefix + 'move',
 
+      // player rotate
+      rotate: eventPlayerPrefix + 'rotate',
+
       // player fire
       fire: eventPlayerPrefix + 'fire',
 

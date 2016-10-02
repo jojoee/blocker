@@ -11,6 +11,7 @@ var GCONFIG = require('./config'),
 Play = function(GAME) {
 
   this.isGameReady = false;
+  this.playerAngularVelocity = 200;
 
   this.lastMiniMapUpdatingTimestamp = 0;
   this.miniMapUpdatingDelay = 500;
@@ -63,6 +64,7 @@ Play = function(GAME) {
   this.heroBubbleGroup;
 
   // input
+  this.cursors;
   this.spaceKey;
   this.enterKey;
 };
@@ -1499,6 +1501,22 @@ Play.prototype = {
     }
   },
 
+  playerRotate: function(angularVelocity) {
+    this.player.body.angularVelocity = angularVelocity;
+
+    // update sub
+    this.updateCreatureWeapon(this.player);
+
+    // update info
+    this.updateCreatureLastVector(this.player);
+
+    // broadcast `move` event
+    var data = {
+      playerInfo: this.player.blr.info,
+    };
+    SOCKET.emit(EVENT_NAME.player.rotate, data);
+  },
+
   playerSendMessage: function() {
     var ts = UTIL.getCurrentUtcTimestamp();
 
@@ -1545,6 +1563,7 @@ Play.prototype = {
     
     SOCKET.on(EVENT_NAME.player.message, this.onPlayerMessage.bind(this));
     SOCKET.on(EVENT_NAME.player.move, this.onPlayerMove.bind(this));
+    SOCKET.on(EVENT_NAME.player.rotate, this.onPlayerRotate.bind(this));
     SOCKET.on(EVENT_NAME.player.fire, this.onPlayerFire.bind(this));
 
     SOCKET.on(EVENT_NAME.player.isDamaged, this.onPlayerIsDamaged.bind(this));
@@ -1742,6 +1761,23 @@ Play.prototype = {
       this.updateCreatureShadow(enemy);
       this.playDashParticle(enemy);
       this.updateCreatureBubblePosition(enemy);
+
+      // update info
+      this.updateCreatureLastVector(enemy);
+    }
+  },
+
+  onPlayerRotate: function(data) {
+    var playerInfo = data.playerInfo,
+      enemy = this.getEnemyByPlayerId(playerInfo.id);
+
+    if (!UTIL.isEmptyObject(enemy)) {
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector);
+
+      // same as `playerRotate`
+
+      // update sub
+      this.updateCreatureWeapon(enemy);
 
       // update info
       this.updateCreatureLastVector(enemy);
@@ -2222,6 +2258,7 @@ Play.prototype = {
     // keyboard
     this.spaceKey = GAME.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     this.enterKey = GAME.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+    this.cursors = GAME.input.keyboard.createCursorKeys();
 
     // emitter
     this.setDashEmitter();
@@ -2308,9 +2345,24 @@ Play.prototype = {
         // reset - bubble
         this.updateCreatureBubbleVisibility(this.player);
 
-        // input - left click
+        // input - left click (mouse over keyboard)
+        // input - left || right
         if (GAME.input.activePointer.leftButton.isDown) {
           this.playerMove();
+
+        } else {
+          var angularVelocity = 0;
+
+          if (this.cursors.left.isDown) {
+            angularVelocity = -this.playerAngularVelocity;
+
+          } else if (this.cursors.right.isDown) {
+            angularVelocity = this.playerAngularVelocity;
+          }
+
+          if (angularVelocity !== 0) {
+            this.playerRotate(angularVelocity);
+          }
         }
 
         // input -  right click || spacebar
