@@ -151,18 +151,38 @@ function initMonsters() {
 /*================================================================ Game
  */
 
+/**
+ * Get new CreatureInfo of zombie
+ * 
+ * @returns {CreatureInfo}
+ */
 function getNewZombieInfo() {
   return getNewCreatureInfo('zombie', 100, 4, 6);
 }
 
+/**
+ * Get new CreatureInfo of machine
+ * 
+ * @returns {CreatureInfo}
+ */
 function getNewMachineInfo() {
   return getNewCreatureInfo('machine', 0, 5, 5);
 }
 
+/**
+ * Get new CreatureInfo of bat
+ * 
+ * @returns {CreatureInfo}
+ */
 function getNewBatInfo() {
   return getNewCreatureInfo('bat', 120, 3, 3);
 }
 
+/**
+ * Get new CreatureInfo of hero
+ * 
+ * @returns {CreatureInfo}
+ */
 function getNewPlayerInfo() {
   return getNewCreatureInfo('hero', 200, 3, 8);
 }
@@ -294,6 +314,13 @@ function resetCreatureInfo(creatureInfo, startVector) {
   return creatureInfo;
 }
 
+/**
+ * Check the `creatureid` is already existing in the `creatureInfos`
+ * 
+ * @param {string} creatureid
+ * @param {Array.CreatureInfo} creatureInfos
+ * @returns {boolean}
+ */
 function isDuplicateCreatureId(creatureid, creatureInfos) {
   var i = 0,
     isDuplicated = false,
@@ -379,7 +406,7 @@ function getMonsterInfoIndex(monsterId, monsterInfos) {
 
 /**
  * Check this player is already
- * exists in the server 
+ * exists in the server
  * 
  * @param {string} playerId
  * @returns {boolean}
@@ -705,6 +732,9 @@ IO.on('connection', function(socket) {
 /*================================================================ Log / Report
  */
 
+/**
+ * Report number of current connection
+ */
 function reportNumberOfConnections() {
   var n = getNumberOfConnection();
   UTIL.serverLog('Players (n)', n);
@@ -713,6 +743,13 @@ function reportNumberOfConnections() {
 /*================================================================ Update
  */
 
+/**
+ * Get nearest player
+ * 
+ * @param {CreatureInfo} monsterInfo
+ * @param {number} visibleRange
+ * @returns {Object}
+ */
 function getNearestPlayer(monsterInfo, visibleRange) {
   var nPlayers = PLAYER_INFOS.length,
     nearestPlayerDistance = 9000, // hack (must to bigger more than map size)

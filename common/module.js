@@ -38,6 +38,11 @@ var Vector = function(x, y, rotation) {
 Vector.prototype = Object.create(Position.prototype);
 Vector.prototype.constructor = Vector;
 
+/**
+ * Return Vector to JSON object
+ * 
+ * @returns {Object}
+ */
 Vector.prototype.toJson = function() {
   var result = {
     x: this.x,
@@ -48,12 +53,24 @@ Vector.prototype.toJson = function() {
   return result; 
 };
 
+/**
+ * Update Vector properties
+ * 
+ * @param {number} x
+ * @param {number} y
+ * @param {number} rotation
+ */
 Vector.prototype.update = function(x, y, rotation) {
   this.x = x;
   this.y = y;
   this.rotation = rotation;
 };
 
+/**
+ * Update Vector properties by JSON object
+ * 
+ * @param {Object}
+ */
 Vector.prototype.updateByJson = function(obj) {
   this.x = obj.x;
   this.y = obj.y;
@@ -115,6 +132,7 @@ var CreatureInfo = function(id, type, startVector, velocitySpeed, life, maxLife)
   /** @type {number} last recover timestamp */
   this.lastRecoverTimestamp = 0;
 
+  /** @type {Object} */
   this.autoMove = {};
 };
 
@@ -122,7 +140,7 @@ var CreatureInfo = function(id, type, startVector, velocitySpeed, life, maxLife)
  * Creature
  * internal class
  * 
- * @param {Object} info
+ * @param {CreatureInfo} info
  * @param {Object} phrInfo
  * @param {Object} misc
  */
@@ -147,10 +165,16 @@ var Creature = function(info, phrInfo, misc) {
   this.bullet = {};
 };
 
+/**
+ * Update last damage timestamp (by current UTC timestamp)
+ */
 Creature.prototype.updateLastDamageTimestamp = function() {
   this.info.lastDamageTimestamp = UTIL.getCurrentUtcTimestamp();
 };
 
+/**
+ * Update last recover timestamp (by current UTC timestamp)
+ */
 Creature.prototype.updateLastRecoverTimestamp = function() {
   this.info.lastRecoverTimestamp = UTIL.getCurrentUtcTimestamp();
 };

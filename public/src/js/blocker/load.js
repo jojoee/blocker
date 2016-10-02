@@ -1,5 +1,6 @@
 var CONFIG = require('./config');
 
+// load all game assets
 Load = function(GAME) {};
 Load.prototype = {
 

@@ -10,18 +10,28 @@ var GCONFIG = require('./config'),
 
 Play = function(GAME) {
 
+  /** @type {boolean} flag for checking the client is ready to play */
   this.isGameReady = false;
+
+  /** @type {number} player angular speed */
   this.playerAngularVelocity = 200;
 
+  /** @type {number} last updating miniMap timestamp */
   this.lastMiniMapUpdatingTimestamp = 0;
+
+  /** @type {number} miniMap updating delay */
   this.miniMapUpdatingDelay = 500;
 
+  /** @type {number} enter key delay */
   this.enterKeyDelay = 200;
+
+  /** @type {number} bubble box delay */
   this.bubbleDelay = 3000;
 
   /** @type {Object} virtual map, used for calculating */
   this.VTMap = {};
 
+  /** @type {Phaser.Sprite} Phaser.Sprite that contain `Creature` object in `blr` property */
   this.player = {};
 
   // floor
@@ -86,7 +96,7 @@ Play.prototype = {
   /**
    * Get random auto move monster position
    * 
-   * @param {Object} monster - monster object
+   * @param {Phaser.Sprite} monster - Phaser.Sprite that contain `Creature` object in `blr` property
    * @returns {Position} return walkable position
    */
   getRandomAutoMovePosition: function(monster) {
@@ -114,7 +124,7 @@ Play.prototype = {
   /**
    * Update creature lastVector
    * 
-   * @param {Object} Phaser sprite object
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    */
   updateCreatureLastVector: function(creature) {
     creature.blr.info.lastVector = {
@@ -127,7 +137,7 @@ Play.prototype = {
   /**
    * get rotation between creature and mouse
    * 
-   * @param {[type]} creature
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    * @returns {number} rotation
    */
   getRotationBetweenCreatureAndMouse: function(creature) {
@@ -144,7 +154,7 @@ Play.prototype = {
    * So, this function will update
    * - body rotation
    * 
-   * @param {[type]} creature
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    */
   updateCreatureRotationByFollowingMouse: function(creature) {
     var newX = creature.x,
@@ -176,7 +186,7 @@ Play.prototype = {
    * Update creature shadow
    * using creature position by default
    * 
-   * @param {[type]} creature
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    * @param {number} [newX]
    * @param {number} [newY]
    */
@@ -192,7 +202,7 @@ Play.prototype = {
    * Update creature weapon
    * using creature position by default
    * 
-   * @param {[type]} creature
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    * @param {number} [newX]
    * @param {number} [newY]
    * @param {number} [newRotation]
@@ -214,7 +224,7 @@ Play.prototype = {
    * @see http://stackoverflow.com/questions/2641347/how-to-short-circuit-array-foreach-like-calling-break
    * 
    * @param {string} playerId
-   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   * @returns {Phaser.Sprite} Phaser.Sprite that contain `Creature` object in `blr` property
    */
   getEnemyByPlayerId: function(playerId) {
     var isFound = false,
@@ -246,7 +256,8 @@ Play.prototype = {
    * based on `getEnemyByPlayerId`
    * 
    * @param {string} monsterId
-   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   * @param {Phaser.Group} monsterGroup
+   * @returns {Phaser.Sprite} Phaser.Sprite that contain `Creature` object in `blr` property
    */
   getMonsterByMonsterIdAndGroup: function(monsterId, monsterGroup) {
     var isFound = false,
@@ -278,6 +289,7 @@ Play.prototype = {
    * by using creatureId
    * 
    * @param {string} creatureId
+   * @returns {boolean}
    */
   isPlayer: function(creatureId) {
     return (this.player.blr.info.id === creatureId);
@@ -288,6 +300,7 @@ Play.prototype = {
    * default: player
    * 
    * @param {Position|Vector} position
+   * @returns {Phaser.Sprite} Phaser.Sprite that contain `Creature` object in `blr` property
    */
   getNearestHero: function(position) {
     var nearestHero = this.player,
@@ -311,7 +324,7 @@ Play.prototype = {
   /**
    * Log creature respawning into log list
    * 
-   * @param {Creature} creature
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    */
   logCreatureRespawning: function(creature) {
     var logText = creature.blr.info.type + ' ' + creature.blr.info.id +
@@ -322,7 +335,7 @@ Play.prototype = {
   /**
    * Log creature message into log list
    * 
-   * @param {Creature} creature
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    */
   logCreatureMessage: function(creature) {
     var logText = creature.blr.info.type + ' ' + creature.blr.info.id +
@@ -366,7 +379,7 @@ Play.prototype = {
   /**
    * Log on creature is damaged
    * 
-   * @param {Phaser.Sprite} creature - enemy that contain `Creature` object in `blr` property
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
    * @param {string} damageFrom - where is the damage come frome
    */
   logOnCreatureIsDamaged: function(creature, damageFrom) {
@@ -379,7 +392,7 @@ Play.prototype = {
   /**
    * Log on creature is died
    * 
-   * @param {Phaser.Sprite} creature - enemy that contain `Creature` object in `blr` property
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
    * @param {string} damageFrom - where is the damage come frome
    */
   logOnCreatureIsDied: function(creature, damageFrom) {
@@ -391,6 +404,11 @@ Play.prototype = {
   /*================================================================ Bubble
    */
 
+  /**
+   * Set Hero Bubble (contain message)
+   * 
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   */
   setHeroBubble: function(creature) {
     var bubbleStyle = {
         font: '12px ' + GCONFIG.mainFontFamily,
@@ -409,6 +427,13 @@ Play.prototype = {
     this.updateCreatureBubble(creature);
   },
 
+  /**
+   * Update creature bubble
+   * - text
+   * - position
+   * 
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   */
   updateCreatureBubble: function(creature) {
     if (creature.blr.bubble.visible && creature.blr.info.lastMessage) {
       this.updateCreatureBubbleText(creature);
@@ -416,12 +441,22 @@ Play.prototype = {
     }
   },
 
+  /**
+   * Update creature bubble text
+   * 
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   */
   updateCreatureBubbleText: function(creature) {
     var bubbletext = creature.blr.info.lastMessage;
 
     creature.blr.bubble.setText(bubbletext);
   },
 
+  /**
+   * Update creature bubble position
+   * 
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   */
   updateCreatureBubblePosition: function(creature) {
     var bubbleLeftOffset = 0,
       bubbleTopOffset = 0;
@@ -430,6 +465,11 @@ Play.prototype = {
     creature.blr.bubble.y = creature.y;
   },
 
+  /**
+   * Hide creature bubble when time pass
+   * 
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   */
   updateCreatureBubbleVisibility: function(creature) {
     var ts = UTIL.getCurrentUtcTimestamp();
 
@@ -441,6 +481,11 @@ Play.prototype = {
   /*================================================================ Label
    */
 
+  /**
+   * Set creature label (child)
+   * 
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   */
   setCreatureLabel: function(creature) {
     var labelStyle = {
         font: '13px ' + GCONFIG.mainFontFamily,
@@ -454,6 +499,13 @@ Play.prototype = {
     this.updateCreatureLabel(creature);
   },
 
+  /**
+   * Update creature label (child)
+   * - text
+   * - position
+   * 
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   */
   updateCreatureLabel: function(creature) {
     this.updateCreatureLabelText(creature);
 
@@ -462,11 +514,21 @@ Play.prototype = {
     this.updateCreatureLabelPosition(creature);
   },
 
+  /**
+   * Update creature label text
+   * 
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   */
   updateCreatureLabelText: function(creature) {
     var labeltext = creature.blr.info.id + ' ' + creature.blr.info.life + '/' + creature.blr.info.maxLife;
     creature.blr.label.setText(labeltext);
   },
 
+  /**
+   * Update creature label position
+   * 
+   * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
+   */
   updateCreatureLabelPosition: function(creature) {
     var labelLeftOffset = 0,
       labelTopOffset = -10;
@@ -574,8 +636,8 @@ Play.prototype = {
   /**
    * Spawn monster
    * 
-   * @param {Object} monsterGroup - Phaser Group object
-   * @param {Object} monsterBlr
+   * @param {Phaser.Group} monsterGroup
+   * @param {CreatureInfo} monsterBlr
    * 
    * @return {DisplayObject} Phaser DisplayObject
    */
@@ -632,7 +694,7 @@ Play.prototype = {
   /**
    * Spawn player
    * 
-   * @param {Object} playerInfo
+   * @param {CreatureInfo} playerInfo
    */
   spawnPlayer: function(playerInfo) {
     var heroBlr = new Hero(playerInfo);
@@ -648,7 +710,7 @@ Play.prototype = {
   /**
    * Spawn enemy
    * 
-   * @param {Object} playerInfo
+   * @param {CreatureInfo} playerInfo
    */
   spawnEnemy: function(playerInfo) {
     var heroBlr = new Hero(playerInfo);
@@ -668,7 +730,8 @@ Play.prototype = {
   /**
    * Spawn hero
    * 
-   * @param {Object} heroBlr
+   * @param {CreatureInfo} heroBlr
+   * @param {Vector} [currentVector]
    */
   spawnHero: function(heroBlr, currentVector) {
     if (typeof currentVector === 'undefined') currentVector = heroBlr.info.startVector;
@@ -737,6 +800,9 @@ Play.prototype = {
   /**
    * Respawn monster
    * base on `respawnHero`
+   * 
+   * @param {Phaser.Sprite} monster - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {CreatureInfo} monsterInfo
    */
   respawnMonster: function(monster, monsterInfo) {
     // revive
@@ -763,6 +829,12 @@ Play.prototype = {
     this.logCreatureRespawning(monster);
   },
 
+  /**
+   * Respawn hero
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {CreatureInfo} playerInfo
+   */
   respawnHero: function(hero, playerInfo) {
     // revive
     hero.blr.label.revive();
@@ -791,6 +863,9 @@ Play.prototype = {
   /*================================================================ Map
    */
 
+  /**
+   * Render yello square in a tile that is not walkable
+   */
   debugMap: function() {
     var i = 0, // row
       j = 0, // column
@@ -826,6 +901,11 @@ Play.prototype = {
     }
   },
 
+  /**
+   * Set miniMap (background)
+   * - floorGroup
+   * - stoneGroup
+   */
   setMiniMap: function() {
     // tile size must be square
     var miniMapSize = 5,
@@ -879,6 +959,8 @@ Play.prototype = {
 
   /**
    * Update unit (in miniMap)
+   * - hero (player / enemy)
+   * - monster (zombie / machine / bat)
    */
   updateMinimap: function() {
     var ts = UTIL.getCurrentUtcTimestamp();
@@ -914,6 +996,14 @@ Play.prototype = {
     }
   },
 
+  /**
+   * Add creature into `BitmapData` then return it
+   * 
+   * @param {Phaser.BitmapData} miniMapUnitBmd
+   * @param {Phaser.Group} creatureGroup
+   * @param {string} colorCode
+   * @returns {Phaser.BitmapData}
+   */
   addCreatureGroupToMiniMapUnitBmd: function(miniMapUnitBmd, creatureGroup, colorCode) {
     var miniMapSize = 5;
 
@@ -936,6 +1026,9 @@ Play.prototype = {
   /*================================================================ Emitter
    */
 
+  /**
+   * Set dash emiiter
+   */
   setDashEmitter: function() {
     var nEmitter = 60;
 
@@ -949,6 +1042,9 @@ Play.prototype = {
     this.dashEmitterGroup.bounce.setTo(0.5, 0.5);
   },
 
+  /**
+   * Set recover emiiter
+   */
   setRecoverEmitter: function() {
     var nEmitter = 30;
 
@@ -959,6 +1055,9 @@ Play.prototype = {
     this.recoverEmitterGroup.maxParticleSpeed.setTo(200, 200);
   },
 
+  /**
+   * Set damage emiiter
+   */
   setDamageEmitter: function() {
     var nEmitter = 30;
 
@@ -969,42 +1068,63 @@ Play.prototype = {
     this.damageEmitterGroup.maxParticleSpeed.setTo(200, 200);
   },
 
+  /**
+   * Play dash particle
+   */
   playDashParticle: function(creature) {
     this.dashEmitterGroup.x = creature.x;
     this.dashEmitterGroup.y = creature.y;
     this.dashEmitterGroup.start(true, 280, null, 20);
   },
 
+  /**
+   * Play recover particle
+   */
   playRecoverParticle: function(creature) {
     this.recoverEmitterGroup.x = creature.x;
     this.recoverEmitterGroup.y = creature.y;
     this.recoverEmitterGroup.start(true, 280, null, 20);
   },
 
+  /**
+   * Play damage particle
+   */
   playDamageParticle: function(creature) {
     this.damageEmitterGroup.x = creature.x;
     this.damageEmitterGroup.y = creature.y;
     this.damageEmitterGroup.start(true, 280, null, 20);
   },
 
+  /**
+   * Fade dash emiiter
+   */
   fadeDashEmitter: function() {
     this.dashEmitterGroup.forEachAlive(function(particle) {
       particle.alpha = GAME.math.clamp(particle.lifespan / 100, 0, 1);
     }, this);
   },
 
+  /**
+   * Fade recover emiiter
+   */
   fadeRecoverEmitter: function() {
     this.recoverEmitterGroup.forEachAlive(function(particle) {
       particle.alpha = GAME.math.clamp(particle.lifespan / 100, 0, 1);
     }, this);
   },
 
+  /**
+   * Fade damage emiiter
+   */
   fadeDamageEmitter: function() {
     this.damageEmitterGroup.forEachAlive(function(particle) {
       particle.alpha = GAME.math.clamp(particle.lifespan / 100, 0, 1);
     }, this);
   },
 
+  /**
+   * Fade all emiiters
+   */
   fadeAllEmitters: function() {
     this.fadeDashEmitter();
     this.fadeRecoverEmitter();
@@ -1017,8 +1137,8 @@ Play.prototype = {
   /**
    * Callback event when hit well
    * 
-   * @param {[type]} creature [description]
-   * @param {[type]} tile     [description]
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {[type]} tile
    */
   onCreatureOverlapWell: function(creature, tile) {
     this.onCreatureIsRecovered(creature, 'well');
@@ -1027,8 +1147,8 @@ Play.prototype = {
   /**
    * Callback event when hit fire
    * 
-   * @param {[type]} creature [description]
-   * @param {[type]} tile     [description]
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {[type]} tile
    */
   onCreatureOverlapFire: function(creature, tile) {
     this.onCreatureIsDamaged(creature, 'fire');
@@ -1046,24 +1166,54 @@ Play.prototype = {
 
   },
 
+  /**
+   * Callback event when player overlap zombie weapon
+   * 
+   * @param {Phaser.Sprite} player - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {Phaser.Sprite} monsterWeapon
+   */
   onPlayerOverlapZombieWeapon: function(player, monsterWeapon) {
     this.onCreatureIsDamaged(player, 'zombie hands');
   },
 
+  /**
+   * Callback event when player overlap machine weapon
+   * 
+   * @param {Phaser.Sprite} player - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {Phaser.Sprite} monsterWeapon
+   */
   onPlayerOverlapMachineWeapon: function(player, monsterWeapon) {
     this.onCreatureIsDamaged(player, 'machine\'s turret');
   },
 
+  /**
+   * Callback event when player overlap bat weapon
+   * 
+   * @param {Phaser.Sprite} player - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {Phaser.Sprite} monsterWeapon
+   */
   onPlayerOverlapBatWeapon: function(player, monsterWeapon) {
     this.onCreatureIsDamaged(player, 'bat wings');
   },
 
+  /**
+   * Callback event when machine laser overlap player
+   * 
+   * @param {[type]} laser
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property 
+   */
   onMachineLaserOverlapPlayer: function(laser, hero) {
     laser.kill();
 
     this.onCreatureIsDamaged(hero, 'laser');
   },
 
+  /**
+   * Callback event when machine laser overlap enable
+   * 
+   * @param {[type]} laser
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property 
+   */
   onMachineLaserOverlapEnemy: function(laser, hero) {
     // just for clear `enemy` event
     // same as `onMachineLaserOverlapPlayer`
@@ -1074,35 +1224,71 @@ Play.prototype = {
 
   },
 
+  /**
+   * Callback event when player arrow overlap monster
+   * 
+   * @param {[type]} arrow
+   * @param {Phaser.Sprite} monster - Phaser.Sprite that contain `Creature` object in `blr` property 
+   */
   onPlayerArrowOverlapMonster: function(arrow, monster) {
     arrow.kill();
     
     this.onCreatureIsDamaged(monster, 'arrow');
   },
 
+  /**
+   * Callback event when enemy arrow overlap monster
+   * 
+   * @param {[type]} arrow
+   * @param {Phaser.Sprite} monster - Phaser.Sprite that contain `Creature` object in `blr` property 
+   */
   onEnemyArrowOverlapMonster: function(arrow, monster) {
     // just for clear `enemy` event
     // same as `onPlayerArrowOverlapMonster`
     arrow.kill();
   },
 
+  /**
+   * Callback event when player arrow overlap enemy
+   * 
+   * @param {[type]} arrow
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property 
+   */
   onPlayerArrowOverlapEnemy: function(arrow, hero) {
     arrow.kill();
     
     this.onCreatureIsDamaged(hero, 'arrow');
   },
 
+  /**
+   * Callback event when player arrow overlap player
+   * 
+   * @param {[type]} arrow
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property 
+   */
   onPlayerArrowOverlapPlayer: function(arrow, hero) {
     // just in case
     arrow.kill();
   },
 
+  /**
+   * Callback event when enemy arrow overlap player
+   * 
+   * @param {[type]} arrow
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property 
+   */
   onEnemyArrowOverlapPlayer: function(arrow, hero) {
     // just for clear `enemy` event
     // same as `onPlayerArrowOverlapEnemy`
     arrow.kill();
   },
 
+  /**
+   * Callback event when enemy arrow overlap enemy
+   * 
+   * @param {[type]} arrow
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property 
+   */
   onEnemyArrowOverlapEnemy: function(arrow, hero) {
     // just for clear `enemy` event
     // same as `onPlayerArrowOverlapEnemy`
@@ -1139,6 +1325,15 @@ Play.prototype = {
   /*================================================================ Damage, Recover, Kill
    */
 
+  /**
+   * When creature is recovered, that checking
+   * - alive
+   * - life
+   * - timestamp
+   * 
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {string} recoveredFrom
+   */
   onCreatureIsRecovered: function(creature, recoveredFrom) {
     var ts = UTIL.getCurrentUtcTimestamp();
 
@@ -1151,9 +1346,13 @@ Play.prototype = {
   },
 
   /**
-   * When creature is damaged
+   * When creature is damaged, that checking
+   * - alive
+   * - life
+   * - timestamp
+   * - immortal mode
    * 
-   * @param {Object} creature - creature object
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    * @param {string} damageFrom - where is the damage come frome
    */
   onCreatureIsDamaged: function(creature, damageFrom) {
@@ -1178,6 +1377,12 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When creature is recovered
+   * 
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {string} damageFrom - where is the damage come frome
+   */
   recoverCreature: function(creature, recoveredFrom) {
     if (creature.blr.info.type === 'hero') {
       this.recoverHero(creature, recoveredFrom);
@@ -1187,10 +1392,22 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When monster is recovered
+   * 
+   * @param {Phaser.Sprite} monster - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {string} recoveredFrom
+   */
   recoverMonster: function(monster, recoveredFrom) {
     // TODO: complete it
   },
 
+  /**
+   * When hero is recovered
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {string} recoveredFrom
+   */
   recoverHero: function(hero, recoveredFrom) {
     var data = {
       playerInfo: hero.blr.info,
@@ -1199,6 +1416,12 @@ Play.prototype = {
     SOCKET.emit(EVENT_NAME.player.isRecovered, data);
   },
 
+  /**
+   * When creature is damaged
+   * 
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {string} damageFrom - where is the damage come frome
+   */
   damageCreature: function(creature, damageFrom) {
     if (creature.blr.info.type === 'hero') {
       if (this.isPlayer(creature)) {
@@ -1213,6 +1436,13 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When monster is damaged, checking monster type
+   * then pick the eventName of that type
+   * 
+   * @param {Phaser.Sprite} monster - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {string} damageFrom
+   */
   damageMonster: function(monster, damageFrom) {
     var monsterType = monster.blr.info.type,
       eventName = '';
@@ -1240,6 +1470,12 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When player is damaged
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {string} damageFrom
+   */
   damagePlayer: function(hero, damageFrom) {
     var data = {
       playerInfo: hero.blr.info,
@@ -1248,14 +1484,26 @@ Play.prototype = {
     SOCKET.emit(EVENT_NAME.player.isDamaged, data);
   },
 
-  damageEnemy: function(enemy, damageFrom) {
+  /**
+   * When enemy is damaged
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {string} damageFrom
+   */
+  damageEnemy: function(hero, damageFrom) {
     var data = {
-      playerInfo: enemy.blr.info,
+      playerInfo: hero.blr.info,
       damageFrom: damageFrom,
     }; 
     SOCKET.emit(EVENT_NAME.player.attackEnemy, data);
   },
 
+  /**
+   * Kill creature
+   * 
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {string} damageFrom
+   */
   killCreature: function(creature, damageFrom) {
     if (creature.blr.info.type === 'hero') {
       if (this.isPlayer(creature)) {
@@ -1303,6 +1551,12 @@ Play.prototype = {
     }
   },
 
+  /**
+   * Kill player
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {string} damageFrom
+   */
   killPlayer: function(hero, damageFrom) {
     var data = {
       playerInfo: hero.blr.info,
@@ -1311,6 +1565,12 @@ Play.prototype = {
     SOCKET.emit(EVENT_NAME.player.isDied, data);
   },
 
+  /**
+   * Kill enemy
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {string} damageFrom
+   */
   killEnemy: function(hero, damageFrom) {
     var data = {
       playerInfo: hero.blr.info,
@@ -1322,6 +1582,11 @@ Play.prototype = {
   /*================================================================ Event
    */
 
+  /**
+   * Player fire arrow 
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   */
   playerFireArrow: function(hero) {
     var ts = UTIL.getCurrentUtcTimestamp();
 
@@ -1359,6 +1624,8 @@ Play.prototype = {
   /**
    * Player fire arrow by keyboard
    * based on `playerFireArrow`
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
    */
   playerFireArrowByKeyboard: function(hero) {
     var ts = UTIL.getCurrentUtcTimestamp();
@@ -1386,6 +1653,11 @@ Play.prototype = {
     }
   },
 
+  /**
+   * Enemy fire arrow 
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   */
   enemyFireArrow: function(hero, targetPos) {
     // force fire
     this.heroFireArrow(hero, targetPos);
@@ -1394,8 +1666,8 @@ Play.prototype = {
   /**
    * Fire arrow
    * 
-   * @param {Object} Phaser sprite object
-   * @param {Position} target position
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {Position} targetPos
    */
   heroFireArrow: function(hero, targetPos) {
     // update lastVector rotation
@@ -1420,6 +1692,9 @@ Play.prototype = {
     );
   },
 
+  /**
+   * Move player using mouse
+   */
   playerMove: function() {
     // move
     GAME.physics.arcade.moveToPointer(this.player, this.player.blr.info.velocitySpeed);
@@ -1476,6 +1751,9 @@ Play.prototype = {
     SOCKET.emit(EVENT_NAME.player.move, data);
   },
 
+  /**
+   * Rotate player using keyboard
+   */
   playerRotateByKeyboard: function(angularVelocity) {
     this.player.body.angularVelocity = angularVelocity;
 
@@ -1492,6 +1770,9 @@ Play.prototype = {
     SOCKET.emit(EVENT_NAME.player.rotate, data);
   },
 
+  /**
+   * Player send message
+   */
   playerSendMessage: function() {
     var ts = UTIL.getCurrentUtcTimestamp();
 
@@ -1540,6 +1821,9 @@ Play.prototype = {
   /*================================================================ Socket
    */
 
+  /**
+   * Set all socket events
+   */
   setSocketHandlers: function() {
     SOCKET.on(EVENT_NAME.server.newPlayer, this.onPlayerConnect.bind(this));
     SOCKET.on(EVENT_NAME.server.disconnectedPlayer, this.onPlayerDisconnect.bind(this));
@@ -1583,6 +1867,11 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.server.batMove, this.onBatMove.bind(this));
   },
 
+  /**
+   * When player is ready to play
+   * 
+   * @param {Object}
+   */
   onPlayerReady: function(data) {
     if (IS_DEBUG) UTIL.clientLog('Init data', data);
     var zombieInfos = data.zombieInfos,
@@ -1677,6 +1966,11 @@ Play.prototype = {
     this.isGameReady = true;
   },
 
+  /**
+   * When enemy is connected
+   * 
+   * @param {Object}
+   */
   onPlayerConnect: function(data) {
     var playerInfo = data.playerInfo;
     UTIL.clientLog('New player is connected', playerInfo);
@@ -1686,6 +1980,11 @@ Play.prototype = {
     this.spawnEnemy(playerInfo);
   },
 
+  /**
+   * When enemy is disconnected
+   * 
+   * @param {Object}
+   */
   onPlayerDisconnect: function(data) {
     var playerInfo = data.playerInfo;
     UTIL.clientLog('Player is disconnected', playerInfo);
@@ -1715,6 +2014,11 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When enemy send a message
+   * 
+   * @param {Object}
+   */
   onPlayerMessage: function(data) {
     var playerInfo = data.playerInfo,
       enemy = this.getEnemyByPlayerId(playerInfo.id);
@@ -1733,6 +2037,11 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When enemy move
+   * 
+   * @param {Object}
+   */
   onPlayerMove: function(data) {
     var playerInfo = data.playerInfo,
       enemy = this.getEnemyByPlayerId(playerInfo.id);
@@ -1753,6 +2062,11 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When enemy rotate
+   * 
+   * @param {Object}
+   */
   onPlayerRotate: function(data) {
     var playerInfo = data.playerInfo,
       enemy = this.getEnemyByPlayerId(playerInfo.id);
@@ -1770,6 +2084,11 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When enemy fire arrow
+   * 
+   * @param {Object}
+   */
   onPlayerFire: function(data) {
     var playerInfo = data.playerInfo,
       targetPos = data.targetPos,
@@ -1785,6 +2104,11 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When enemy is damaged
+   * 
+   * @param {Object}
+   */
   onPlayerIsDamaged: function(data) {
     var playerInfo = data.playerInfo,
       damageFrom = data.damageFrom,
@@ -1796,12 +2120,22 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When player is damaged
+   * 
+   * @param {Object}
+   */
   onPlayerIsDamagedItSelf: function(data) {
     var damageFrom = data.damageFrom;
     
     this.damageHeroAfterGotSubsequentRequest(this.player, damageFrom);
   },
-  
+
+  /**
+   * When enemy is recovered
+   * 
+   * @param {Object}
+   */
   onPlayerIsRecovered: function(data) {
     var playerInfo = data.playerInfo,
       recoveredFrom = data.recoveredFrom,
@@ -1813,12 +2147,22 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When player is recovered
+   * 
+   * @param {Object}
+   */
   onPlayerIsRecoveredItSelf: function(data) {
     var recoveredFrom = data.recoveredFrom;
 
     this.recoverHeroAfterGotSubsequentRequest(this.player, recoveredFrom);
   },
 
+  /**
+   * When enemy is died
+   * 
+   * @param {Object}
+   */
   onPlayerIsDied: function(data) {
     var playerInfo = data.playerInfo,
       damageFrom = data.damageFrom,
@@ -1830,12 +2174,22 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When player is died
+   * 
+   * @param {Object}
+   */
   onPlayerIsDiedItSelf: function(data) {
     var damageFrom = data.damageFrom;
 
     this.killHeroAfterGotSubsequentRequest(this.player, damageFrom);
   },
 
+  /**
+   * When enemy is respawn
+   * 
+   * @param {Object}
+   */
   onPlayerIsRespawn: function(data) {
     var playerInfo = data.playerInfo,
       enemy = this.getEnemyByPlayerId(playerInfo.id);
@@ -1845,6 +2199,11 @@ Play.prototype = {
     }
   },
 
+  /**
+   * When player is respawn
+   * 
+   * @param {Object}
+   */
   onPlayerIsRespawnItSelf: function(data) {
     var playerInfo = data.playerInfo;
 
@@ -1852,7 +2211,12 @@ Play.prototype = {
     this.respawnHero(this.player, data.playerInfo);
   },
 
-  // TODO: refactor
+  /**
+   * when player / enemy attack zombie
+   * TODO: refactor
+   * 
+   * @param {Object}
+   */
   onPlayerAttackZombie: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1863,7 +2227,12 @@ Play.prototype = {
     }
   },
 
-  // TODO: refactor
+  /**
+   * When player / enemy attack machine
+   * TODO: refactor
+   * 
+   * @param {Object}
+   */
   onPlayerAttackMachine: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1874,7 +2243,12 @@ Play.prototype = {
     }
   },
 
-  // TODO: refactor
+  /**
+   * When player / enemy attack bat
+   * TODO: refactor
+   * 
+   * @param {Object}
+   */
   onPlayerAttackBat: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1885,7 +2259,12 @@ Play.prototype = {
     }
   },
 
-  // TODO: refactor
+  /**
+   * When player / enemy kill zombie
+   * TODO: refactor
+   * 
+   * @param {Object}
+   */
   onPlayerKillZombie: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1896,7 +2275,12 @@ Play.prototype = {
     }
   },
 
-  // TODO: refactor
+  /**
+   * When player / enemy kill machine
+   * TODO: refactor
+   * 
+   * @param {Object}
+   */
   onPlayerKillMachine: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1907,7 +2291,12 @@ Play.prototype = {
     }
   },
 
-  // TODO: refactor
+  /**
+   * When player / enemy kill bat
+   * TODO: refactor
+   * 
+   * @param {Object}
+   */
   onPlayerKillBat: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1918,7 +2307,12 @@ Play.prototype = {
     }
   },
 
-  // TODO: refactor
+  /**
+   * When zombie is respawn
+   * TODO: refactor
+   * 
+   * @param {Object}
+   */
   onRespawnZombie: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1929,7 +2323,12 @@ Play.prototype = {
     }
   },
 
-  // TODO: refactor
+  /**
+   * When machine is respawn
+   * TODO: refactor
+   * 
+   * @param {Object}
+   */
   onRespawnMachine: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1940,7 +2339,12 @@ Play.prototype = {
     }
   },
 
-  // TODO: refactor
+  /**
+   * When bat is respawn
+   * TODO: refactor
+   * 
+   * @param {Object}
+   */
   onRespawnBat: function(data) {
     var monsterInfo = data.monsterInfo,
       damageFrom = data.damageFrom,
@@ -1954,6 +2358,8 @@ Play.prototype = {
   /**
    * On player attack enemy
    * based on `onPlayerIsDamaged`
+   * 
+   * @param {Object}
    */
   onPlayerAttackEnemy: function(data) {
     var playerInfo = data.playerInfo,
@@ -1973,6 +2379,8 @@ Play.prototype = {
   /**
    * On player kill enemy
    * based on `onPlayerIsDied`
+   * 
+   * @param {Object}
    */
   onPlayerKillEnemy: function(data) {
     var playerInfo = data.playerInfo,
@@ -1991,7 +2399,9 @@ Play.prototype = {
 
   /**
    * On respawn enemy
-   * based on onPlayerIsRespawn
+   * based on `onPlayerIsRespawn`
+   * 
+   * @param {Object}
    */
   onRespawnEnemy: function(data) {
     var playerInfo = data.playerInfo,
@@ -2008,10 +2418,22 @@ Play.prototype = {
     }
   },
 
+  /**
+   * On zombie move
+   * TODO: complete it
+   * 
+   * @param {Array.Object}
+   */
   onZombieMove: function(dataArr) {
     
   },
 
+  /**
+   * On machine fire
+   * TODO: complete it
+   * 
+   * @param {Array.Object}
+   */
   onMachineFire: function(dataArr) {
     var nData = dataArr.length,
       i = 0;
@@ -2046,6 +2468,8 @@ Play.prototype = {
   /**
    * On bat move
    * TODO: complete it
+   * 
+   * @param {Array.Object}
    */
   onBatMove: function(dataArr) {
 
@@ -2054,6 +2478,12 @@ Play.prototype = {
   /*================================================================ Socket subsequent request
    */
 
+  /**
+   * Kill hero after got subsequent request
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {strimg} damageFrom
+   */
   killHeroAfterGotSubsequentRequest: function(hero, damageFrom) {
     hero.blr.info.life--;
     hero.blr.updateLastDamageTimestamp();
@@ -2074,6 +2504,9 @@ Play.prototype = {
   /**
    * Kill monster after got subsequent request
    * based on `killHeroAfterGotSubsequentRequest`
+   * 
+   * @param {Phaser.Sprite} monster - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {strimg} damageFrom
    */
   killMonsterAfterGotSubsequentRequest: function(monster, damageFrom) {
     monster.blr.info.life--;
@@ -2092,6 +2525,12 @@ Play.prototype = {
     this.logOnCreatureIsDied(monster, damageFrom);
   },
 
+  /**
+   * Recover hero after got subsequent request
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {strimg} recoveredFrom
+   */
   recoverHeroAfterGotSubsequentRequest: function(hero, recoveredFrom) {
     hero.blr.info.life++;
 
@@ -2100,6 +2539,12 @@ Play.prototype = {
     this.logOnCreatureIsRecovered(hero, recoveredFrom);
   },
 
+  /**
+   * Damage hero after got subsequent request
+   * 
+   * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {strimg} damageFrom
+   */
   damageHeroAfterGotSubsequentRequest: function(hero, damageFrom) {
     hero.blr.info.life--;
 
@@ -2108,6 +2553,12 @@ Play.prototype = {
     this.logOnCreatureIsDamaged(hero, damageFrom);
   },
 
+  /**
+   * Damage monster after got subsequent request
+   * 
+   * @param {Phaser.Sprite} monster - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {strimg} damageFrom
+   */
   damageMonsterAfterGotSubsequentRequest: function(monster, damageFrom) {
     // same as `damageHeroAfterGotSubsequentRequest`
     monster.blr.info.life--;
@@ -2117,6 +2568,14 @@ Play.prototype = {
     this.logOnCreatureIsDamaged(monster, damageFrom);
   },
 
+  /**
+   * forceUpdateEnemyAfterGotSubsequentRequest
+   * same as `forceUpdateCreatureAfterGotSubsequentRequest`
+   * 
+   * @param {Phaser.Sprite} enemy - Phaser.Sprite that contain `Creature` object in `blr` property
+   * @param {number} life
+   * @param {Vector} currentVector
+   */
   forceUpdateEnemyAfterGotSubsequentRequest: function(enemy, life, currentVector) {
     this.forceUpdateCreatureAfterGotSubsequentRequest(enemy, life, currentVector);
   },
@@ -2138,7 +2597,7 @@ Play.prototype = {
    * - body y
    * - body rotation
    * 
-   * @param {Phaser.Sprite} enemy that contain `Creature` object in `blr` property
+   * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    * @param {number} life
    * @param {Vector} currentVector
    */

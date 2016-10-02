@@ -62,16 +62,29 @@ var Ui = {
   /*================================================================ Message
    */
 
+  /**
+   * Get message text from the input
+   * 
+   * @returns {string}
+   */
   getMessageInput: function() {
     return this.messageInputEle.value;
   },
 
+  /**
+   * Enable message input
+   * so we can type into it
+   */
   enableMessageInput: function() {
     this.messageInputEle.style.opacity = 1;
     this.messageInputEle.style.pointerEvents = 'visible';
     this.messageInputEle.focus();
   },
 
+  /**
+   * Disable message input
+   * so we cannot type anymore
+   */
   disableMessageInput: function() {
     this.messageInputEle.style.opacity = .4;
     this.messageInputEle.style.pointerEvents = 'none';
