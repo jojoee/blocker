@@ -1,6 +1,26 @@
 # Blocker
 Multiplayer online game using Phaser + WebSocket (Socket.IO).
 
+## Control
+```
+1. Mouse
+- Left: move
+- Right: fire
+
+2. Keyboard
+- Up: move
+- Left / Right: rorate
+- Spacebar: fire
+```
+
+## Gifshot
+
+Hit very HARD!
+
+Burnnnnn! ... die
+
+We are debugging
+
 ## Getting Started
 1. Install [Node.js](https://nodejs.org/en/)
 2. Install Nodemon Bower Gulp: `npm install -g nodemon gulp bower`
@@ -56,108 +76,42 @@ take effect from subsequent request. (currently, there are only 2 events
 (move / fire) that can execute on client before broadcasting)
 ```
 
-## Gifshot
-
-Hit very HARD!
-
-Burnnnnn! ... die
-
-We are debugging
-
 ## TODO
-- [x] `spacebar` can fire arrow
-- [x] Respawn monster when it's died
 - [ ] Respawn delay
-- [x] Messaging
-- [x] Machine fire laser
-- [x] Monster (random walk)
-- [x] Implement webfont
-- [x] Implement module pattern both client and server
-- [x] Gulp.js for client development
-- [x] Nodemon for server development
-- [x] Weapon behind the player
-- [x] Move player body in front of weapon
 - [x] Map by [Tiled Map Editor](http://www.mapeditor.org/)
-- [x] Control: Mouse (mouse over keyboard)
 - [ ] Redirect all pages to root (cause we only use root page)
 - [ ] Update bubble/message graphic, [1](http://www.html5gamedevs.com/topic/8837-speech-bubble-text-with-rectangle-as-background/)
 - [ ] Add deploy shell script
 - [ ] Day / Night system
-- [ ] Monster path finder, [1](http://jojoee.github.io/phaser-examples/games/paths-face/), [2](http://jojoee.github.io/phaser-examples/games/boids-steering/), [3](http://jojoee.github.io/phaser-examples/games/easystarjs/)
-- [ ] Player / Enemy can collect item in the floor
 - [ ] Implement [Shields.io](https://shields.io/)
 - [x] minimap, [1](http://www.html5gamedevs.com/topic/14182-creating-a-mini-map-in-phaser/), [2](http://www.html5gamedevs.com/topic/14930-creating-a-mini-map-from-a-render-texture/), [3](https://gist.github.com/jafrmartins/73e1e344237c980f3707f2760835f0bf)
-- [x] Invisible mode
-- [ ] Creature sight feature, [1](http://jojoee.github.io/phaser-examples/games/bresenham-light/), [2](http://www.emanueleferonato.com/wp-content/uploads/2014/10/survival/), [3](http://jojoee.github.io/phaser-examples/games/horror-ray-casting/)
-- [ ] Tutorial for development
-- [ ] Talkable monster
-- [ ] Arorw / Laser is killed when hit stoneGroup
 - [ ] Responsive (support mobile / tablet user)
 - [ ] Support screen when resizing 
-- [ ] Add test (TDD) with test-task-runner, [1](https://github.com/gulpjs/gulp/blob/master/docs/recipes/mocha-test-runner-with-gulp.md)
-- [x] Universal / Isomorphic concepts
-- [ ] Plugin: Screen shaker when player's attacked
 - [ ] HUD
-- [x] Bring `creature label` to the top
-- [x] Player always top
-- [ ] Boss mode
-- [ ] Score system
-- [x] Immortal mode for debugging
 - [ ] Score board (Leader board)
-- [ ] Update Favicon
-- [x] Concat + Minify
-- [ ] Cache (server)
-- [ ] Cache (client with Service Worker)
+- [ ] Cache
 - [ ] Knockback when creature is hitted
-- [x] Log system
-- [ ] Error system
-- [ ] Testing
-- [ ] Document
-- [ ] Analysis
-- [ ] Optimize / Profiling
-- [ ] Quality tools (e.g. sonarqube)
-- [x] Preload / Loading screen
+- [ ] Add test (TDD) with test-task-runner, [1](https://github.com/gulpjs/gulp/blob/master/docs/recipes/mocha-test-runner-with-gulp.md)
+- [ ] QA - Analysis / Optimize / Profiling / ETC (e.g. sonarqube)
 - [ ] Sound
-- [ ] Effect / Screen transition
-- [ ] Refactor
-- [ ] Local storage
-- [ ] Update DocBlockr
-- [ ] Character selector
-- [ ] Implement monster nest
-- [ ] Update all graphics + Font
-- [ ] Multi line chat
-- [x] Log combat (e.g. atk, kill)
-- [ ] Log filter
-- [x] Set emitter
-- [x] Using [pm2](https://github.com/Unitech/pm2) for deploy
-- [ ] Tween: player move 
-- [ ] Tween: monster move
+- [ ] Effect / Screen transition / Screen shake
 - [ ] Fix - Creature is damaged and welled in the same time
-+ [x] Global chat
-+ [x] Make it online
-+ [ ] Typing status
-+ [ ] Private chat
-+ [x] Online player
-+ [ ] Chat log (256 messages)
-+ [ ] GM mode / id
-+ [ ] Command (that used by player e.g. list all players)
-+ [ ] Room / Channel (able to create private room), [1](https://divillysausages.com/2015/07/12/an-intro-to-socket-io/), [2](http://www.tamas.io/advanced-chat-using-node-js-and-socket-io-episode-1/), [3](https://www.joezimjs.com/javascript/plugging-into-socket-io-advanced/)
-* [ ] Facebook like + comment
-* [ ] Add social meta (og meta)
-* [ ] Add [Github ribbon](http://tholman.com/github-corners/)
-* [ ] Add Social share
-* [ ] Bot player
-* [ ] Bot (make it smoother)
+- [ ] Arrow / Laser is killed when hit stoneGroup
+- [ ] Room / Channel (able to create private room), [1](https://divillysausages.com/2015/07/12/an-intro-to-socket-io/), [2](http://www.tamas.io/advanced-chat-using-node-js-and-socket-io-episode-1/), [3](https://www.joezimjs.com/javascript/plugging-into-socket-io-advanced/)
+- [ ] Add social meta / share
+- [ ] Bot player
+- [ ] Tween: player move
+- [ ] Hero can collect item in the floor
+- [ ] Other class (e.g. Swordsman)
+- [ ] Monster path finder, [1](http://jojoee.github.io/phaser-examples/games/paths-face/), [2](http://jojoee.github.io/phaser-examples/games/boids-steering/), [3](http://jojoee.github.io/phaser-examples/games/easystarjs/)
+- [ ] Creature sight feature, [1](http://jojoee.github.io/phaser-examples/games/bresenham-light/), [2](http://www.emanueleferonato.com/wp-content/uploads/2014/10/survival/), [3](http://jojoee.github.io/phaser-examples/games/horror-ray-casting/)
+- [ ] Monster walk - random walk
+- [ ] Monster can be fired, welled
+- [ ] Talkable monster
+- [ ] Tween: monster move
 
 ## In considering
 - [ ] [appmetrics.js](https://github.com/ebidel/appmetrics.js)
-- [x] Remove jQuery
-- [x] Remove lodash
-- [x] Remove moment
-- [ ] Promise
-- [ ] Optimize player list (e.g. using `Angular`, etc.)
-- [x] CSS preprocessor
-- [ ] Create own `screen-shake` plugin
 
 ## Reference & Tutorial & Plugin & Tool
 - Inspired by [Blocker](http://blockergame.com/)
