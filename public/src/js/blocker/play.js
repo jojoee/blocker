@@ -1750,24 +1750,14 @@ Play.prototype = {
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
-
-      enemy.blr.info.life++;
-
-      this.playRecoverParticle(enemy);
-      enemy.animations.play('recover', 10, false, false);
-      this.logOnCreatureIsRecovered(enemy, recoveredFrom);
+      this.recoverHeroAfterGotSubsequentRequest(enemy, recoveredFrom);
     }
   },
 
   onPlayerIsRecoveredItSelf: function(data) {
     var recoveredFrom = data.recoveredFrom;
-    
-    // same as `onPlayerIsRecovered`
-    this.player.blr.info.life++;
 
-    this.playRecoverParticle(this.player);
-    this.player.animations.play('recover', 10, false, false);
-    this.logOnCreatureIsRecovered(this.player, recoveredFrom);
+    this.recoverHeroAfterGotSubsequentRequest(this.player, recoveredFrom);
   },
 
   onPlayerIsDied: function(data) {
@@ -1778,7 +1768,6 @@ Play.prototype = {
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyFromSocketEvent(enemy, playerInfo.life, playerInfo.lastVector);
       this.killHeroAfterGotSubsequentRequest(enemy, damageFrom);
-      this.logOnCreatureIsDied(enemy, damageFrom);
     }
   },
 
@@ -1786,7 +1775,6 @@ Play.prototype = {
     var damageFrom = data.damageFrom;
 
     this.killHeroAfterGotSubsequentRequest(this.player, damageFrom);
-    this.logOnCreatureIsDied(this.player, damageFrom);
   },
 
   onPlayerIsRespawn: function(data) {
@@ -1845,9 +1833,7 @@ Play.prototype = {
       monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup);
 
     if (!UTIL.isEmptyObject(monster)) {
-      this.forceUpdateMonsterFromSocketEvent(monster, monsterInfo.life, monsterInfo.lastVector);
       this.killMonsterAfterGotSubsequentRequest(monster, damageFrom);
-      this.logOnCreatureIsDied(monster, damageFrom);
     }
   },
 
@@ -1858,9 +1844,7 @@ Play.prototype = {
       monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup);
 
     if (!UTIL.isEmptyObject(monster)) {
-      this.forceUpdateMonsterFromSocketEvent(monster, monsterInfo.life, monsterInfo.lastVector);
       this.killMonsterAfterGotSubsequentRequest(monster, damageFrom);
-      this.logOnCreatureIsDied(monster, damageFrom);
     }
   },
 
@@ -1871,9 +1855,7 @@ Play.prototype = {
       monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup);
 
     if (!UTIL.isEmptyObject(monster)) {
-      this.forceUpdateMonsterFromSocketEvent(monster, monsterInfo.life, monsterInfo.lastVector);
       this.killMonsterAfterGotSubsequentRequest(monster, damageFrom);
-      this.logOnCreatureIsDied(monster, damageFrom);
     }
   },
 
@@ -1940,13 +1922,11 @@ Play.prototype = {
     // I am died ?
     if (this.isPlayer(playerInfo.id)) {
       this.killHeroAfterGotSubsequentRequest(this.player, damageFrom);
-      this.logOnCreatureIsDied(this.player, damageFrom);
 
     } else {
       var enemy = this.getEnemyByPlayerId(playerInfo.id);
 
       this.killHeroAfterGotSubsequentRequest(enemy, damageFrom);
-      this.logOnCreatureIsDied(enemy, damageFrom);
     }
   },
 
@@ -1982,6 +1962,8 @@ Play.prototype = {
     hero.blr.bubble.kill();
     // hero.blr.bullet.kill();
     hero.kill();
+
+    this.logOnCreatureIsDied(hero, damageFrom);
   },
 
   /**
@@ -2001,6 +1983,16 @@ Play.prototype = {
     // monster.blr.bubble.kill();
     // monster.blr.bullet.kill();
     monster.kill();
+    
+    this.logOnCreatureIsDied(monster, damageFrom);
+  },
+
+  recoverHeroAfterGotSubsequentRequest: function(hero, recoveredFrom) {
+    hero.blr.info.life++;
+
+    this.playRecoverParticle(hero);
+    hero.animations.play('recover', 10, false, false);
+    this.logOnCreatureIsRecovered(hero, recoveredFrom);
   },
 
   damageHeroAfterGotSubsequentRequest: function(hero, damageFrom) {
@@ -2020,10 +2012,22 @@ Play.prototype = {
     this.logOnCreatureIsDamaged(monster, damageFrom);
   },
 
+  forceUpdateEnemyFromSocketEvent: function(enemy, life, currentVector) {
+    this.forceUpdateCreatureFromSocketEvent(enemy, life, currentVector);
+  },
+
   /**
    * This function will force update
-   * (it's used every time when receive enemy event data from socket event
-   * except `ready`, `connect`, `disconnect`, `respawn` event)
+   * it's used every time when receive enemy event data from socket event except
+   * - ready
+   * - connect
+   * - disconnect
+   * - respawn
+   * - monster related (cause it's completely controlled by server)
+   * - enemy related (cause it's completely controlled by other clients)
+   * so, now we only force update player event
+   * 
+   * and it will force update
    * - life
    * - body x
    * - body y
@@ -2033,14 +2037,6 @@ Play.prototype = {
    * @param {number} life
    * @param {Vector} currentVector
    */
-  forceUpdateEnemyFromSocketEvent: function(enemy, life, currentVector) {
-    this.forceUpdateCreatureFromSocketEvent(enemy, life, currentVector);
-  },
-
-  forceUpdateMonsterFromSocketEvent: function(monster, life, currentVector) {
-    this.forceUpdateCreatureFromSocketEvent(monster, life, currentVector);
-  },
-
   forceUpdateCreatureFromSocketEvent: function(creature, life, currentVector) {
     creature.blr.info.life = life;
     creature.x = currentVector.x;
