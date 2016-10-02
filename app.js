@@ -621,7 +621,7 @@ IO.on('connection', function(socket) {
     
     if (monsterIdx > -1) {
       // die event
-      IO.emit(EVENT_NAME.player.kilLBat, data);
+      IO.emit(EVENT_NAME.player.killBat, data);
 
       // reset monster info
       var newStartVector = getRandomStartCreatureVector();

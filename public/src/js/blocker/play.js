@@ -2095,7 +2095,8 @@ Play.prototype = {
       if (!UTIL.isEmptyObject(monster)) {
         var ts = UTIL.getCurrentUtcTimestamp();
 
-        if (ts > monster.blr.misc.nextFireTimestamp &&
+        if (monster.alive &&
+          ts > monster.blr.misc.nextFireTimestamp &&
           monster.blr.bullet.countDead() > 0) {
           monster.blr.misc.nextFireTimestamp = ts + monster.blr.misc.fireRate;
 
