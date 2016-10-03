@@ -44,6 +44,7 @@ var PLAYER_INFOS = [];
 
 initVirtualMap();
 initMonsters();
+initBots();
 
 // Set static file
 APP.use('/public', EXPRESS.static(STATIC_PATH));
@@ -145,6 +146,20 @@ function initMonsters() {
   for (i = 0; i < nBats; i++) {
     var creatureInfo = getNewBatInfo();
     BAT_INFOS.push(creatureInfo);
+  }
+}
+
+/**
+ * Initial bot player
+ * - stay
+ */
+function initBots() {
+  var nBots = 4,
+    i = 0;
+
+  for (i = 0; i < nBots; i++) {
+    var heroInfo = getNewPlayerInfo();
+    PLAYER_INFOS.push(heroInfo); 
   }
 }
 
