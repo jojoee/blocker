@@ -1359,7 +1359,7 @@ Play.prototype = {
     var ts = UTIL.getCurrentUtcTimestamp();
 
     // force kill (just in case)
-    if (creature <= 0) this.killCreature(creature, damageFrom);
+    if (creature.blr.info.life <= 0) this.killCreature(creature, damageFrom);
 
     if (creature.alive &&
       creature.blr.info.life > 0 &&
