@@ -10,7 +10,6 @@ var config = require('./../../../common/config'),
   blocker = require('./blocker'),
   socketUrl = location.protocol + '//' + location.hostname + ':' + config.serverPort;
 
-window.FAKER = require('faker');
 window.COMMON_MODULE = require('./../../../common/module');
 window.UI = require('./ui');
 window.UTIL = require('./../../../common/util');
