@@ -15,7 +15,7 @@ var Util = {
    * 
    * @see http://stackoverflow.com/questions/154059/how-do-you-check-for-an-empty-string-in-javascript
    * 
-   * @param {String|Array|null}
+   * @param {string|Array|null}
    * @returns {boolean}
    */
   isEmpty: function(a) {

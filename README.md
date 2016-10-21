@@ -43,8 +43,8 @@ for develop the client side, please run - `gulp watch`
   e.g.
   - getName: string, '' (default)
   - getRandomInt: number, 0 (default)
-  - getPlayers: array, [] (default)
-  - getPlayer: object, {} (default)
+  - getPlayers: Array, [] (default)
+  - getPlayer: Object, {} (default)
 
   except getIndex
   e.g.
