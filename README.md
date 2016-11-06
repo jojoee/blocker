@@ -75,6 +75,7 @@ take effect from subsequent request. (currently, there are only 2 events
 ```
 
 ## TODO
+- [ ] Using [MessagePack](http://msgpack.org/) instead of JSON
 - [ ] Respawn delay
 - [x] Map by [Tiled Map Editor](http://www.mapeditor.org/)
 - [ ] Redirect all pages to root (cause we only use root page)
