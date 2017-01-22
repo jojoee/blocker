@@ -1,4 +1,6 @@
 # Blocker
+[![Build Status](https://travis-ci.org/jojoee/blocker.svg)](https://travis-ci.org/jojoee/blocker)
+
 Multiplayer online game using Phaser + WebSocket (Socket.IO).
 
 ## Control
@@ -21,18 +23,18 @@ Multiplayer online game using Phaser + WebSocket (Socket.IO).
 
 ## Getting Started
 1. Install [Node.js](https://nodejs.org/en/)
-2. Install Nodemon Bower Gulp: `npm install -g nodemon gulp bower`
-3. Install dependencies: `npm install & bower install`
+2. Install Nodemon Bower Gulp: `npm install -g nodemon yarn bower`
+3. Install dependencies: `yarn && bower install`
 4. Start: `node app.js`
-5. Build client script: `gulp`
+5. Build client script: `npm run build`
 6. Enjoy!
 ```
-for develop the client side, please run - `gulp watch`
+for develop the client side, please run - `npm run build.watch`
 ```
 
 ## Deploy
 1. Install `pm2`: `npm install pm2 -g`
-2. Build client script: `gulp`
+2. Build client script: `npm run build`
 3. Run app: `pm2 start app.js`
 
 ## Note
@@ -75,6 +77,8 @@ take effect from subsequent request. (currently, there are only 2 events
 ```
 
 ## TODO
+- [ ] Separate "devDependencies" from "dependencies"
+- [ ] Add `checkAlive` event: the player is already gone, but it's still in the game (cause from network issue)
 - [ ] Using [MessagePack](http://msgpack.org/) instead of JSON
 - [ ] Respawn delay
 - [x] Map by [Tiled Map Editor](http://www.mapeditor.org/)
