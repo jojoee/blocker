@@ -12,7 +12,7 @@
 *.tar.gz
 *DS_store
 
-bk
+bk*
 logs
 npm-debug.log
 node_modules
