@@ -44,7 +44,9 @@ var PLAYER_INFOS = [];
 
 initVirtualMap();
 initMonsters();
-initBots();
+
+// disable bot (for now)
+// initBots();
 
 // Set static file
 APP.use('/public', EXPRESS.static(STATIC_PATH));
