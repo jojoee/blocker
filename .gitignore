@@ -8,6 +8,10 @@ bk*
 logs
 npm-debug.log
 
+# IDE
+.idea
+.vscode
+
 # dependency
 node_modules
 bower_components
