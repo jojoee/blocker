@@ -6,10 +6,10 @@
  * `server`: other else is (e.g. newPlayer)
  */
 
-var eventPlayerPrefix = 'player.',
-  eventServerPrefix = 'server.'
+const eventPlayerPrefix = 'player.'
+const eventServerPrefix = 'server.'
 
-var commonConfig = {
+const commonConfig = {
   // prod
   isProd: true,
 

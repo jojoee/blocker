@@ -1,14 +1,13 @@
-var GCONFIG = require('./config'),
-  MODULE = require('./../../../../common/module'),
-  GUTIL = require('./../../../../common/gutil'),
-  Position = MODULE.Position,
-  Vector = MODULE.Vector,
-  Hero = MODULE.Hero,
-  Zombie = MODULE.Zombie,
-  Machine = MODULE.Machine,
-  Bat = MODULE.Bat
+const GCONFIG = require('./config')
+const MODULE = require('./../../../../common/module')
+const GUTIL = require('./../../../../common/gutil')
+const Position = MODULE.Position
+const Hero = MODULE.Hero
+const Zombie = MODULE.Zombie
+const Machine = MODULE.Machine
+const Bat = MODULE.Bat
 
-Play = function (GAME) {
+Play = function (GAME) { // eslint-disable-line
   /** @type {boolean} flag for checking the client is ready to play */
   this.isGameReady = false
 
@@ -34,47 +33,47 @@ Play = function (GAME) {
   this.player = {}
 
   // floor
-  this.floorGroup
-  this.vtmapDebugGroup
-  this.stoneShadowGroup
-  this.stoneGroup
+  this.floorGroup = null
+  this.vtmapDebugGroup = null
+  this.stoneShadowGroup = null
+  this.stoneGroup = null
 
   // monster
-  this.monsterShadowGroup
-  this.zombieWeaponGroup
-  this.zombieGroup
-  this.machineWeaponGroup
-  this.machineGroup
-  this.batWeaponGroup
-  this.batGroup
+  this.monsterShadowGroup = null
+  this.zombieWeaponGroup = null
+  this.zombieGroup = null
+  this.machineWeaponGroup = null
+  this.machineGroup = null
+  this.batWeaponGroup = null
+  this.batGroup = null
 
   // hero
-  this.heroShadowGroup
-  this.enemyWeaponGroup
-  this.enemyGroup
-  this.playerWeaponGroup
-  this.playerGroup
+  this.heroShadowGroup = null
+  this.enemyWeaponGroup = null
+  this.enemyGroup = null
+  this.playerWeaponGroup = null
+  this.playerGroup = null
 
   // emitter
-  this.dashEmitterGroup
-  this.damageEmitterGroup
-  this.recoverEmitterGroup
+  this.dashEmitterGroup = null
+  this.damageEmitterGroup = null
+  this.recoverEmitterGroup = null
 
   // bullet
-  this.machineLaserGroup
-  this.enemyArrowGroup
-  this.playerArrowGroup
+  this.machineLaserGroup = null
+  this.enemyArrowGroup = null
+  this.playerArrowGroup = null
 
   // sky
-  this.treeGroup
-  this.miniMapBg
-  this.miniMapUnit
-  this.heroBubbleGroup
+  this.treeGroup = null
+  this.miniMapBg = null
+  this.miniMapUnit = null
+  this.heroBubbleGroup = null
 
   // input
-  this.cursors
-  this.spaceKey
-  this.enterKey
+  this.cursors = null
+  this.spaceKey = null
+  this.enterKey = null
 }
 
 Play.prototype = {
@@ -99,13 +98,13 @@ Play.prototype = {
    * @returns {Position} return walkable position
    */
   getRandomAutoMovePosition: function (monster) {
-    var targetPos,
-      isTooClose = true
+    let targetPos
+    let isTooClose = true
 
     while (isTooClose) {
       targetPos = this.getRandomStartedCreaturePosition()
 
-      var distance = GAME.physics.arcade.distanceToXY(
+      const distance = GAME.physics.arcade.distanceToXY(
         monster,
         targetPos.x,
         targetPos.y
@@ -156,10 +155,7 @@ Play.prototype = {
    * @param {Phaser.Sprite} creature - Phaser.Sprite that contain `Creature` object in `blr` property
    */
   updateCreatureRotationByFollowingMouse: function (creature) {
-    var newX = creature.x,
-      newY = creature.y,
-      newRotation = this.getRotationBetweenCreatureAndMouse(creature)
-
+    const newRotation = this.getRotationBetweenCreatureAndMouse(creature)
     creature.rotation = newRotation
   },
 
@@ -226,9 +222,9 @@ Play.prototype = {
    * @returns {Phaser.Sprite} Phaser.Sprite that contain `Creature` object in `blr` property
    */
   getEnemyByPlayerId: function (playerId) {
-    var isFound = false,
-      result = {},
-      BreakException = {}
+    let isFound = false
+    let result = {}
+    const BreakException = {}
 
     try {
       this.enemyGroup.forEach(function (hero) {
@@ -258,9 +254,9 @@ Play.prototype = {
    * @returns {Phaser.Sprite} Phaser.Sprite that contain `Creature` object in `blr` property
    */
   getMonsterByMonsterIdAndGroup: function (monsterId, monsterGroup) {
-    var isFound = false,
-      result = {},
-      BreakException = {}
+    let isFound = false
+    let result = {}
+    const BreakException = {}
 
     try {
       monsterGroup.forEach(function (monster) {
@@ -300,8 +296,8 @@ Play.prototype = {
    * @returns {Phaser.Sprite} Phaser.Sprite that contain `Creature` object in `blr` property
    */
   getNearestHero: function (position) {
-    var nearestHero = this.player,
-      nearestDistance = UTIL.getDistanceBetween(position, this.player.blr.info.lastVector)
+    let nearestHero = this.player
+    let nearestDistance = UTIL.getDistanceBetween(position, this.player.blr.info.lastVector)
 
     this.enemyGroup.forEachAlive(function (hero) {
       var distance = UTIL.getDistanceBetween(position, hero.blr.info.lastVector)
@@ -407,13 +403,13 @@ Play.prototype = {
    * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
    */
   setHeroBubble: function (creature) {
-    var bubbleStyle = {
-        font: '12px ' + GCONFIG.mainFontFamily,
-        fill: '#000',
-        backgroundColor: '#ffffff',
-        align: 'center'
-      },
-      bubble = GAME.add.text(0, 0, '', bubbleStyle)
+    const bubbleStyle = {
+      font: '12px ' + GCONFIG.mainFontFamily,
+      fill: '#000',
+      backgroundColor: '#ffffff',
+      align: 'center'
+    }
+    let bubble = GAME.add.text(0, 0, '', bubbleStyle)
 
     bubble.anchor.set(0.5, 2.4)
     bubble.padding.set(0)
@@ -444,7 +440,7 @@ Play.prototype = {
    * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
    */
   updateCreatureBubbleText: function (creature) {
-    var bubbletext = creature.blr.info.lastMessage
+    const bubbletext = creature.blr.info.lastMessage
 
     creature.blr.bubble.setText(bubbletext)
   },
@@ -455,9 +451,6 @@ Play.prototype = {
    * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
    */
   updateCreatureBubblePosition: function (creature) {
-    var bubbleLeftOffset = 0,
-      bubbleTopOffset = 0
-
     creature.blr.bubble.x = creature.x
     creature.blr.bubble.y = creature.y
   },
@@ -468,7 +461,7 @@ Play.prototype = {
    * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
    */
   updateCreatureBubbleVisibility: function (creature) {
-    var ts = UTIL.getCurrentUtcTimestamp()
+    const ts = UTIL.getCurrentUtcTimestamp()
 
     if (ts - creature.blr.info.lastMessageTimestamp > this.bubbleDelay) {
       creature.blr.bubble.visible = false
@@ -484,12 +477,12 @@ Play.prototype = {
    * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
    */
   setCreatureLabel: function (creature) {
-    var labelStyle = {
-        font: '13px ' + GCONFIG.mainFontFamily,
-        fill: '#fff',
-        align: 'left'
-      },
-      label = GAME.add.text(0, 0, '', labelStyle)
+    const labelStyle = {
+      font: '13px ' + GCONFIG.mainFontFamily,
+      fill: '#fff',
+      align: 'left'
+    }
+    const label = GAME.add.text(0, 0, '', labelStyle)
 
     creature.addChild(label)
     creature.blr.label = label
@@ -517,7 +510,7 @@ Play.prototype = {
    * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
    */
   updateCreatureLabelText: function (creature) {
-    var labeltext = creature.blr.info.id + ' ' + creature.blr.info.life + '/' + creature.blr.info.maxLife
+    const labeltext = creature.blr.info.id + ' ' + creature.blr.info.life + '/' + creature.blr.info.maxLife
     creature.blr.label.setText(labeltext)
   },
 
@@ -527,8 +520,8 @@ Play.prototype = {
    * @param {Phaser.Sprite} creature - creature that contain `Creature` object in `blr` property
    */
   updateCreatureLabelPosition: function (creature) {
-    var labelLeftOffset = 0,
-      labelTopOffset = -10
+    const labelLeftOffset = 0
+    const labelTopOffset = -10
 
     creature.blr.label.x = -(creature.blr.label.width / 2) - labelLeftOffset
     creature.blr.label.y = -(creature.height / 2) - (creature.blr.label.height / 2) + labelTopOffset
@@ -544,14 +537,14 @@ Play.prototype = {
    */
   spawnZombie: function (creatureInfo) {
     // init
-    var monsterBlr = new Zombie(creatureInfo)
-    var monster = this.spawnMonster(this.zombieGroup, monsterBlr)
+    const monsterBlr = new Zombie(creatureInfo)
+    let monster = this.spawnMonster(this.zombieGroup, monsterBlr)
 
     // animation
     monster.animations.add('blink', [0, 1, 0])
 
     // weapon
-    var weapon = GAME.add.sprite(monster.x, monster.y, 'handsWeapon')
+    const weapon = GAME.add.sprite(monster.x, monster.y, 'handsWeapon')
     weapon.anchor.set(0.5)
     weapon.animations.add('attack', [0, 1, 2, 3, 4])
     weapon.animations.play('attack', 10, true, false)
@@ -570,14 +563,14 @@ Play.prototype = {
    */
   spawnMachine: function (creatureInfo) {
     // init
-    var monsterBlr = new Machine(creatureInfo)
-    var monster = this.spawnMonster(this.machineGroup, monsterBlr)
+    const monsterBlr = new Machine(creatureInfo)
+    let monster = this.spawnMonster(this.machineGroup, monsterBlr)
 
     // animation
     monster.animations.add('blink', [0, 1, 0])
 
     // weapon
-    var weapon = GAME.add.sprite(monster.x, monster.y, 'laserTurretWeapon')
+    const weapon = GAME.add.sprite(monster.x, monster.y, 'laserTurretWeapon')
     weapon.anchor.set(0.5)
     weapon.animations.add('attack', [0, 1, 2])
     weapon.animations.play('attack', 10, true, false)
@@ -586,7 +579,7 @@ Play.prototype = {
     this.machineWeaponGroup.add(monster.blr.weapon)
 
     // bullet
-    var bulletGroup = GAME.add.group()
+    let bulletGroup = GAME.add.group()
     bulletGroup.enableBody = true
     bulletGroup.physicsBodyType = Phaser.Physics.ARCADE
     bulletGroup.createMultiple(monster.blr.misc.nBullets, 'laserBullet')
@@ -608,14 +601,14 @@ Play.prototype = {
    */
   spawnBat: function (creatureInfo) {
     // init
-    var monsterBlr = new Bat(creatureInfo)
-    var monster = this.spawnMonster(this.batGroup, monsterBlr)
+    const monsterBlr = new Bat(creatureInfo)
+    let monster = this.spawnMonster(this.batGroup, monsterBlr)
 
     // animation
     monster.animations.add('blink', [0, 1, 0])
 
     // weapon
-    var weapon = GAME.add.sprite(monster.x, monster.y, 'wingsWeapon')
+    const weapon = GAME.add.sprite(monster.x, monster.y, 'wingsWeapon')
     weapon.anchor.set(0.5)
     weapon.animations.add('attack', [0, 1, 2, 3])
     weapon.animations.play('attack', 10, true, false)
@@ -639,19 +632,19 @@ Play.prototype = {
    * @return {DisplayObject} Phaser DisplayObject
    */
   spawnMonster: function (monsterGroup, monsterBlr) {
-    var monsterPhrInfo = monsterBlr.phrInfo,
-      startVector = monsterBlr.info.startVector
+    const monsterPhrInfo = monsterBlr.phrInfo
+    const startVector = monsterBlr.info.startVector
 
-    var monsterSpriteName = monsterPhrInfo.spriteName,
-      monsterBodyOffset = monsterPhrInfo.bodyOffset,
-      monsterBodyWidth = monsterPhrInfo.width,
-      monsterBodyHeight = monsterPhrInfo.height,
-      monsterBodyWidthSize = monsterBodyWidth - monsterBodyOffset * 2,
-      monsterBodyHeightSize = monsterBodyHeight - monsterBodyOffset * 2,
-      monsterBodyMass = monsterPhrInfo.bodyMass
+    const monsterSpriteName = monsterPhrInfo.spriteName
+    const monsterBodyOffset = monsterPhrInfo.bodyOffset
+    const monsterBodyWidth = monsterPhrInfo.width
+    const monsterBodyHeight = monsterPhrInfo.height
+    const monsterBodyWidthSize = monsterBodyWidth - monsterBodyOffset * 2
+    const monsterBodyHeightSize = monsterBodyHeight - monsterBodyOffset * 2
+    const monsterBodyMass = monsterPhrInfo.bodyMass
 
     // sprite
-    var monster = monsterGroup.create(startVector.x, startVector.y, monsterSpriteName)
+    let monster = monsterGroup.create(startVector.x, startVector.y, monsterSpriteName)
     GAME.physics.enable(monster)
     monster.anchor.set(0.5)
 
@@ -671,7 +664,7 @@ Play.prototype = {
     monster.blr = monsterBlr
 
     // shadow
-    var shadow = GAME.add.sprite(monster.x, monster.y, 'shadow')
+    let shadow = GAME.add.sprite(monster.x, monster.y, 'shadow')
     shadow.anchor.set(0.1)
     shadow.scale.setTo(0.7, 0.7)
     shadow.alpha = 0.3
@@ -694,7 +687,7 @@ Play.prototype = {
    * @param {CreatureInfo} playerInfo
    */
   spawnPlayer: function (playerInfo) {
-    var heroBlr = new Hero(playerInfo)
+    let heroBlr = new Hero(playerInfo)
 
     this.player = this.spawnHero(heroBlr, heroBlr.info.lastVector)
     this.playerGroup.add(this.player)
@@ -710,10 +703,10 @@ Play.prototype = {
    * @param {CreatureInfo} playerInfo
    */
   spawnEnemy: function (playerInfo) {
-    var heroBlr = new Hero(playerInfo)
+    let heroBlr = new Hero(playerInfo)
 
     // same as `spawnPlayer`
-    var enemy = this.spawnHero(heroBlr, heroBlr.info.lastVector)
+    let enemy = this.spawnHero(heroBlr, heroBlr.info.lastVector)
     this.enemyGroup.add(enemy)
     this.enemyWeaponGroup.add(enemy.blr.weapon)
     this.enemyArrowGroup.add(enemy.blr.bullet)
@@ -732,12 +725,12 @@ Play.prototype = {
    */
   spawnHero: function (heroBlr, currentVector) {
     if (typeof currentVector === 'undefined') currentVector = heroBlr.info.startVector
-    var bodyMass = heroBlr.phrInfo.bodyMass,
-      bodyOffset = 8,
-      bodySize = 46 - bodyOffset * 2
+    const bodyMass = heroBlr.phrInfo.bodyMass
+    const bodyOffset = 8
+    const bodySize = 46 - bodyOffset * 2
 
     // init & sprite
-    var hero = GAME.add.sprite(currentVector.x, currentVector.y, 'hero')
+    let hero = GAME.add.sprite(currentVector.x, currentVector.y, 'hero')
     hero.rotation = currentVector.rotation
     hero.blr = heroBlr
     hero.anchor.set(0.5)
@@ -864,17 +857,15 @@ Play.prototype = {
    * Render yello square in a tile that is not walkable
    */
   debugMap: function () {
-    var i = 0, // row
-      j = 0, // column
-      renderPadding = 4
-    mapData = this.VTMap.data,
-      mapTileWidth = this.VTMap.mapTileWidth,
-      mapTileHeight = this.VTMap.mapTileHeight,
-      nTileWidth = this.VTMap.nTileWidth,
-      nTileHeight = this.VTMap.nTileHeight
+    const renderPadding = 4
+    const mapData = this.VTMap.data
+    const mapTileWidth = this.VTMap.mapTileWidth
+    const mapTileHeight = this.VTMap.mapTileHeight
+    const nTileWidth = this.VTMap.nTileWidth
+    const nTileHeight = this.VTMap.nTileHeight
 
-    var bmdWidth = mapTileWidth - renderPadding * 2,
-      bmdHeight = mapTileHeight - renderPadding * 2
+    const bmdWidth = mapTileWidth - renderPadding * 2
+    const bmdHeight = mapTileHeight - renderPadding * 2
 
     var bmd = GAME.add.bitmapData(bmdWidth, bmdHeight)
     bmd.ctx.beginPath()
@@ -882,15 +873,15 @@ Play.prototype = {
     bmd.ctx.fillStyle = 'rgba(240, 240, 100, .6)'
     bmd.ctx.fill()
 
-    for (i = 0; i < nTileWidth; i++) {
-      for (j = 0; j < nTileHeight; j++) {
+    for (let i = 0; i < nTileWidth; i++) {
+      for (let j = 0; j < nTileHeight; j++) {
         var mapPoint = mapData[i][j]
 
         // walkable
         if (mapPoint !== 0) {
-          var x = (j * mapTileHeight) + renderPadding
-          y = (i * mapTileWidth) + renderPadding,
-            drawnObject = GAME.add.sprite(x, y, bmd)
+          const x = (j * mapTileHeight) + renderPadding
+          const y = (i * mapTileWidth) + renderPadding
+          const drawnObject = GAME.add.sprite(x, y, bmd)
 
           this.vtmapDebugGroup.add(drawnObject)
         }
@@ -905,21 +896,22 @@ Play.prototype = {
    */
   setMiniMap: function () {
     // tile size must be square
-    var miniMapSize = 5,
-      miniMapBgBmd = GAME.add.bitmapData(
-        miniMapSize * this.VTMap.nTileWidth,
-        miniMapSize * this.VTMap.nTileHeight
-      ),
-      miniMapBgSpr
+    const miniMapSize = 5
+    let miniMapBgBmd = GAME.add.bitmapData(
+      miniMapSize * this.VTMap.nTileWidth,
+      miniMapSize * this.VTMap.nTileHeight
+    )
+    let miniMapBgSpr
 
     // row
-    for (var i = 0; i < this.VTMap.nTileHeight; i++) {
+    for (let i = 0; i < this.VTMap.nTileHeight; i++) {
       // column
-      for (var j = 0; j < this.VTMap.nTileWidth; j++) {
-        var mapData = this.VTMap.data[i][j],
-          color = '#36a941',
-          miniMapX = j * miniMapSize,
-          miniMapY = i * miniMapSize
+      for (let j = 0; j < this.VTMap.nTileWidth; j++) {
+        const mapData = this.VTMap.data[i][j]
+        // @todo should be in config file
+        let color = '#36a941'
+        const miniMapX = j * miniMapSize
+        const miniMapY = i * miniMapSize
 
         switch (mapData) {
           // brush
@@ -960,16 +952,16 @@ Play.prototype = {
    * - monster (zombie / machine / bat)
    */
   updateMinimap: function () {
-    var ts = UTIL.getCurrentUtcTimestamp()
+    const ts = UTIL.getCurrentUtcTimestamp()
 
     if (ts - this.lastMiniMapUpdatingTimestamp > this.miniMapUpdatingDelay) {
       // tile size must be square
-      var miniMapSize = 5,
-        miniMapUnitBmd = GAME.add.bitmapData(
-          miniMapSize * this.VTMap.nTileWidth,
-          miniMapSize * this.VTMap.nTileHeight
-        ),
-        miniMapUnitSpr
+      const miniMapSize = 5
+      let miniMapUnitBmd = GAME.add.bitmapData(
+        miniMapSize * this.VTMap.nTileWidth,
+        miniMapSize * this.VTMap.nTileHeight
+      )
+      let miniMapUnitSpr
 
       // destroy
       this.miniMapUnit.forEachAlive(function (unitSpr) {
@@ -1002,14 +994,14 @@ Play.prototype = {
    * @returns {Phaser.BitmapData}
    */
   addCreatureGroupToMiniMapUnitBmd: function (miniMapUnitBmd, creatureGroup, colorCode) {
-    var miniMapSize = 5
+    const miniMapSize = 5
 
     creatureGroup.forEachAlive(function (creature) {
-      var x = creature.x,
-        y = creature.y,
-        tileIndex = GUTIL.convertPointToTileIndex(x, y),
-        miniMapX = tileIndex.x * miniMapSize,
-        miniMapY = tileIndex.y * miniMapSize
+      const x = creature.x
+      const y = creature.y
+      const tileIndex = GUTIL.convertPointToTileIndex(x, y)
+      const miniMapX = tileIndex.x * miniMapSize
+      const miniMapY = tileIndex.y * miniMapSize
 
       miniMapUnitBmd.ctx.fillStyle = colorCode
       // actually, it should be the same as `setMiniMap`
@@ -1027,7 +1019,7 @@ Play.prototype = {
    * Set dash emiiter
    */
   setDashEmitter: function () {
-    var nEmitter = 60
+    const nEmitter = 60
 
     this.dashEmitterGroup = GAME.add.emitter(0, 0, nEmitter)
     this.dashEmitterGroup.makeParticles('dashParticle')
@@ -1043,7 +1035,7 @@ Play.prototype = {
    * Set recover emiiter
    */
   setRecoverEmitter: function () {
-    var nEmitter = 30
+    const nEmitter = 30
 
     this.recoverEmitterGroup = GAME.add.emitter(0, 0, nEmitter)
     this.recoverEmitterGroup.makeParticles('recoverParticle')
@@ -1056,7 +1048,7 @@ Play.prototype = {
    * Set damage emiiter
    */
   setDamageEmitter: function () {
-    var nEmitter = 30
+    const nEmitter = 30
 
     this.damageEmitterGroup = GAME.add.emitter(0, 0, nEmitter)
     this.damageEmitterGroup.makeParticles('damageParticle')
@@ -1332,7 +1324,7 @@ Play.prototype = {
    * @param {string} recoveredFrom
    */
   onCreatureIsRecovered: function (creature, recoveredFrom) {
-    var ts = UTIL.getCurrentUtcTimestamp()
+    const ts = UTIL.getCurrentUtcTimestamp()
 
     if (creature.alive &&
       creature.blr.info.life < creature.blr.info.maxLife &&
@@ -1353,7 +1345,7 @@ Play.prototype = {
    * @param {string} damageFrom - where is the damage come frome
    */
   onCreatureIsDamaged: function (creature, damageFrom) {
-    var ts = UTIL.getCurrentUtcTimestamp()
+    const ts = UTIL.getCurrentUtcTimestamp()
 
     // force kill (just in case)
     if (creature.blr.info.life <= 0) this.killCreature(creature, damageFrom)
@@ -1404,7 +1396,7 @@ Play.prototype = {
    * @param {string} recoveredFrom
    */
   recoverHero: function (hero, recoveredFrom) {
-    var data = {
+    const data = {
       playerInfo: hero.blr.info,
       recoveredFrom: recoveredFrom
     }
@@ -1437,8 +1429,8 @@ Play.prototype = {
    * @param {string} damageFrom
    */
   damageMonster: function (monster, damageFrom) {
-    var monsterType = monster.blr.info.type,
-      eventName = ''
+    const monsterType = monster.blr.info.type
+    let eventName = ''
 
     switch (monsterType) {
       case 'zombie':
@@ -1455,7 +1447,7 @@ Play.prototype = {
     }
 
     if (!UTIL.isEmpty(eventName)) {
-      var data = {
+      const data = {
         monsterInfo: monster.blr.info,
         damageFrom: damageFrom
       }
@@ -1470,7 +1462,7 @@ Play.prototype = {
    * @param {string} damageFrom
    */
   damagePlayer: function (hero, damageFrom) {
-    var data = {
+    const data = {
       playerInfo: hero.blr.info,
       damageFrom: damageFrom
     }
@@ -1484,7 +1476,7 @@ Play.prototype = {
    * @param {string} damageFrom
    */
   damageEnemy: function (hero, damageFrom) {
-    var data = {
+    const data = {
       playerInfo: hero.blr.info,
       damageFrom: damageFrom
     }
@@ -1516,8 +1508,8 @@ Play.prototype = {
    * @param {string} damageFrom
    */
   killMonster: function (monster, damageFrom) {
-    var monsterType = monster.blr.info.type,
-      eventName = ''
+    const monsterType = monster.blr.info.type
+    let eventName = ''
 
     switch (monsterType) {
       case 'zombie':
@@ -1534,7 +1526,7 @@ Play.prototype = {
     }
 
     if (!UTIL.isEmpty(eventName)) {
-      var data = {
+      const data = {
         monsterInfo: monster.blr.info,
         damageFrom: damageFrom
       }
@@ -1549,7 +1541,7 @@ Play.prototype = {
    * @param {string} damageFrom
    */
   killPlayer: function (hero, damageFrom) {
-    var data = {
+    const data = {
       playerInfo: hero.blr.info,
       damageFrom: damageFrom
     }
@@ -1563,7 +1555,7 @@ Play.prototype = {
    * @param {string} damageFrom
    */
   killEnemy: function (hero, damageFrom) {
-    var data = {
+    const data = {
       playerInfo: hero.blr.info,
       damageFrom: damageFrom
     }
@@ -1579,7 +1571,7 @@ Play.prototype = {
    * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
    */
   playerFireArrow: function (hero) {
-    var ts = UTIL.getCurrentUtcTimestamp()
+    const ts = UTIL.getCurrentUtcTimestamp()
 
     if (ts > hero.blr.misc.nextFireTimestamp &&
       hero.blr.bullet.countDead() > 0) {
@@ -1596,14 +1588,14 @@ Play.prototype = {
       hero.blr.misc.nextFireTimestamp = ts + hero.blr.misc.fireRate
 
       // fire
-      var targetPos = new Position(
+      const targetPos = new Position(
         GAME.input.activePointer.worldX,
         GAME.input.activePointer.worldY
       )
       this.heroFireArrow(hero, targetPos)
 
       // broadcast `fire` event
-      var data = {
+      const data = {
         playerInfo: this.player.blr.info,
         targetPos: targetPos
       }
@@ -1618,7 +1610,7 @@ Play.prototype = {
    * @param {Phaser.Sprite} hero - Phaser.Sprite that contain `Creature` object in `blr` property
    */
   playerFireArrowByKeyboard: function (hero) {
-    var ts = UTIL.getCurrentUtcTimestamp()
+    const ts = UTIL.getCurrentUtcTimestamp()
 
     if (ts > hero.blr.misc.nextFireTimestamp &&
       hero.blr.bullet.countDead() > 0) {
@@ -1626,15 +1618,15 @@ Play.prototype = {
       hero.blr.misc.nextFireTimestamp = ts + hero.blr.misc.fireRate
 
       // fire
-      var r = 400
-      var targetPos = new Position(
+      const r = 400
+      const targetPos = new Position(
         this.player.x + Math.cos(this.player.rotation) * r,
         this.player.y + Math.sin(this.player.rotation) * r
       )
       this.heroFireArrow(hero, targetPos)
 
       // broadcast `fire` event
-      var data = {
+      const data = {
         playerInfo: this.player.blr.info,
         targetPos: targetPos
       }
@@ -1667,8 +1659,8 @@ Play.prototype = {
     hero.blr.weapon.animations.play('attack', 14, false, false)
 
     // fire
-    var r = 40
-    var bullet = hero.blr.bullet.getFirstExists(false)
+    const r = 40
+    let bullet = hero.blr.bullet.getFirstExists(false)
     bullet.reset(
       hero.blr.weapon.x + Math.cos(hero.rotation) * r,
       hero.blr.weapon.y + Math.sin(hero.rotation) * r
@@ -1733,7 +1725,7 @@ Play.prototype = {
     this.updateCreatureLastVector(this.player)
 
     // broadcast `move` event
-    var data = {
+    const data = {
       playerInfo: this.player.blr.info
     }
     SOCKET.emit(EVENT_NAME.player.move, data)
@@ -1752,7 +1744,7 @@ Play.prototype = {
     this.updateCreatureLastVector(this.player)
 
     // broadcast `move` event
-    var data = {
+    const data = {
       playerInfo: this.player.blr.info
     }
     SOCKET.emit(EVENT_NAME.player.rotate, data)
@@ -1762,7 +1754,7 @@ Play.prototype = {
    * Player send message
    */
   playerSendMessage: function () {
-    var ts = UTIL.getCurrentUtcTimestamp()
+    const ts = UTIL.getCurrentUtcTimestamp()
 
     // if start typing
     if (!this.player.blr.misc.isTyping) {
@@ -1775,7 +1767,7 @@ Play.prototype = {
       this.player.blr.misc.isTyping = false
 
       // update
-      var message = UI.getMessageInput()
+      const message = UI.getMessageInput()
       if (message) {
         // set message
         this.player.blr.updateLastMessageTimestamp(ts)
@@ -1787,7 +1779,7 @@ Play.prototype = {
         this.logCreatureMessage(this.player)
 
         // broadcast `message` event
-        var data = {
+        const data = {
           playerInfo: this.player.blr.info
         }
         SOCKET.emit(EVENT_NAME.player.message, data)
@@ -1860,11 +1852,11 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerReady: function (data) {
-    var zombieInfos = data.zombieInfos,
-      machineInfos = data.machineInfos,
-      playerInfo = data.playerInfo,
-      batInfos = data.batInfos,
-      existingPlayerInfos = data.existingPlayerInfos
+    const zombieInfos = data.zombieInfos
+    const machineInfos = data.machineInfos
+    const playerInfo = data.playerInfo
+    const batInfos = data.batInfos
+    const existingPlayerInfos = data.existingPlayerInfos
 
     this.VTMap = data.VTMap
 
@@ -1877,26 +1869,26 @@ Play.prototype = {
     this.setMiniMap()
 
     // monster - zombie
-    var nZombies = zombieInfos.length
-    for (var i = 0; i < nZombies; i++) {
+    const nZombies = zombieInfos.length
+    for (let i = 0; i < nZombies; i++) {
       this.spawnZombie(zombieInfos[i])
     }
 
     // monster - machine
-    var nMachines = machineInfos.length
-    for (var i = 0; i < nMachines; i++) {
+    const nMachines = machineInfos.length
+    for (let i = 0; i < nMachines; i++) {
       this.spawnMachine(machineInfos[i])
     }
 
     // monster - bat
-    var nBats = batInfos.length
-    for (var i = 0; i < nBats; i++) {
+    const nBats = batInfos.length
+    for (let i = 0; i < nBats; i++) {
       this.spawnBat(batInfos[i])
     }
 
     // hero - enemy
-    var nEnemies = existingPlayerInfos.length
-    for (var i = 0; i < nEnemies; i++) {
+    const nEnemies = existingPlayerInfos.length
+    for (let i = 0; i < nEnemies; i++) {
       this.spawnEnemy(existingPlayerInfos[i])
     }
 
@@ -1972,12 +1964,12 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerDisconnect: function (data) {
-    var playerInfo = data.playerInfo
+    const playerInfo = data.playerInfo
     UTIL.clientLog('Enemy is disconnected', playerInfo)
     this.logOnPlayerDisconnect(playerInfo)
 
     // remove enemy
-    var isFound = false
+    let isFound = false
 
     this.enemyGroup.forEach(function (enemy) {
       if (enemy.blr.info.id === playerInfo.id) {
@@ -2005,8 +1997,8 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerMessage: function (data) {
-    var playerInfo = data.playerInfo,
-      enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const playerInfo = data.playerInfo
+    let enemy = this.getEnemyByPlayerId(playerInfo.id)
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
@@ -2028,8 +2020,8 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerMove: function (data) {
-    var playerInfo = data.playerInfo,
-      enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const playerInfo = data.playerInfo
+    const enemy = this.getEnemyByPlayerId(playerInfo.id)
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
@@ -2053,8 +2045,8 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerRotate: function (data) {
-    var playerInfo = data.playerInfo,
-      enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const playerInfo = data.playerInfo
+    const enemy = this.getEnemyByPlayerId(playerInfo.id)
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
@@ -2075,9 +2067,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerFire: function (data) {
-    var playerInfo = data.playerInfo,
-      targetPos = data.targetPos,
-      enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const playerInfo = data.playerInfo
+    const targetPos = data.targetPos
+    const enemy = this.getEnemyByPlayerId(playerInfo.id)
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
@@ -2095,9 +2087,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerIsDamaged: function (data) {
-    var playerInfo = data.playerInfo,
-      damageFrom = data.damageFrom,
-      enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const playerInfo = data.playerInfo
+    const damageFrom = data.damageFrom
+    const enemy = this.getEnemyByPlayerId(playerInfo.id)
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
@@ -2111,7 +2103,7 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerIsDamagedItSelf: function (data) {
-    var damageFrom = data.damageFrom
+    const damageFrom = data.damageFrom
 
     this.damageHeroAfterGotSubsequentRequest(this.player, damageFrom)
   },
@@ -2122,9 +2114,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerIsRecovered: function (data) {
-    var playerInfo = data.playerInfo,
-      recoveredFrom = data.recoveredFrom,
-      enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const playerInfo = data.playerInfo
+    const recoveredFrom = data.recoveredFrom
+    const enemy = this.getEnemyByPlayerId(playerInfo.id)
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
@@ -2138,7 +2130,7 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerIsRecoveredItSelf: function (data) {
-    var recoveredFrom = data.recoveredFrom
+    const recoveredFrom = data.recoveredFrom
 
     this.recoverHeroAfterGotSubsequentRequest(this.player, recoveredFrom)
   },
@@ -2149,9 +2141,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerIsDied: function (data) {
-    var playerInfo = data.playerInfo,
-      damageFrom = data.damageFrom,
-      enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const playerInfo = data.playerInfo
+    const damageFrom = data.damageFrom
+    const enemy = this.getEnemyByPlayerId(playerInfo.id)
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
@@ -2165,7 +2157,7 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerIsDiedItSelf: function (data) {
-    var damageFrom = data.damageFrom
+    const damageFrom = data.damageFrom
 
     this.killHeroAfterGotSubsequentRequest(this.player, damageFrom)
   },
@@ -2176,8 +2168,8 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerIsRespawn: function (data) {
-    var playerInfo = data.playerInfo,
-      enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const playerInfo = data.playerInfo
+    const enemy = this.getEnemyByPlayerId(playerInfo.id)
 
     if (!UTIL.isEmptyObject(enemy)) {
       this.respawnHero(enemy, playerInfo)
@@ -2190,10 +2182,10 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerIsRespawnItSelf: function (data) {
-    var playerInfo = data.playerInfo
+    const playerInfo = data.playerInfo
 
     // same as `onPlayerIsRespawn`
-    this.respawnHero(this.player, data.playerInfo)
+    this.respawnHero(this.player, playerInfo)
   },
 
   /**
@@ -2203,9 +2195,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerAttackZombie: function (data) {
-    var monsterInfo = data.monsterInfo,
-      damageFrom = data.damageFrom,
-      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup)
+    const monsterInfo = data.monsterInfo
+    const damageFrom = data.damageFrom
+    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.damageMonsterAfterGotSubsequentRequest(monster, damageFrom)
@@ -2219,9 +2211,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerAttackMachine: function (data) {
-    var monsterInfo = data.monsterInfo,
-      damageFrom = data.damageFrom,
-      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup)
+    const monsterInfo = data.monsterInfo
+    const damageFrom = data.damageFrom
+    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.damageMonsterAfterGotSubsequentRequest(monster, damageFrom)
@@ -2235,9 +2227,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerAttackBat: function (data) {
-    var monsterInfo = data.monsterInfo,
-      damageFrom = data.damageFrom,
-      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup)
+    const monsterInfo = data.monsterInfo
+    const damageFrom = data.damageFrom
+    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.damageMonsterAfterGotSubsequentRequest(monster, damageFrom)
@@ -2251,9 +2243,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerKillZombie: function (data) {
-    var monsterInfo = data.monsterInfo,
-      damageFrom = data.damageFrom,
-      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup)
+    const monsterInfo = data.monsterInfo
+    const damageFrom = data.damageFrom
+    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.killMonsterAfterGotSubsequentRequest(monster, damageFrom)
@@ -2267,9 +2259,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerKillMachine: function (data) {
-    var monsterInfo = data.monsterInfo,
-      damageFrom = data.damageFrom,
-      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup)
+    const monsterInfo = data.monsterInfo
+    const damageFrom = data.damageFrom
+    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.killMonsterAfterGotSubsequentRequest(monster, damageFrom)
@@ -2283,9 +2275,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerKillBat: function (data) {
-    var monsterInfo = data.monsterInfo,
-      damageFrom = data.damageFrom,
-      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup)
+    const monsterInfo = data.monsterInfo
+    const damageFrom = data.damageFrom
+    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.killMonsterAfterGotSubsequentRequest(monster, damageFrom)
@@ -2299,9 +2291,8 @@ Play.prototype = {
    * @param {Object}
    */
   onRespawnZombie: function (data) {
-    var monsterInfo = data.monsterInfo,
-      damageFrom = data.damageFrom,
-      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup)
+    const monsterInfo = data.monsterInfo
+    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.respawnMonster(monster, monsterInfo)
@@ -2315,9 +2306,8 @@ Play.prototype = {
    * @param {Object}
    */
   onRespawnMachine: function (data) {
-    var monsterInfo = data.monsterInfo,
-      damageFrom = data.damageFrom,
-      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup)
+    const monsterInfo = data.monsterInfo
+    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.respawnMonster(monster, monsterInfo)
@@ -2331,9 +2321,8 @@ Play.prototype = {
    * @param {Object}
    */
   onRespawnBat: function (data) {
-    var monsterInfo = data.monsterInfo,
-      damageFrom = data.damageFrom,
-      monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup)
+    const monsterInfo = data.monsterInfo
+    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.respawnMonster(monster, monsterInfo)
@@ -2347,8 +2336,8 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerAttackEnemy: function (data) {
-    var playerInfo = data.playerInfo,
-      damageFrom = data.damageFrom
+    const playerInfo = data.playerInfo
+    const damageFrom = data.damageFrom
 
     // I am attacked ?
     if (this.isPlayer(playerInfo.id)) {
@@ -2367,8 +2356,8 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerKillEnemy: function (data) {
-    var playerInfo = data.playerInfo,
-      damageFrom = data.damageFrom
+    const playerInfo = data.playerInfo
+    const damageFrom = data.damageFrom
 
     // I am died ?
     if (this.isPlayer(playerInfo.id)) {
@@ -2387,8 +2376,7 @@ Play.prototype = {
    * @param {Object}
    */
   onRespawnEnemy: function (data) {
-    var playerInfo = data.playerInfo,
-      damageFrom = data.damageFrom
+    const playerInfo = data.playerInfo
 
     // I am respawn ?
     if (this.isPlayer(playerInfo.id)) {
@@ -2417,24 +2405,23 @@ Play.prototype = {
    * @param {Array.Object}
    */
   onMachineFire: function (dataArr) {
-    var nData = dataArr.length,
-      i = 0
+    const nData = dataArr.length
 
-    for (i = 0; i < nData; i++) {
-      var data = dataArr[i],
-        monsterInfo = data.monsterInfo,
-        targetVector = data.targetVector,
-        monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup)
+    for (let i = 0; i < nData; i++) {
+      const data = dataArr[i]
+      const monsterInfo = data.monsterInfo
+      const targetVector = data.targetVector
+      let monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup)
 
       if (!UTIL.isEmptyObject(monster)) {
-        var ts = UTIL.getCurrentUtcTimestamp()
+        const ts = UTIL.getCurrentUtcTimestamp()
 
         if (monster.alive &&
           ts > monster.blr.misc.nextFireTimestamp &&
           monster.blr.bullet.countDead() > 0) {
           monster.blr.misc.nextFireTimestamp = ts + monster.blr.misc.fireRate
 
-          var bullet = monster.blr.bullet.getFirstDead()
+          let bullet = monster.blr.bullet.getFirstDead()
           bullet.reset(monster.blr.weapon.x, monster.blr.weapon.y)
           bullet.rotation = GAME.physics.arcade.moveToXY(
             bullet,
@@ -2710,7 +2697,7 @@ Play.prototype = {
 
   update: function () {
     if (this.isGameReady) {
-      var ts = UTIL.getCurrentUtcTimestamp()
+      const ts = UTIL.getCurrentUtcTimestamp()
 
       // collide - creature with floorGroup
       // GAME.physics.arcade.collide(this.zombieGroup, this.floorGroup);
@@ -2791,7 +2778,7 @@ Play.prototype = {
         if (GAME.input.activePointer.leftButton.isDown) {
           this.playerMove()
         } else {
-          var angularVelocity = 0
+          let angularVelocity = 0
 
           if (this.cursors.left.isDown) {
             angularVelocity = -this.playerAngularVelocity
@@ -2833,8 +2820,8 @@ Play.prototype = {
       // monster - machine
       this.machineGroup.forEachAlive(function (monster) {
         // fire
-        var nearestHero = this.getNearestHero(monster.blr.info.lastVector),
-          newWeaponRotation = GAME.physics.arcade.angleBetween(monster, nearestHero)
+        const nearestHero = this.getNearestHero(monster.blr.info.lastVector)
+        const newWeaponRotation = GAME.physics.arcade.angleBetween(monster, nearestHero)
 
         this.updateCreatureWeapon(monster, monster.x, monster.y, newWeaponRotation)
       }, this)
@@ -2879,8 +2866,8 @@ Play.prototype = {
 
   render: function () {
     if (this.isGameReady && IS_DEBUG) {
-      var creatureBodyDebugColor = 'rgba(0,255, 0, 0.4)',
-        weaponBodyDebugColor = 'rgba(215, 125, 125, 0.4)'
+      const creatureBodyDebugColor = 'rgba(0,255, 0, 0.4)'
+      const weaponBodyDebugColor = 'rgba(215, 125, 125, 0.4)'
 
       // top
       GAME.debug.bodyInfo(this.player, 264, 18)

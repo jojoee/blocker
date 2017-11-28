@@ -2,10 +2,9 @@
  * Blocker game
  */
 
-var config = require('./../../../common/config'),
-  boot = require('./blocker/boot'),
-  load = require('./blocker/load'),
-  play = require('./blocker/play')
+const boot = require('./blocker/boot')
+const load = require('./blocker/load')
+const play = require('./blocker/play')
 
 module.exports = {
   Boot: boot,

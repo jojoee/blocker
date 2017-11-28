@@ -1,4 +1,4 @@
-var Config = {
+const Config = {
   mainFontFamily: 'Roboto',
   screenColor: '#dedede',
   assetPath: '/public/dist/asset'

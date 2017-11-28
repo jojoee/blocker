@@ -2,8 +2,7 @@
  * Common module
  */
 
-var UTIL = require('./util'),
-  COMMON_CONFIG = require('./config')
+const UTIL = require('./util')
 
 /**
  * Position class
@@ -13,7 +12,7 @@ var UTIL = require('./util'),
  *
  * @returns {Object}
  */
-var Position = function (x, y) {
+const Position = function (x, y) {
   this.x = x
   this.y = y
 }
@@ -28,7 +27,7 @@ var Position = function (x, y) {
  *
  * @returns {Object}
  */
-var Vector = function (x, y, rotation) {
+const Vector = function (x, y, rotation) {
   if (typeof rotation === 'undefined') rotation = 0
   Position.call(this, x, y)
 
@@ -44,7 +43,7 @@ Vector.prototype.constructor = Vector
  * @returns {Object}
  */
 Vector.prototype.toJson = function () {
-  var result = {
+  const result = {
     x: this.x,
     y: this.y,
     rotation: this.rotation
@@ -86,7 +85,7 @@ Vector.prototype.updateByJson = function (obj) {
  * @param {number} life
  * @param {number} maxLife
  */
-var CreatureInfo = function (id, type, startVector, velocitySpeed, life, maxLife) {
+const CreatureInfo = function (id, type, startVector, velocitySpeed, life, maxLife) {
   /** @type {string} */
   this.id = id
 
@@ -118,7 +117,7 @@ var CreatureInfo = function (id, type, startVector, velocitySpeed, life, maxLife
   this.life = life
 
   /** @type {Vector} last vector of creature */
-  this.lastVector = startVector,
+  this.lastVector = startVector
 
   /** @type {string} last message */
   this.lastMessage = ''
@@ -144,7 +143,7 @@ var CreatureInfo = function (id, type, startVector, velocitySpeed, life, maxLife
  * @param {Object} phrInfo
  * @param {Object} misc
  */
-var Creature = function (info, phrInfo, misc) {
+const Creature = function (info, phrInfo, misc) {
   this.info = info
   this.phrInfo = phrInfo
   this.misc = misc
@@ -225,28 +224,28 @@ Creature.prototype.updateLastEnterTimestamp = function (ts) {
  *
  * @param {CreatureInfo} creatureInfo
  */
-var Hero = function (creatureInfo) {
-  var info = creatureInfo,
-    phrInfo = {
-      spriteName: '',
-      width: 0,
-      height: 0,
-      bodyOffset: 0,
-      bodyMass: 100
-    },
-    misc = {
-      isImmortal: false,
+const Hero = function (creatureInfo) {
+  const info = creatureInfo
+  const phrInfo = {
+    spriteName: '',
+    width: 0,
+    height: 0,
+    bodyOffset: 0,
+    bodyMass: 100
+  }
+  const misc = {
+    isImmortal: false,
 
-      // bullet
-      fireRate: 500, // 2 fire/sec
-      nextFireTimestamp: 0,
-      nBullets: 40,
-      bulletSpeed: 500,
+    // bullet
+    fireRate: 500, // 2 fire/sec
+    nextFireTimestamp: 0,
+    nBullets: 40,
+    bulletSpeed: 500,
 
-      // bubble
-      isTyping: false,
-      lastEnterTimestamp: 0
-    }
+    // bubble
+    isTyping: false,
+    lastEnterTimestamp: 0
+  }
 
   Creature.call(this, info, phrInfo, misc)
 }
@@ -258,22 +257,22 @@ Hero.prototype.constructor = Hero
  *
  * @param {CreatureInfo} creatureInfo
  */
-var Zombie = function (creatureInfo) {
-  var info = creatureInfo,
-    phrInfo = {
-      spriteName: 'zombie',
-      width: 46,
-      height: 46,
-      bodyOffset: 6,
-      bodyMass: 0
-    },
-    misc = {
-      isImmortal: false,
+const Zombie = function (creatureInfo) {
+  const info = creatureInfo
+  const phrInfo = {
+    spriteName: 'zombie',
+    width: 46,
+    height: 46,
+    bodyOffset: 6,
+    bodyMass: 0
+  }
+  const misc = {
+    isImmortal: false,
 
-      // bubble
-      isTyping: false,
-      lastEnterTimestamp: 0
-    }
+    // bubble
+    isTyping: false,
+    lastEnterTimestamp: 0
+  }
 
   Creature.call(this, info, phrInfo, misc)
 }
@@ -285,28 +284,28 @@ Zombie.prototype.constructor = Zombie
  *
  * @param {CreatureInfo} creatureInfo
  */
-var Machine = function (creatureInfo) {
-  var info = creatureInfo,
-    phrInfo = {
-      spriteName: 'machine',
-      width: 46,
-      height: 46,
-      bodyOffset: 6,
-      bodyMass: 20
-    },
-    misc = {
-      isImmortal: false,
+const Machine = function (creatureInfo) {
+  const info = creatureInfo
+  const phrInfo = {
+    spriteName: 'machine',
+    width: 46,
+    height: 46,
+    bodyOffset: 6,
+    bodyMass: 20
+  }
+  const misc = {
+    isImmortal: false,
 
-      // bullet
-      fireRate: 1000, // 1 fire/sec
-      nextFireTimestamp: 0,
-      nBullets: 40,
-      bulletSpeed: 500,
+    // bullet
+    fireRate: 1000, // 1 fire/sec
+    nextFireTimestamp: 0,
+    nBullets: 40,
+    bulletSpeed: 500,
 
-      // bubble
-      isTyping: false,
-      lastEnterTimestamp: 0
-    }
+    // bubble
+    isTyping: false,
+    lastEnterTimestamp: 0
+  }
 
   Creature.call(this, info, phrInfo, misc)
 }
@@ -318,22 +317,22 @@ Machine.prototype.constructor = Machine
  *
  * @param {CreatureInfo} creatureInfo
  */
-var Bat = function (creatureInfo) {
-  var info = creatureInfo,
-    phrInfo = {
-      spriteName: 'bat',
-      width: 46,
-      height: 46,
-      bodyOffset: 8,
-      bodyMass: 0
-    },
-    misc = {
-      isImmortal: false,
+const Bat = function (creatureInfo) {
+  const info = creatureInfo
+  const phrInfo = {
+    spriteName: 'bat',
+    width: 46,
+    height: 46,
+    bodyOffset: 8,
+    bodyMass: 0
+  }
+  const misc = {
+    isImmortal: false,
 
-      // bubble
-      isTyping: false,
-      lastEnterTimestamp: 0
-    }
+    // bubble
+    isTyping: false,
+    lastEnterTimestamp: 0
+  }
 
   Creature.call(this, info, phrInfo, misc)
 }

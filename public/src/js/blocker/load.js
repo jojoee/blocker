@@ -1,7 +1,7 @@
-var CONFIG = require('./config')
+const CONFIG = require('./config')
 
 // load all game assets
-Load = function (GAME) {}
+Load = function (GAME) {} // eslint-disable-line
 Load.prototype = {
 
   setPreloadingBg: function () {
@@ -9,7 +9,7 @@ Load.prototype = {
   },
 
   setPreloadingImage: function () {
-    var preloadingBorder = GAME.add.sprite(
+    let preloadingBorder = GAME.add.sprite(
       WINDOW_WIDTH / 2,
       WINDOW_HEIGHT / 2 + 30,
       'loadingBorder'
@@ -17,7 +17,7 @@ Load.prototype = {
     preloadingBorder.x -= preloadingBorder.width / 2
     preloadingBorder.alpha = 0.5
 
-    var preloading = GAME.add.sprite(
+    let preloading = GAME.add.sprite(
       WINDOW_WIDTH / 2,
       WINDOW_HEIGHT / 2 + 30,
       'loading'
@@ -28,7 +28,7 @@ Load.prototype = {
   },
 
   setPreloadingTitle: function () {
-    var title = GAME.add.text(
+    const title = GAME.add.text(
       WINDOW_WIDTH / 2,
       WINDOW_HEIGHT / 2 - 40,
       'Blocker', {
@@ -37,7 +37,7 @@ Load.prototype = {
       }
     )
 
-    var subTitle = GAME.add.text(
+    const subTitle = GAME.add.text(
       WINDOW_WIDTH / 2,
       WINDOW_HEIGHT / 2,
       'Multiplayer online game using Phaser + WebSocket (Socket.IO)', {

@@ -2,11 +2,11 @@
  * Game utility
  */
 
-var UTIL = require('./util'),
-  MODULE = require('./module'),
-  Position = MODULE.Position
+const UTIL = require('./util')
+const MODULE = require('./module')
+const Position = MODULE.Position
 
-var Gutil = {
+const Gutil = {
 
   /* ---------------------------------------------------------------- Game
    */
@@ -34,10 +34,10 @@ var Gutil = {
     if (typeof tileWidth === 'undefined') tileWidth = 46
     if (typeof tileHeight === 'undefined') tileHeight = 46
     if (typeof isMiddle === 'undefined') isMiddle = false
-    var result,
-      x = tileIndexX * tileWidth,
-      y = tileIndexY * tileHeight,
-      zeroPos = new Position(x, y)
+    let result
+    const x = tileIndexX * tileWidth
+    const y = tileIndexY * tileHeight
+    const zeroPos = new Position(x, y)
 
     if (!isMiddle) {
       result = zeroPos
@@ -63,9 +63,9 @@ var Gutil = {
   convertPointToTileIndex: function (pointX, pointY, tileWidth, tileHeight) {
     if (typeof tileWidth === 'undefined') tileWidth = 46
     if (typeof tileHeight === 'undefined') tileHeight = 46
-    var tileIndexX = Math.round(pointX / tileWidth),
-      tileIndexY = Math.round(pointY / tileHeight),
-      result = new Position(tileIndexX, tileIndexY)
+    const tileIndexX = Math.round(pointX / tileWidth)
+    const tileIndexY = Math.round(pointY / tileHeight)
+    const result = new Position(tileIndexX, tileIndexY)
 
     return result
   }

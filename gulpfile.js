@@ -16,36 +16,34 @@
  * - https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md
  */
 
-var gulp = require('gulp'),
-  browserSync = require('browser-sync').create(),
-  notify = require('gulp-notify'),
-  less = require('gulp-less'),
-  sourcemaps = require('gulp-sourcemaps'),
-  uglify = require('gulp-uglify'),
-  obfuscate = require('gulp-obfuscate'), // unused
-  cssmin = require('gulp-cssmin'),
-  rename = require('gulp-rename'), // unused
-  imagemin = require('gulp-imagemin'),
-  clean = require('gulp-clean'),
-  autoprefixer = require('gulp-autoprefixer'),
-  browserify = require('browserify'),
-  watchify = require('watchify'),
-  gulpIf = require('gulp-if'),
-  gulpUtil = require('gulp-util'),
-  vinylBuffer = require('vinyl-buffer'),
-  vinylSourceStream = require('vinyl-source-stream'),
-  lodashAssign = require('lodash.assign'),
-  config = require('./common/config'),
-  serverConfig = require('./server/config')
+const gulp = require('gulp')
+const browserSync = require('browser-sync').create()
+const notify = require('gulp-notify')
+const less = require('gulp-less')
+const sourcemaps = require('gulp-sourcemaps')
+const uglify = require('gulp-uglify')
+const cssmin = require('gulp-cssmin')
+const imagemin = require('gulp-imagemin')
+const clean = require('gulp-clean')
+const autoprefixer = require('gulp-autoprefixer')
+const browserify = require('browserify')
+const watchify = require('watchify')
+const gulpIf = require('gulp-if')
+const gulpUtil = require('gulp-util')
+const vinylBuffer = require('vinyl-buffer')
+const vinylSourceStream = require('vinyl-source-stream')
+const lodashAssign = require('lodash.assign')
+const config = require('./common/config')
+const serverConfig = require('./server/config')
 
-var serverPort = config.serverPort,
-  isProd = config.isProd,
-  brwoserSyncPort = serverConfig.brwoserSyncPort,
-  browserSyncUrl = 'http://localhost:' + serverPort,
-  browserSyncOpt = {
-    port: brwoserSyncPort,
-    proxy: browserSyncUrl
-  }
+const serverPort = config.serverPort
+const isProd = config.isProd
+const brwoserSyncPort = serverConfig.brwoserSyncPort
+const browserSyncUrl = 'http://localhost:' + serverPort
+const browserSyncOpt = {
+  port: brwoserSyncPort,
+  proxy: browserSyncUrl
+}
 
 /* ================================================================ Helper
  */
@@ -53,7 +51,7 @@ var serverPort = config.serverPort,
 function handleError (err) {
   gulpUtil.log(err)
 
-  var args = Array.prototype.slice.call(arguments)
+  const args = Array.prototype.slice.call(arguments)
   notify.onError({
     title: 'Compile Error',
     message: '<%= error.message %>'
@@ -65,12 +63,12 @@ function handleError (err) {
 /* ================================================================ Js task
  */
 
-var browserifyCustomOpt = {
+const browserifyCustomOpt = {
   entries: ['./public/src/js/main.js'],
   debug: !isProd
 }
-var browserifyOpt = lodashAssign({}, watchify.args, browserifyCustomOpt)
-var watchifyJs = watchify(browserify(browserifyOpt))
+const browserifyOpt = lodashAssign({}, watchify.args, browserifyCustomOpt)
+const watchifyJs = watchify(browserify(browserifyOpt))
 
 watchifyJs.on('update', bundle)
 watchifyJs.on('log', gulpUtil.log)
@@ -132,7 +130,7 @@ gulp.task('sound', function () {
 gulp.task('serve', function () {
   browserSync.init(browserSyncOpt)
 
-  var watchOpt = {
+  const watchOpt = {
     interval: 500
   }
 

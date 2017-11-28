@@ -19,6 +19,8 @@
     "verbose": true,
     "env": "mocha",
     "globals": [
+      "io",
+      "location",
       "GAME",
       "UTIL",
       "UI",
@@ -29,6 +31,10 @@
       "GAME_WORLD_HEIGHT",
       "WINDOW_WIDTH",
       "WINDOW_HEIGHT",
+      "IS_DEBUG",
+      "Boot",
+      "Load",
+      "Play",
       "Phaser"
     ],
     "ignore": [

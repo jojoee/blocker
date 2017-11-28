@@ -2,9 +2,9 @@
  * Client UI
  */
 
-var UTIL = require('./../../../common/util')
+const UTIL = require('./../../../common/util')
 
-var Ui = {
+const Ui = {
 
   logListEle: document.getElementById('logs'),
   creatureListEle: document.getElementById('creatures'),
@@ -20,8 +20,8 @@ var Ui = {
    * @param {string} text
    */
   addTextToLogList: function (text) {
-    var liEle = document.createElement('li'),
-      t = document.createTextNode(text)
+    const liEle = document.createElement('li')
+    const t = document.createTextNode(text)
     liEle.appendChild(t)
 
     this.logListEle.insertBefore(liEle, this.logListEle.firstChild)
@@ -38,8 +38,8 @@ var Ui = {
    */
   addCreatureIdToCreatureList: function (creatureId, customClass) {
     if (typeof customClass === 'undefined') customClass = 'creature'
-    var liEle = document.createElement('li'),
-      t = document.createTextNode(creatureId)
+    const liEle = document.createElement('li')
+    const t = document.createTextNode(creatureId)
 
     liEle.appendChild(t)
     liEle.setAttribute('data-creature-id', creatureId)
@@ -54,7 +54,7 @@ var Ui = {
    * @param {string} creatureId
    */
   removeCreatureIdFromCreatureList: function (creatureId) {
-    var liEle = document.querySelectorAll('[data-creature-id="' + creatureId + '"]')[0]
+    const liEle = document.querySelectorAll('[data-creature-id="' + creatureId + '"]')[0]
 
     UTIL.removeElement(liEle)
   },

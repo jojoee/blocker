@@ -2,7 +2,7 @@
  * Utility
  */
 
-var Util = {
+const Util = {
 
   /* ---------------------------------------------------------------- Utility
    */
@@ -32,7 +32,7 @@ var Util = {
    * @returns {boolean}
    */
   isEmptyObject: function (obj) {
-    for (var prop in obj) {
+    for (const prop in obj) {
       if (obj.hasOwnProperty(prop)) { return false }
     }
 
@@ -76,11 +76,10 @@ var Util = {
    */
   getRandomId: function (n) {
     if (typeof n === 'undefined') n = 8
-    var text = '',
-      possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
-      i = 0
+    let text = ''
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
-    for (i = 0; i < n; i++) {
+    for (let i = 0; i < n; i++) {
       text += possible.charAt(Math.floor(Math.random() * possible.length))
     }
 
@@ -98,8 +97,8 @@ var Util = {
    * @return {number}
    */
   getDistance: function (x1, y1, x2, y2) {
-    var dx = x1 - x2,
-      dy = y1 - y2
+    const dx = x1 - x2
+    const dy = y1 - y2
 
     return Math.sqrt(dx * dx + dy * dy)
   },
@@ -142,15 +141,13 @@ var Util = {
    * @param {any} defaultValue
    */
   creature2DArray: function (nRows, nCols, defaultValue) {
-    var arr = [],
-      i = 0,
-      j = 0
+    let arr = []
 
-    for (i = 0; i < nRows; i++) {
+    for (let i = 0; i < nRows; i++) {
       arr.push([])
       arr[i].push(new Array(nCols))
 
-      for (j = 0; j < nCols; j++) {
+      for (let j = 0; j < nCols; j++) {
         arr[i][j] = defaultValue
       }
     }

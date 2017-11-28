@@ -11,12 +11,9 @@ const IO = require('socket.io')(SERVER)
 const UTIL = require('./common/util')
 const GUTIL = require('./common/gutil')
 const CONFIG = require('./common/config')
-// const SERVER_CONFIG = require('./server/config')
 const mapJson = require('./public/src/asset/image/map.json')
-// const SERVER_MODULE = require('./server/module')
 const MODULE = require('./common/module')
 const Vector = MODULE.Vector
-// const Position = MODULE.Position
 const CreatureInfo = MODULE.CreatureInfo
 let VTMAP = {}
 
@@ -154,7 +151,7 @@ function initMonsters () {
  *
  * @todo move nBots to config
  */
-function initBots () {
+function initBots () { // eslint-disable-line
   const nBots = 4
 
   for (let i = 0; i < nBots; i++) {
@@ -576,7 +573,7 @@ IO.on('connection', function (socket) {
   // is died
   // @todo refactor cause it has the same behavior
   socket.on(EVENT_NAME.player.isDied, function (data) {
-    const playerInfo = data.playerInfo
+    let playerInfo = data.playerInfo
     const playerIdx = getPlayerInfoIndexById(playerInfo.id)
 
     if (playerIdx > -1) {
@@ -586,7 +583,7 @@ IO.on('connection', function (socket) {
 
       // reset player info
       const newStartVector = getRandomStartCreatureVector()
-      const playerInfo = resetCreatureInfo(playerInfo, newStartVector)
+      playerInfo = resetCreatureInfo(playerInfo, newStartVector)
 
       // update server data
       PLAYER_INFOS[playerIdx] = playerInfo
