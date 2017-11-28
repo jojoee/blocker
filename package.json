@@ -9,10 +9,34 @@
     "build": "gulp",
     "build.watch": "gulp watch",
     "dev": "",
-    "lint": "standard --verbose | snazzy"
+    "standard": "standard",
+    "standard.fix": "standard --fix",
+    "validate": "npm run standard"
   },
   "author": "Nathachai Thongniran",
   "license": "MIT",
+  "standard": {
+    "verbose": true,
+    "env": "mocha",
+    "globals": [
+      "GAME",
+      "UTIL",
+      "UI",
+      "SOCKET",
+      "SOCKET_URL",
+      "EVENT_NAME",
+      "GAME_WORLD_WIDTH",
+      "GAME_WORLD_HEIGHT",
+      "WINDOW_WIDTH",
+      "WINDOW_HEIGHT",
+      "Phaser"
+    ],
+    "ignore": [
+      "bower_components/**",
+      "node_modules/**",
+      "bk*"
+    ]
+  },
   "dependencies": {
     "express": "^4.16.2",
     "lodash.assign": "^4.2.0",

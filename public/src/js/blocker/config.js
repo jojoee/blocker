@@ -1,7 +1,7 @@
 var Config = {
   mainFontFamily: 'Roboto',
   screenColor: '#dedede',
-  assetPath: '/public/dist/asset',
-};
+  assetPath: '/public/dist/asset'
+}
 
-module.exports = Config;
+module.exports = Config

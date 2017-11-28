@@ -4,7 +4,7 @@
 
 var serverConfig = {
   // dev
-  brwoserSyncPort: 8002,
-};
+  brwoserSyncPort: 8002
+}
 
-module.exports = serverConfig;
+module.exports = serverConfig

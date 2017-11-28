@@ -1,13 +1,13 @@
 /**
  * Server config
- * 
+ *
  * Event name
  * `player`: is something that interact by player (e.g. message)
  * `server`: other else is (e.g. newPlayer)
  */
 
 var eventPlayerPrefix = 'player.',
-  eventServerPrefix = 'server.';
+  eventServerPrefix = 'server.'
 
 var commonConfig = {
   // prod
@@ -20,7 +20,7 @@ var commonConfig = {
   serverPort: 8001,
   game: {
     worldWidth: 2300,
-    worldHeight: 2300,
+    worldHeight: 2300
   },
   eventName: {
     player: {
@@ -44,7 +44,7 @@ var commonConfig = {
       isDamagedItSelf: eventPlayerPrefix + 'isDamagedItSelf',
 
       // player is recovered
-      isRecovered: eventPlayerPrefix + 'isRecovered', 
+      isRecovered: eventPlayerPrefix + 'isRecovered',
       isRecoveredItSelf: eventPlayerPrefix + 'isRecoveredItSelf',
 
       // player is died
@@ -77,7 +77,7 @@ var commonConfig = {
       killEnemy: eventPlayerPrefix + 'killEnemy',
 
       // respawn enemy
-      respawnEnemy: eventPlayerPrefix + 'respawnEnemy',
+      respawnEnemy: eventPlayerPrefix + 'respawnEnemy'
     },
     server: {
       // send new player
@@ -91,9 +91,9 @@ var commonConfig = {
 
       // monster move
       zombieMove: eventPlayerPrefix + 'zombieMove',
-      batMove: eventPlayerPrefix + 'batMove',
+      batMove: eventPlayerPrefix + 'batMove'
     }
   }
-};
+}
 
-module.exports = commonConfig;
+module.exports = commonConfig

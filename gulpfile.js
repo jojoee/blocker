@@ -1,13 +1,13 @@
-'use strict';
+'use strict'
 
 /**
  * Task runner
  * - Js (Browserify)
  * - Less
- * 
+ *
  * Why `vinyl-source-stream`
  * - http://stackoverflow.com/questions/30794356/why-do-i-have-to-use-vinyl-source-stream-with-gulp
- *  
+ *
  * Reference
  * - https://github.com/BrowserSync/recipes/tree/master/recipes/gulp.browserify
  * - https://gist.github.com/neoziro/a834f55ba665a6b616b6
@@ -36,7 +36,7 @@ var gulp = require('gulp'),
   vinylSourceStream = require('vinyl-source-stream'),
   lodashAssign = require('lodash.assign'),
   config = require('./common/config'),
-  serverConfig = require('./server/config');
+  serverConfig = require('./server/config')
 
 var serverPort = config.serverPort,
   isProd = config.isProd,
@@ -45,37 +45,37 @@ var serverPort = config.serverPort,
   browserSyncOpt = {
     port: brwoserSyncPort,
     proxy: browserSyncUrl
-  };
+  }
 
-/*================================================================ Helper
+/* ================================================================ Helper
  */
 
-function handleError(err) {
-  gulpUtil.log(err);
+function handleError (err) {
+  gulpUtil.log(err)
 
-  var args = Array.prototype.slice.call(arguments);
+  var args = Array.prototype.slice.call(arguments)
   notify.onError({
     title: 'Compile Error',
     message: '<%= error.message %>'
-  }).apply(this, args);
+  }).apply(this, args)
 
   if (typeof this.emit === 'function') this.emit('end')
 }
 
-/*================================================================ Js task
+/* ================================================================ Js task
  */
 
 var browserifyCustomOpt = {
   entries: ['./public/src/js/main.js'],
   debug: !isProd
-};
-var browserifyOpt = lodashAssign({}, watchify.args, browserifyCustomOpt);
-var watchifyJs = watchify(browserify(browserifyOpt));
+}
+var browserifyOpt = lodashAssign({}, watchify.args, browserifyCustomOpt)
+var watchifyJs = watchify(browserify(browserifyOpt))
 
-watchifyJs.on('update', bundle);
-watchifyJs.on('log', gulpUtil.log);
+watchifyJs.on('update', bundle)
+watchifyJs.on('log', gulpUtil.log)
 
-function bundle() {
+function bundle () {
   return watchifyJs.bundle()
     .on('error', gulpUtil.log.bind(gulpUtil, 'Browserify Error'))
     .pipe(vinylSourceStream('bundle.js'))
@@ -88,24 +88,24 @@ function bundle() {
     .pipe(gulp.dest('./public/dist/js'))
     .pipe(browserSync.stream({
       'once': true
-    }));
+    }))
 }
 
-gulp.task('js', bundle);
+gulp.task('js', bundle)
 
-/*================================================================ Other tasks
+/* ================================================================ Other tasks
  */
 
-gulp.task('clean', function() {
+gulp.task('clean', function () {
   var cleanOpt = {
     read: false
-  };
+  }
 
   return gulp.src('./public/dist/*', cleanOpt)
-    .pipe(clean());
-});
+    .pipe(clean())
+})
 
-gulp.task('less', function() {
+gulp.task('less', function () {
   return gulp.src('./public/src/less/main.less')
     .pipe(gulpIf(!isProd, sourcemaps.init()))
     .pipe(less())
@@ -115,37 +115,37 @@ gulp.task('less', function() {
     .pipe(gulp.dest('./public/dist/css'))
     .pipe(browserSync.stream({
       'once': true
-    }));
-});
+    }))
+})
 
-gulp.task('image', function() {
+gulp.task('image', function () {
   return gulp.src('./public/src/asset/image/**/*')
     .pipe(gulpIf(isProd, imagemin()))
-    .pipe(gulp.dest('./public/dist/asset/image'));
-});
+    .pipe(gulp.dest('./public/dist/asset/image'))
+})
 
-gulp.task('sound', function() {
+gulp.task('sound', function () {
   return gulp.src('./public/src/asset/sound/**/*')
-    .pipe(gulp.dest('./public/dist/asset/sound'));
-});
+    .pipe(gulp.dest('./public/dist/asset/sound'))
+})
 
-gulp.task('serve', function() {
-  browserSync.init(browserSyncOpt);
+gulp.task('serve', function () {
+  browserSync.init(browserSyncOpt)
 
   var watchOpt = {
     interval: 500
-  };
+  }
 
-  gulp.watch('./public/index.html', watchOpt).on('change', browserSync.reload);
-  gulp.watch('./public/src/less/**/*.less', ['less']);
-  gulp.watch('./public/src/asset/image/**/*', ['image']);
-  gulp.watch('./public/src/asset/sound/**/*', ['sound']);
-  gulp.watch('./public/src/js/main.js', ['js']);
-});
+  gulp.watch('./public/index.html', watchOpt).on('change', browserSync.reload)
+  gulp.watch('./public/src/less/**/*.less', ['less'])
+  gulp.watch('./public/src/asset/image/**/*', ['image'])
+  gulp.watch('./public/src/asset/sound/**/*', ['sound'])
+  gulp.watch('./public/src/js/main.js', ['js'])
+})
 
 // should run `clean` first
-gulp.task('build', ['less', 'js', 'image', 'sound'], function() {
-  watchifyJs.close();
-});
-gulp.task('watch', ['serve']);
-gulp.task('default', ['build']);
+gulp.task('build', ['less', 'js', 'image', 'sound'], function () {
+  watchifyJs.close()
+})
+gulp.task('watch', ['serve'])
+gulp.task('default', ['build'])

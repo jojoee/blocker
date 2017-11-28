@@ -1,9 +1,9 @@
 /**
- * Client config 
+ * Client config
  */
 
 var clientConfig = {
 
-};
+}
 
-module.exports = clientConfig;
+module.exports = clientConfig
