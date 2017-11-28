@@ -1,20 +1,20 @@
-*.seed
-*.log
-*.csv
-*.dat
-*.out
-*.pid
-*.gz
-*.tmx
-*.psd
-*.zip
-*.rar
-*.tar.gz
+# OS
 *DS_store
 
+# backup
 bk*
+
+# log
 logs
 npm-debug.log
+
+# dependency
 node_modules
 bower_components
+
+# build
 public/dist
+
+# lock
+package-lock.json
+yarn.lock
