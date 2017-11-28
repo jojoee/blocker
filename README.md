@@ -33,9 +33,10 @@ for develop the client side, please run - `npm run build.watch`
 ```
 
 ## Deploy
-1. Install `pm2`: `npm install pm2 -g`
-2. Build client script: `npm run build`
-3. Run app: `pm2 start app.js`
+1. Follow step 1, 2, 3 in "Getting Started" section
+2. Install `pm2`: `npm install pm2 -g`
+3. Build client script: `npm run build`
+4. Run app: `pm2 start app.js`
 
 ## Note
 ```
@@ -77,7 +78,10 @@ take effect from subsequent request. (currently, there are only 2 events
 ```
 
 ## TODO
-- [ ] Separate "devDependencies" from "dependencies"
+- [ ] Check `const` and `let` again
+- [ ] Make all functions are functional
+- [ ] Remove all `eslint-disable-line`
+- [x] Separate "devDependencies" from "dependencies"
 - [ ] Add `checkAlive` event: the player is already gone, but it's still in the game (cause from network issue)
 - [ ] Using [MessagePack](http://msgpack.org/) instead of JSON
 - [ ] Respawn delay
