@@ -1,0 +1,28 @@
+{
+  "files.exclude": {
+    "screenshot": true
+  },
+  "standard.options": {
+    "verbose": true,
+    "env": "mocha",
+    "globals": [
+      "io",
+      "location",
+      "GAME",
+      "UTIL",
+      "UI",
+      "SOCKET",
+      "SOCKET_URL",
+      "EVENT_NAME",
+      "GAME_WORLD_WIDTH",
+      "GAME_WORLD_HEIGHT",
+      "WINDOW_WIDTH",
+      "WINDOW_HEIGHT",
+      "IS_DEBUG",
+      "Boot",
+      "Load",
+      "Play",
+      "Phaser"
+    ]
+  }
+}
