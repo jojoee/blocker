@@ -24,6 +24,7 @@ const browserSync = require('browser-sync').create()
 const notify = require('gulp-notify')
 const less = require('gulp-less')
 const sourcemaps = require('gulp-sourcemaps')
+const babel = require('gulp-babel')
 const uglify = require('gulp-uglify')
 const cssmin = require('gulp-cssmin')
 const imagemin = require('gulp-imagemin')
@@ -81,6 +82,9 @@ function bundle () {
       .on('error', gulpUtil.log.bind(gulpUtil, 'Browserify Error'))
       .pipe(vinylSourceStream('bundle.js'))
       .pipe(vinylBuffer())
+      .pipe(babel({
+        presets: ['es2015']
+      }))
       .pipe(uglify()).on('error', handleError)
       .pipe(gulp.dest('./public/dist/js'))
       .pipe(browserSync.stream({

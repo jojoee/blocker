@@ -7,7 +7,7 @@ const Zombie = MODULE.Zombie
 const Machine = MODULE.Machine
 const Bat = MODULE.Bat
 
-Play = function (GAME) { // eslint-disable-line
+let Play = function (GAME) {
   /** @type {boolean} flag for checking the client is ready to play */
   this.isGameReady = false
 

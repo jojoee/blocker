@@ -1,7 +1,7 @@
 var CONFIG = require('./config')
 
 // load all assets for loading screen
-Boot = function (GAME) {} // eslint-disable-line
+let Boot = function (GAME) {}
 Boot.prototype = {
   init: function () {
 

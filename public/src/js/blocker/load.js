@@ -1,7 +1,7 @@
 const CONFIG = require('./config')
 
 // load all game assets
-Load = function (GAME) {} // eslint-disable-line
+let Load = function (GAME) {}
 Load.prototype = {
 
   setPreloadingBg: function () {
