@@ -1,13 +1,17 @@
 const GCONFIG = require('./config')
 const MODULE = require('./../../../../common/module')
 const GUTIL = require('./../../../../common/gutil')
+const UTIL = require('./../../../../common/util')
 const Position = MODULE.Position
 const Hero = MODULE.Hero
 const Zombie = MODULE.Zombie
 const Machine = MODULE.Machine
 const Bat = MODULE.Bat
+const start = UTIL.getCurrentUtcTimestamp()
+let nSocketSent = 0
 
 function send (eventName, data) {
+  nSocketSent = nSocketSent + 1
   SOCKET.emit(eventName, data)
 }
 
@@ -2858,6 +2862,9 @@ Play.prototype = {
 
   render: function () {
     if (this.isGameReady && IS_DEBUG) {
+      const ts = UTIL.getCurrentUtcTimestamp()
+      const timePass = (ts - start) / 1000
+      const nSocketSentPerSec = nSocketSent / timePass
       const creatureBodyDebugColor = 'rgba(0,255, 0, 0.4)'
       const weaponBodyDebugColor = 'rgba(215, 125, 125, 0.4)'
 
@@ -2874,6 +2881,7 @@ Play.prototype = {
       GAME.debug.line('machineGroup dead ' + this.machineGroup.countDead())
       GAME.debug.line('batGroup living ' + this.batGroup.countLiving())
       GAME.debug.line('batGroup dead ' + this.batGroup.countDead())
+      GAME.debug.line(`nSocketSent ${nSocketSent} (${nSocketSentPerSec.toFixed(0)} nps)`)
       GAME.debug.stop()
 
       // weapon body
