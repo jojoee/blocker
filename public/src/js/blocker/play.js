@@ -7,6 +7,10 @@ const Zombie = MODULE.Zombie
 const Machine = MODULE.Machine
 const Bat = MODULE.Bat
 
+function send (eventName, data) {
+  SOCKET.emit(eventName, data)
+}
+
 let Play = function (GAME) {
   /** @type {boolean} flag for checking the client is ready to play */
   this.isGameReady = false
@@ -1396,11 +1400,10 @@ Play.prototype = {
    * @param {string} recoveredFrom
    */
   recoverHero: function (hero, recoveredFrom) {
-    const data = {
+    send(EVENT_NAME.player.isRecovered, {
       playerInfo: hero.blr.info,
       recoveredFrom: recoveredFrom
-    }
-    SOCKET.emit(EVENT_NAME.player.isRecovered, data)
+    })
   },
 
   /**
@@ -1447,11 +1450,10 @@ Play.prototype = {
     }
 
     if (!UTIL.isEmpty(eventName)) {
-      const data = {
+      send(eventName, {
         monsterInfo: monster.blr.info,
         damageFrom: damageFrom
-      }
-      SOCKET.emit(eventName, data)
+      })
     }
   },
 
@@ -1462,11 +1464,10 @@ Play.prototype = {
    * @param {string} damageFrom
    */
   damagePlayer: function (hero, damageFrom) {
-    const data = {
+    send(EVENT_NAME.player.isDamaged, {
       playerInfo: hero.blr.info,
       damageFrom: damageFrom
-    }
-    SOCKET.emit(EVENT_NAME.player.isDamaged, data)
+    })
   },
 
   /**
@@ -1476,11 +1477,10 @@ Play.prototype = {
    * @param {string} damageFrom
    */
   damageEnemy: function (hero, damageFrom) {
-    const data = {
+    send(EVENT_NAME.player.attackEnemy, {
       playerInfo: hero.blr.info,
       damageFrom: damageFrom
-    }
-    SOCKET.emit(EVENT_NAME.player.attackEnemy, data)
+    })
   },
 
   /**
@@ -1526,11 +1526,10 @@ Play.prototype = {
     }
 
     if (!UTIL.isEmpty(eventName)) {
-      const data = {
+      send(eventName, {
         monsterInfo: monster.blr.info,
         damageFrom: damageFrom
-      }
-      SOCKET.emit(eventName, data)
+      })
     }
   },
 
@@ -1541,11 +1540,10 @@ Play.prototype = {
    * @param {string} damageFrom
    */
   killPlayer: function (hero, damageFrom) {
-    const data = {
+    send(EVENT_NAME.player.isDied, {
       playerInfo: hero.blr.info,
       damageFrom: damageFrom
-    }
-    SOCKET.emit(EVENT_NAME.player.isDied, data)
+    })
   },
 
   /**
@@ -1555,11 +1553,10 @@ Play.prototype = {
    * @param {string} damageFrom
    */
   killEnemy: function (hero, damageFrom) {
-    const data = {
+    send(EVENT_NAME.player.killEnemy, {
       playerInfo: hero.blr.info,
       damageFrom: damageFrom
-    }
-    SOCKET.emit(EVENT_NAME.player.killEnemy, data)
+    })
   },
 
   /* ================================================================ Event
@@ -1599,7 +1596,7 @@ Play.prototype = {
         playerInfo: this.player.blr.info,
         targetPos: targetPos
       }
-      SOCKET.emit(EVENT_NAME.player.fire, data)
+      send(EVENT_NAME.player.fire, data)
     }
   },
 
@@ -1626,11 +1623,10 @@ Play.prototype = {
       this.heroFireArrow(hero, targetPos)
 
       // broadcast `fire` event
-      const data = {
+      send(EVENT_NAME.player.fire, {
         playerInfo: this.player.blr.info,
         targetPos: targetPos
-      }
-      SOCKET.emit(EVENT_NAME.player.fire, data)
+      })
     }
   },
 
@@ -1697,10 +1693,9 @@ Play.prototype = {
       this.updateCreatureLastVector(this.player)
 
       // broadcast `move` event
-      var data = {
+      send(EVENT_NAME.player.move, {
         playerInfo: this.player.blr.info
-      }
-      SOCKET.emit(EVENT_NAME.player.move, data)
+      })
     }
   },
 
@@ -1725,10 +1720,9 @@ Play.prototype = {
     this.updateCreatureLastVector(this.player)
 
     // broadcast `move` event
-    const data = {
+    send(EVENT_NAME.player.move, {
       playerInfo: this.player.blr.info
-    }
-    SOCKET.emit(EVENT_NAME.player.move, data)
+    })
   },
 
   /**
@@ -1744,10 +1738,9 @@ Play.prototype = {
     this.updateCreatureLastVector(this.player)
 
     // broadcast `move` event
-    const data = {
+    send(EVENT_NAME.player.rotate, {
       playerInfo: this.player.blr.info
-    }
-    SOCKET.emit(EVENT_NAME.player.rotate, data)
+    })
   },
 
   /**
@@ -1779,10 +1772,9 @@ Play.prototype = {
         this.logCreatureMessage(this.player)
 
         // broadcast `message` event
-        const data = {
+        send(EVENT_NAME.player.message, {
           playerInfo: this.player.blr.info
-        }
-        SOCKET.emit(EVENT_NAME.player.message, data)
+        })
       }
 
       UI.disableMessageInput()
@@ -2692,7 +2684,7 @@ Play.prototype = {
     this.setDamageEmitter()
 
     // player ready
-    SOCKET.emit(EVENT_NAME.player.ready, null)
+    send(EVENT_NAME.player.ready, null)
   },
 
   update: function () {
