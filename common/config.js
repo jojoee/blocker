@@ -24,6 +24,8 @@ const commonConfig = {
   },
   eventName: {
     player: {
+      ping: eventPlayerPrefix + 'ping',
+
       // player is ready to connect
       ready: eventPlayerPrefix + 'ready',
 
