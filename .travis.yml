@@ -12,11 +12,9 @@ branches:
     - master
 install:
   - npm install -g npm@latest
-  - npm install -g yarn bower gulp standard
+  - npm install -g yarn bower
   - yarn
   - bower install
-before_script:
-  - npm prune
 script:
   - yarn validate
   - yarn build
