@@ -18,5 +18,5 @@ install:
 before_script:
   - npm prune
 script:
-  - npm run validate
-  - npm run build
+  - yarn validate
+  - yarn build
