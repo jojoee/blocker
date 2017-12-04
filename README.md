@@ -23,20 +23,20 @@ Multiplayer online game using Phaser + WebSocket (Socket.IO).
 
 ## Getting Started
 1. Install [Node.js](https://nodejs.org/en/)
-2. Install Nodemon Bower Gulp: `npm install -g nodemon yarn bower`
+2. Install Nodemon Bower Gulp: `npm install -g nodemon yarn bower pm2`
 3. Install dependencies: `yarn && bower install`
-4. Start: `node app.js`
-5. Build client script: `npm run build`
-6. Enjoy!
+
 ```
-for develop the client side, please run - `npm run build.watch`
+Build client side
+- dev: `yarn build.watch`
+- prod: `yarn build`
 ```
 
-## Deploy
-1. Follow step 1, 2, 3 in "Getting Started" section
-2. Install `pm2`: `npm install pm2 -g`
-3. Build client script: `npm run build`
-4. Run app: `pm2 start app.js`
+```
+Start server side
+- dev: `nodemon app.js --watch app.js`
+- prod: `pm2 start app.js`
+```
 
 ## Note
 ```
@@ -75,17 +75,18 @@ for develop the client side, please run - `npm run build.watch`
 Anything's related with `life` directly, is need to broadcast first then
 take effect from subsequent request. (currently, there are only 2 events
 (move / fire) that can execute on client before broadcasting)
+
+6. CommonJs
 ```
 
 ## TODO
+- [ ] Fix config `isProd: true`
 - [ ] Check `const` and `let` again
-- [ ] Make all functions are functional
+- [ ] Make all functions functional
 - [ ] Remove all `eslint-disable-line`
-- [x] Separate "devDependencies" from "dependencies"
 - [ ] Add `checkAlive` event: the player is already gone, but it's still in the game (cause from network issue)
 - [ ] Using [MessagePack](http://msgpack.org/) instead of JSON
 - [ ] Respawn delay
-- [x] Map by [Tiled Map Editor](http://www.mapeditor.org/)
 - [ ] Redirect all pages to root (cause we only use root page)
 - [ ] Update bubble/message graphic, [1](http://www.html5gamedevs.com/topic/8837-speech-bubble-text-with-rectangle-as-background/)
 - [ ] Add deploy shell script
@@ -117,19 +118,17 @@ take effect from subsequent request. (currently, there are only 2 events
 - [ ] Talkable monster
 - [ ] Tween: monster move
 
-## In considering
-- [ ] [appmetrics.js](https://github.com/ebidel/appmetrics.js)
-
 ## Reference & Tutorial & Plugin & Tool
 - Inspired by [Blocker](http://blockergame.com/)
 - [phaser-multiplayer-game](https://github.com/xicombd/phaser-multiplayer-game)
 - [phaser-screen-shake](https://github.com/dmaslov/phaser-screen-shake)
 - [Text to ASCII Art Generator (TAAG)](http://patorjk.com/software/taag/)
 - [phaser-state-transition](phaser-state-transition-plugin)
+- [Tiled Map Editor](http://www.mapeditor.org/)
 
-## Others
-- [Express.js - app.listen vs server.listen](http://stackoverflow.com/questions/17696801/express-js-app-listen-vs-server-listen)
+### Multiplayer
 - Introduction to development of multiplayer HTML5 games (with Socket.io) [1](http://www.slideshare.net/Lotti86/introduction-to-multiplayer-game-development), [2](https://github.com/Lotti/codemotion2015)
-- Express serve static file, [1](http://stackoverflow.com/questions/5924072/express-js-cant-get-my-static-files-why), [2](https://expressjs.com/en/starter/static-files.html)
+
+### Data structure
 - Generate id, [1](http://stackoverflow.com/questions/24041220/sending-message-to-a-specific-id-in-socket-io-1-0/), [2](http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript), [3](https://github.com/dylang/shortid), [4](https://github.com/broofa/node-uuid)
 - [Remove / Generate client id](http://stackoverflow.com/questions/7702461/socket-io-custom-client-id)
