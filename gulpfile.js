@@ -1,6 +1,9 @@
 'use strict'
 
 /**
+ * @todo refactor
+ * @todo move path to variable
+ *
  * Task runner
  * - Js (Browserify)
  * - Less
@@ -28,7 +31,6 @@ const clean = require('gulp-clean')
 const autoprefixer = require('gulp-autoprefixer')
 const browserify = require('browserify')
 const watchify = require('watchify')
-const gulpIf = require('gulp-if')
 const gulpUtil = require('gulp-util')
 const vinylBuffer = require('vinyl-buffer')
 const vinylSourceStream = require('vinyl-source-stream')
@@ -74,19 +76,30 @@ watchifyJs.on('update', bundle)
 watchifyJs.on('log', gulpUtil.log)
 
 function bundle () {
-  return watchifyJs.bundle()
-    .on('error', gulpUtil.log.bind(gulpUtil, 'Browserify Error'))
-    .pipe(vinylSourceStream('bundle.js'))
-    .pipe(vinylBuffer())
-    .pipe(gulpIf(!isProd, sourcemaps.init({
-      loadMaps: true
-    })))
-    .pipe(gulpIf(isProd, uglify())).on('error', handleError)
-    .pipe(gulpIf(!isProd, sourcemaps.write('./')))
-    .pipe(gulp.dest('./public/dist/js'))
-    .pipe(browserSync.stream({
-      'once': true
-    }))
+  if (isProd) {
+    return watchifyJs.bundle()
+      .on('error', gulpUtil.log.bind(gulpUtil, 'Browserify Error'))
+      .pipe(vinylSourceStream('bundle.js'))
+      .pipe(vinylBuffer())
+      .pipe(uglify()).on('error', handleError)
+      .pipe(gulp.dest('./public/dist/js'))
+      .pipe(browserSync.stream({
+        'once': true
+      }))
+  } else {
+    return watchifyJs.bundle()
+      .on('error', gulpUtil.log.bind(gulpUtil, 'Browserify Error'))
+      .pipe(vinylSourceStream('bundle.js'))
+      .pipe(vinylBuffer())
+      .pipe(sourcemaps.init({
+        loadMaps: true
+      }))
+      .pipe(sourcemaps.write('./'))
+      .pipe(gulp.dest('./public/dist/js'))
+      .pipe(browserSync.stream({
+        'once': true
+      }))
+  }
 }
 
 gulp.task('js', bundle)
@@ -104,22 +117,37 @@ gulp.task('clean', function () {
 })
 
 gulp.task('less', function () {
-  return gulp.src('./public/src/less/main.less')
-    .pipe(gulpIf(!isProd, sourcemaps.init()))
-    .pipe(less())
-    .pipe(autoprefixer('last 2 versions', '> 1%', 'ie 8'))
-    .pipe(gulpIf(!isProd, sourcemaps.write('./')))
-    .pipe(gulpIf(isProd, cssmin()))
-    .pipe(gulp.dest('./public/dist/css'))
-    .pipe(browserSync.stream({
-      'once': true
-    }))
+  if (isProd) {
+    return gulp.src('./public/src/less/main.less')
+      .pipe(less())
+      .pipe(autoprefixer('last 2 versions', '> 1%', 'ie 8'))
+      .pipe(cssmin())
+      .pipe(gulp.dest('./public/dist/css'))
+      .pipe(browserSync.stream({
+        'once': true
+      }))
+  } else {
+    return gulp.src('./public/src/less/main.less')
+      .pipe(sourcemaps.init())
+      .pipe(less())
+      .pipe(autoprefixer('last 2 versions', '> 1%', 'ie 8'))
+      .pipe(sourcemaps.write('./'))
+      .pipe(gulp.dest('./public/dist/css'))
+      .pipe(browserSync.stream({
+        'once': true
+      }))
+  }
 })
 
 gulp.task('image', function () {
-  return gulp.src('./public/src/asset/image/**/*')
-    .pipe(gulpIf(isProd, imagemin()))
-    .pipe(gulp.dest('./public/dist/asset/image'))
+  if (isProd) {
+    return gulp.src('./public/src/asset/image/**/*')
+      .pipe(imagemin())
+      .pipe(gulp.dest('./public/dist/asset/image'))
+  } else {
+    return gulp.src('./public/src/asset/image/**/*')
+      .pipe(gulp.dest('./public/dist/asset/image'))
+  }
 })
 
 gulp.task('sound', function () {
