@@ -17,9 +17,9 @@ Multiplayer online game using Phaser + WebSocket (Socket.IO).
 
 ## Gifshot
 
-![Blocker - Game play 1](https://raw.githubusercontent.com/jojoee/blocker/master/screenshot/play1.jpg "Blocker - Game play 1")
+[![Blocker - Game play 1](https://raw.githubusercontent.com/jojoee/blocker/master/screenshot/play1.jpg "Blocker - Game play 1")](http://blocker.jojoee.com/)
 
-![Blocker - Debug](https://raw.githubusercontent.com/jojoee/blocker/master/screenshot/debug.jpg "Blocker - Debug")
+[![Blocker - Debug](https://raw.githubusercontent.com/jojoee/blocker/master/screenshot/debug.jpg "Blocker - Debug")](http://blocker.jojoee.com/)
 
 ## Getting Started
 1. Install [Node.js](https://nodejs.org/en/)
@@ -80,6 +80,8 @@ take effect from subsequent request. (currently, there are only 2 events
 ```
 
 ## TODO
+- [ ] All game calculation should be calculated on server-side
+- [ ] Send player-event to server (not playerInfo object, cause it's too big)
 - [ ] Fix config `isProd: true`
 - [ ] Check `const` and `let` again
 - [ ] Make all functions functional
