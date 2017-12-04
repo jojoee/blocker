@@ -12,7 +12,7 @@ branches:
     - master
 install:
   - npm install -g npm@latest
-  - npm install -g yarn bower
+  - npm install -g yarn bower gulp standard
   - yarn
   - bower install
 before_script:
