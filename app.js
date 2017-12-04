@@ -494,6 +494,11 @@ IO.on('connection', function (socket) {
     socket.broadcast.emit(EVENT_NAME.server.newPlayer, data2)
   })
 
+  // ping
+  socket.on(EVENT_NAME.player.ping, function () {
+    IO.sockets.connected[socketId].emit(EVENT_NAME.player.ping)
+  })
+
   // message
   // @todo refactor cause it has the same behavior
   socket.on(EVENT_NAME.player.message, function (data) {

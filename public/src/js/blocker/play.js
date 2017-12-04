@@ -7,13 +7,20 @@ const Hero = MODULE.Hero
 const Zombie = MODULE.Zombie
 const Machine = MODULE.Machine
 const Bat = MODULE.Bat
-const start = UTIL.getCurrentUtcTimestamp()
+const startTs = UTIL.getCurrentUtcTimestamp()
 let nSocketSent = 0
+let ping = 0
+let startPing = 0
 
-function send (eventName, data) {
+function send (eventName, data = null) {
   nSocketSent = nSocketSent + 1
   SOCKET.emit(eventName, data)
 }
+
+setInterval(function () {
+  startPing = UTIL.getCurrentUtcTimestamp()
+  send(EVENT_NAME.player.ping)
+}, 1000)
 
 let Play = function (GAME) {
   /** @type {boolean} flag for checking the client is ready to play */
@@ -1803,6 +1810,7 @@ Play.prototype = {
     SOCKET.on(EVENT_NAME.server.newPlayer, this.onPlayerConnect.bind(this))
     SOCKET.on(EVENT_NAME.server.disconnectedPlayer, this.onPlayerDisconnect.bind(this))
 
+    SOCKET.on(EVENT_NAME.player.ping, this.onPlayerPing.bind(this))
     SOCKET.on(EVENT_NAME.player.message, this.onPlayerMessage.bind(this))
     SOCKET.on(EVENT_NAME.player.move, this.onPlayerMove.bind(this))
     SOCKET.on(EVENT_NAME.player.rotate, this.onPlayerRotate.bind(this))
@@ -1985,6 +1993,11 @@ Play.prototype = {
     if (!isFound) {
       console.error('not found enemy ' + playerInfo.id, playerInfo)
     }
+  },
+
+  onPlayerPing: function (data) {
+    const end = UTIL.getCurrentUtcTimestamp()
+    ping = end - startPing
   },
 
   /**
@@ -2863,7 +2876,8 @@ Play.prototype = {
   render: function () {
     if (this.isGameReady && IS_DEBUG) {
       const ts = UTIL.getCurrentUtcTimestamp()
-      const timePass = (ts - start) / 1000
+      const timePass = (ts - startTs) / 1000
+      // @todo calculate from last 10 secs instead of all-times
       const nSocketSentPerSec = nSocketSent / timePass
       const creatureBodyDebugColor = 'rgba(0,255, 0, 0.4)'
       const weaponBodyDebugColor = 'rgba(215, 125, 125, 0.4)'
@@ -2874,6 +2888,8 @@ Play.prototype = {
 
       // middle
       GAME.debug.start(6, 276)
+      GAME.debug.line(`ping ${ping} ms`)
+      GAME.debug.line(`nSocketSent ${nSocketSent} (${nSocketSentPerSec.toFixed(0)} nps)`)
       GAME.debug.line('Frames per second (FPS) ' + GAME.time.fps)
       GAME.debug.line('zombieGroup living ' + this.zombieGroup.countLiving())
       GAME.debug.line('zombieGroup dead ' + this.zombieGroup.countDead())
@@ -2881,7 +2897,6 @@ Play.prototype = {
       GAME.debug.line('machineGroup dead ' + this.machineGroup.countDead())
       GAME.debug.line('batGroup living ' + this.batGroup.countLiving())
       GAME.debug.line('batGroup dead ' + this.batGroup.countDead())
-      GAME.debug.line(`nSocketSent ${nSocketSent} (${nSocketSentPerSec.toFixed(0)} nps)`)
       GAME.debug.stop()
 
       // weapon body
