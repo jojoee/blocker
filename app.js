@@ -799,8 +799,10 @@ function getNearestPlayer (monsterInfo, visibleRange) {
 
   if (!UTIL.isEmptyObject(nearestPlayerVector)) {
     data = {
-      monsterInfo: monsterInfo,
-      targetCreatureId: playerInfo.id,
+      monsterInfo: {
+        id: monsterInfo.id
+      },
+      targetCreatureId: playerInfo.id, // unused
       targetVector: nearestPlayerVector
     }
   }

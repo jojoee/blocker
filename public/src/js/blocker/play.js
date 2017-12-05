@@ -2458,9 +2458,9 @@ Play.prototype = {
 
     for (let i = 0; i < nData; i++) {
       const data = dataArr[i]
-      const monsterInfo = data.monsterInfo
+      const { id } = data.monsterInfo
       const targetVector = data.targetVector
-      let monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup)
+      let monster = this.getMonsterByMonsterIdAndGroup(id, this.machineGroup)
 
       if (!UTIL.isEmptyObject(monster)) {
         const ts = UTIL.getCurrentUtcTimestamp()
