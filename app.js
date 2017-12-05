@@ -519,8 +519,6 @@ IO.on('connection', function (socket) {
     const playerIdx = getPlayerInfoIndexById(id)
 
     if (playerIdx > -1) {
-      PLAYER_INFOS[playerIdx].id = id
-      PLAYER_INFOS[playerIdx].life = life
       PLAYER_INFOS[playerIdx].lastVector = lastVector
       socket.broadcast.emit(EVENT_NAME.player.move, data)
     }
