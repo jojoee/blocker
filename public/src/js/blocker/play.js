@@ -1798,8 +1798,15 @@ Play.prototype = {
         this.logCreatureMessage(this.player)
 
         // broadcast `message` event
+        // @todo define object structure somewhere
+        // @todo remove life, lastVector, lastMessageTimestamp
+        const playerInfo = this.player.blr.info
         send(EVENT_NAME.player.message, {
-          playerInfo: this.player.blr.info
+          id: playerInfo.id,
+          life: playerInfo.life,
+          lastVector: playerInfo.lastVector,
+          lastMessage: playerInfo.lastMessage,
+          lastMessageTimestamp: playerInfo.lastMessageTimestamp
         })
       }
 
@@ -2021,16 +2028,16 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerMessage: function (data) {
-    const playerInfo = data.playerInfo
-    let enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const { id, life, lastVector, lastMessageTimestamp, lastMessage } = data
+    let enemy = this.getEnemyByPlayerId(id)
 
     if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, life, lastVector)
 
       // set message (same as `playerSendMessage`)
-      enemy.blr.updateLastMessageTimestamp(playerInfo.lastMessageTimestamp)
-      enemy.blr.info.lastMessage = playerInfo.lastMessage
-      enemy.blr.bubble.setText(playerInfo.lastMessage)
+      enemy.blr.updateLastMessageTimestamp(lastMessageTimestamp)
+      enemy.blr.info.lastMessage = lastMessage
+      enemy.blr.bubble.setText(lastMessage)
       enemy.blr.bubble.visible = true
 
       // log (same as `playerSendMessage`)
