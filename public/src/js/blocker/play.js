@@ -1,3 +1,4 @@
+const sizeof = require('object-sizeof')
 const GCONFIG = require('./config')
 const MODULE = require('./../../../../common/module')
 const GUTIL = require('./../../../../common/gutil')
@@ -9,11 +10,13 @@ const Machine = MODULE.Machine
 const Bat = MODULE.Bat
 const startTs = UTIL.getCurrentUtcTimestamp()
 let nSocketSent = 0
+let nSizeSent = 0
 let ping = 0
 let startPing = 0
 
 function send (eventName, data = null) {
   nSocketSent = nSocketSent + 1
+  nSizeSent = nSizeSent + sizeof(data)
   SOCKET.emit(eventName, data)
 }
 
@@ -2879,6 +2882,8 @@ Play.prototype = {
       const timePass = (ts - startTs) / 1000
       // @todo calculate from last 10 secs instead of all-times
       const nSocketSentPerSec = nSocketSent / timePass
+      // @todo calculate from last 10 secs instead of all-times
+      const nSizeSentPerSec = nSizeSent / timePass
       const creatureBodyDebugColor = 'rgba(0,255, 0, 0.4)'
       const weaponBodyDebugColor = 'rgba(215, 125, 125, 0.4)'
 
@@ -2890,6 +2895,7 @@ Play.prototype = {
       GAME.debug.start(6, 276)
       GAME.debug.line(`ping ${ping} ms`)
       GAME.debug.line(`nSocketSent ${nSocketSent} (${nSocketSentPerSec.toFixed(0)} nps)`)
+      GAME.debug.line(`nSizeSent ${nSizeSent} (${nSizeSentPerSec.toFixed(0)} bps)`)
       GAME.debug.line('Frames per second (FPS) ' + GAME.time.fps)
       GAME.debug.line('zombieGroup living ' + this.zombieGroup.countLiving())
       GAME.debug.line('zombieGroup dead ' + this.zombieGroup.countDead())
