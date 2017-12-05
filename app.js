@@ -565,11 +565,11 @@ IO.on('connection', function (socket) {
   // is recovered
   // @todo refactor cause it has the same behavior
   socket.on(EVENT_NAME.player.isRecovered, function (data) {
-    const playerInfo = data.playerInfo
-    const playerIdx = getPlayerInfoIndexById(playerInfo.id)
+    const { id, life } = data.playerInfo
+    const playerIdx = getPlayerInfoIndexById(id)
 
     if (playerIdx > -1) {
-      PLAYER_INFOS[playerIdx] = playerInfo
+      PLAYER_INFOS[playerIdx].life = life
 
       IO.sockets.connected[socketId].emit(EVENT_NAME.player.isRecoveredItSelf, data)
       socket.broadcast.emit(EVENT_NAME.player.isRecovered, data)

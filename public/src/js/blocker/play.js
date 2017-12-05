@@ -1414,9 +1414,14 @@ Play.prototype = {
    * @param {string} recoveredFrom
    */
   recoverHero: function (hero, recoveredFrom) {
+    const playerInfo = hero.blr.info
     send(EVENT_NAME.player.isRecovered, {
-      playerInfo: hero.blr.info,
-      recoveredFrom: recoveredFrom
+      playerInfo: {
+        id: playerInfo.id,
+        life: playerInfo.life,
+        lastVector: playerInfo.lastVector
+      },
+      recoveredFrom
     })
   },
 
@@ -2163,12 +2168,12 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerIsRecovered: function (data) {
-    const playerInfo = data.playerInfo
+    const { id, life, lastVector } = data.playerInfo
     const recoveredFrom = data.recoveredFrom
-    const enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const enemy = this.getEnemyByPlayerId(id)
 
     if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, life, lastVector)
       this.recoverHeroAfterGotSubsequentRequest(enemy, recoveredFrom)
     }
   },
