@@ -1469,8 +1469,12 @@ Play.prototype = {
     }
 
     if (!UTIL.isEmpty(eventName)) {
+      const monsterInfo = monster.blr.info
       send(eventName, {
-        monsterInfo: monster.blr.info,
+        monsterInfo: {
+          id: monsterInfo.id,
+          life: monsterInfo.life
+        },
         damageFrom: damageFrom
       })
     }
@@ -2249,9 +2253,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerAttackZombie: function (data) {
-    const monsterInfo = data.monsterInfo
+    const { id } = data.monsterInfo
     const damageFrom = data.damageFrom
-    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.zombieGroup)
+    const monster = this.getMonsterByMonsterIdAndGroup(id, this.zombieGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.damageMonsterAfterGotSubsequentRequest(monster, damageFrom)
@@ -2265,9 +2269,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerAttackMachine: function (data) {
-    const monsterInfo = data.monsterInfo
+    const { id } = data.monsterInfo
     const damageFrom = data.damageFrom
-    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.machineGroup)
+    const monster = this.getMonsterByMonsterIdAndGroup(id, this.machineGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.damageMonsterAfterGotSubsequentRequest(monster, damageFrom)
@@ -2281,9 +2285,9 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerAttackBat: function (data) {
-    const monsterInfo = data.monsterInfo
+    const { id } = data.monsterInfo
     const damageFrom = data.damageFrom
-    const monster = this.getMonsterByMonsterIdAndGroup(monsterInfo.id, this.batGroup)
+    const monster = this.getMonsterByMonsterIdAndGroup(id, this.batGroup)
 
     if (!UTIL.isEmptyObject(monster)) {
       this.damageMonsterAfterGotSubsequentRequest(monster, damageFrom)

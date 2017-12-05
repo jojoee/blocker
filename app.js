@@ -606,11 +606,11 @@ IO.on('connection', function (socket) {
   // attack - zombie
   // @todo refactor
   socket.on(EVENT_NAME.player.attackZombie, function (data) {
-    const monsterInfo = data.monsterInfo
-    const monsterIdx = getMonsterInfoIndex(monsterInfo.id, ZOMBIE_INFOS)
+    const { id, life } = data.monsterInfo
+    const monsterIdx = getMonsterInfoIndex(id, ZOMBIE_INFOS)
 
     if (monsterIdx > -1) {
-      ZOMBIE_INFOS[monsterIdx] = monsterInfo
+      ZOMBIE_INFOS[monsterIdx].life = life
 
       IO.emit(EVENT_NAME.player.attackZombie, data)
     }
@@ -619,11 +619,11 @@ IO.on('connection', function (socket) {
   // attack - machine
   // @todo refactor
   socket.on(EVENT_NAME.player.attackMachine, function (data) {
-    const monsterInfo = data.monsterInfo
-    const monsterIdx = getMonsterInfoIndex(monsterInfo.id, MACHINE_INFOS)
+    const { id, life } = data.monsterInfo
+    const monsterIdx = getMonsterInfoIndex(id, MACHINE_INFOS)
 
     if (monsterIdx > -1) {
-      MACHINE_INFOS[monsterIdx] = monsterInfo
+      MACHINE_INFOS[monsterIdx].life = life
 
       IO.emit(EVENT_NAME.player.attackMachine, data)
     }
@@ -632,11 +632,11 @@ IO.on('connection', function (socket) {
   // attack - bat
   // @todo refactor
   socket.on(EVENT_NAME.player.attackBat, function (data) {
-    const monsterInfo = data.monsterInfo
-    const monsterIdx = getMonsterInfoIndex(monsterInfo.id, BAT_INFOS)
+    const { id, life } = data.monsterInfo
+    const monsterIdx = getMonsterInfoIndex(id, BAT_INFOS)
 
     if (monsterIdx > -1) {
-      BAT_INFOS[monsterIdx] = monsterInfo
+      BAT_INFOS[monsterIdx].life = life
 
       IO.emit(EVENT_NAME.player.attackBat, data)
     }
