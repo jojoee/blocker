@@ -516,7 +516,7 @@ IO.on('connection', function (socket) {
   // @todo refactor cause it has the same behavior
   // @todo define object structure somewhere
   socket.on(EVENT_NAME.player.move, function (data) {
-    const { id, life, lastVector } = data
+    const { id, lastVector } = data
     const playerIdx = getPlayerInfoIndexById(id)
 
     if (playerIdx > -1) {
@@ -528,11 +528,11 @@ IO.on('connection', function (socket) {
   // rotate
   // @todo refactor cause it has the same behavior
   socket.on(EVENT_NAME.player.rotate, function (data) {
-    const playerInfo = data.playerInfo
-    const playerIdx = getPlayerInfoIndexById(playerInfo.id)
+    const { id, lastVector } = data
+    const playerIdx = getPlayerInfoIndexById(id)
 
     if (playerIdx > -1) {
-      PLAYER_INFOS[playerIdx] = playerInfo
+      PLAYER_INFOS[playerIdx].lastVector = lastVector
       socket.broadcast.emit(EVENT_NAME.player.rotate, data)
     }
   })

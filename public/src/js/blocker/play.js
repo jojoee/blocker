@@ -1763,9 +1763,12 @@ Play.prototype = {
     // update info
     this.updateCreatureLastVector(this.player)
 
-    // broadcast `move` event
+    // broadcast `rotate` event
+    const playerInfo = this.player.blr.info
     send(EVENT_NAME.player.rotate, {
-      playerInfo: this.player.blr.info
+      id: playerInfo.id,
+      life: playerInfo.life,
+      lastVector: playerInfo.lastVector
     })
   },
 
@@ -2076,11 +2079,12 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerRotate: function (data) {
-    const playerInfo = data.playerInfo
-    const enemy = this.getEnemyByPlayerId(playerInfo.id)
+    // const playerInfo = data.playerInfo
+    const { id, life, lastVector } = data
+    const enemy = this.getEnemyByPlayerId(id)
 
     if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, life, lastVector)
 
       // same as `playerRotate`
 
