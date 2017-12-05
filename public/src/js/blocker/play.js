@@ -1606,11 +1606,17 @@ Play.prototype = {
       this.heroFireArrow(hero, targetPos)
 
       // broadcast `fire` event
-      const data = {
-        playerInfo: this.player.blr.info,
+      // @todo define structure
+      // @todo remove life, lastVector, targetPos
+      const playerInfo = this.player.blr.info
+      send(EVENT_NAME.player.fire, {
+        playerInfo: {
+          id: playerInfo.id,
+          life: playerInfo.life,
+          lastVector: playerInfo.lastVector
+        },
         targetPos: targetPos
-      }
-      send(EVENT_NAME.player.fire, data)
+      })
     }
   },
 
@@ -1637,8 +1643,15 @@ Play.prototype = {
       this.heroFireArrow(hero, targetPos)
 
       // broadcast `fire` event
+      // @todo define structure
+      // @todo remove life, lastVector, targetPos
+      const playerInfo = this.player.blr.info
       send(EVENT_NAME.player.fire, {
-        playerInfo: this.player.blr.info,
+        playerInfo: {
+          id: playerInfo.id,
+          life: playerInfo.life,
+          lastVector: playerInfo.lastVector
+        },
         targetPos: targetPos
       })
     }
@@ -2102,12 +2115,13 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerFire: function (data) {
-    const playerInfo = data.playerInfo
+    const { id, life, lastVector } = data.playerInfo
+    /** @type {Position} */
     const targetPos = data.targetPos
-    const enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const enemy = this.getEnemyByPlayerId(id)
 
     if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, life, lastVector)
 
       // update sub (same as `playerFireArrow`)
       this.updateCreatureWeapon(enemy)

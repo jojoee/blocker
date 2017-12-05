@@ -540,11 +540,10 @@ IO.on('connection', function (socket) {
   // fire
   // @todo refactor cause it has the same behavior
   socket.on(EVENT_NAME.player.fire, function (data) {
-    const playerInfo = data.playerInfo
-    const playerIdx = getPlayerInfoIndexById(playerInfo.id)
+    const { id } = data.playerInfo
+    const playerIdx = getPlayerInfoIndexById(id)
 
     if (playerIdx > -1) {
-      PLAYER_INFOS[playerIdx] = playerInfo
       socket.broadcast.emit(EVENT_NAME.player.fire, data)
     }
   })
