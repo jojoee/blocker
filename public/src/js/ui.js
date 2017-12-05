@@ -20,11 +20,13 @@ const Ui = {
    * @param {string} text
    */
   addTextToLogList: function (text) {
-    const liEle = document.createElement('li')
-    const t = document.createTextNode(text)
-    liEle.appendChild(t)
+    if (IS_DEBUG) {
+      const liEle = document.createElement('li')
+      const t = document.createTextNode(text)
+      liEle.appendChild(t)
 
-    this.logListEle.insertBefore(liEle, this.logListEle.firstChild)
+      this.logListEle.insertBefore(liEle, this.logListEle.firstChild)
+    }
   },
 
   /* ================================================================ Creature list
