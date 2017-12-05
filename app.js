@@ -501,6 +501,7 @@ IO.on('connection', function (socket) {
 
   // message
   // @todo refactor cause it has the same behavior
+  // @todo define object structure somewhere
   socket.on(EVENT_NAME.player.message, function (data) {
     const { id, lastMessage, lastMessageTimestamp } = data
     const playerIdx = getPlayerInfoIndexById(id)
@@ -527,6 +528,7 @@ IO.on('connection', function (socket) {
 
   // rotate
   // @todo refactor cause it has the same behavior
+  // @todo define object structure somewhere
   socket.on(EVENT_NAME.player.rotate, function (data) {
     const { id, lastVector } = data
     const playerIdx = getPlayerInfoIndexById(id)
@@ -539,6 +541,7 @@ IO.on('connection', function (socket) {
 
   // fire
   // @todo refactor cause it has the same behavior
+  // @todo define object structure somewhere
   socket.on(EVENT_NAME.player.fire, function (data) {
     const { id } = data.playerInfo
     const playerIdx = getPlayerInfoIndexById(id)
@@ -776,6 +779,7 @@ function reportNumberOfConnections () { // eslint-disable-line
 /**
  * Get nearest player
  *
+ * @todo update function name
  * @param {CreatureInfo} monsterInfo
  * @param {number} visibleRange
  * @returns {Object}

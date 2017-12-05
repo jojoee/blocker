@@ -81,8 +81,8 @@ take effect from subsequent request. (currently, there are only 2 events
 
 ## TODO
 - [ ] All game calculation should be calculated on server-side
-- [ ] Send player-event to server (not playerInfo object, cause it's too big)
-- [ ] Fix config `isProd: true`
+- [ ] Define structure of sending-object and response-object from server
+- [ ] Send player-event to server (not data-object)
 - [ ] Check `const` and `let` again
 - [ ] Make all functions functional
 - [ ] Remove all `eslint-disable-line`

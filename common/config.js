@@ -91,7 +91,7 @@ const commonConfig = {
       // machine fire
       machineFire: eventPlayerPrefix + 'machineFire',
 
-      // monster move
+      // monster move (unused at the moment)
       zombieMove: eventPlayerPrefix + 'zombieMove',
       batMove: eventPlayerPrefix + 'batMove'
     }
