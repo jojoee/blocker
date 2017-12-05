@@ -1707,8 +1707,14 @@ Play.prototype = {
       this.updateCreatureLastVector(this.player)
 
       // broadcast `move` event
+      // @todo define object structure somewhere
+      // @todo stop sending "life", should be calculated by server
+      // @todo stop sending "lastVector", should be calculated by server
+      const playerInfo = this.player.blr.info
       send(EVENT_NAME.player.move, {
-        playerInfo: this.player.blr.info
+        id: playerInfo.id,
+        life: playerInfo.life,
+        lastVector: playerInfo.lastVector
       })
     }
   },
@@ -1734,8 +1740,14 @@ Play.prototype = {
     this.updateCreatureLastVector(this.player)
 
     // broadcast `move` event
+    // @todo define object structure somewhere
+    // @todo stop sending "life", should be calculated by server
+    // @todo stop sending "lastVector", should be calculated by server
+    const playerInfo = this.player.blr.info
     send(EVENT_NAME.player.move, {
-      playerInfo: this.player.blr.info
+      id: playerInfo.id,
+      life: playerInfo.life,
+      lastVector: playerInfo.lastVector
     })
   },
 
@@ -2032,11 +2044,11 @@ Play.prototype = {
    * @param {Object}
    */
   onPlayerMove: function (data) {
-    const playerInfo = data.playerInfo
-    const enemy = this.getEnemyByPlayerId(playerInfo.id)
+    const { id, life, lastVector } = data
+    const enemy = this.getEnemyByPlayerId(id)
 
     if (!UTIL.isEmptyObject(enemy)) {
-      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, playerInfo.life, playerInfo.lastVector)
+      this.forceUpdateEnemyAfterGotSubsequentRequest(enemy, life, lastVector)
 
       // same as `playerMove`
 

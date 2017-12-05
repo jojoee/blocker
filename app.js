@@ -513,12 +513,15 @@ IO.on('connection', function (socket) {
 
   // move
   // @todo refactor cause it has the same behavior
+  // @todo define object structure somewhere
   socket.on(EVENT_NAME.player.move, function (data) {
-    const playerInfo = data.playerInfo
-    const playerIdx = getPlayerInfoIndexById(playerInfo.id)
+    const { id, life, lastVector } = data
+    const playerIdx = getPlayerInfoIndexById(id)
 
     if (playerIdx > -1) {
-      PLAYER_INFOS[playerIdx] = playerInfo
+      PLAYER_INFOS[playerIdx].id = id
+      PLAYER_INFOS[playerIdx].life = life
+      PLAYER_INFOS[playerIdx].lastVector = lastVector
       socket.broadcast.emit(EVENT_NAME.player.move, data)
     }
   })
