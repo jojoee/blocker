@@ -17,6 +17,8 @@ Multiplayer online game using Phaser + WebSocket (Socket.IO).
 
 ## Gifshot
 
+![Demo](https://i.imgur.com/Eqtse6G.gif)
+
 [![Blocker - Game play 1](https://raw.githubusercontent.com/jojoee/blocker/master/screenshot/play1.jpg "Blocker - Game play 1")](http://blocker.jojoee.com/)
 
 [![Blocker - Debug](https://raw.githubusercontent.com/jojoee/blocker/master/screenshot/debug.jpg "Blocker - Debug")](http://blocker.jojoee.com/)
