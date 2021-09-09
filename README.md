@@ -11,7 +11,7 @@ Multiplayer online game using Phaser + WebSocket (Socket.IO).
 
 2. Keyboard
 - Up: move
-- Left / Right: rorate
+- Left / Right: rotate
 - Spacebar: fire
 ```
 
