@@ -4,7 +4,7 @@ WORKDIR /code
 
 COPY ./ /code
 
-RUN npm install -g nodemon yarn bower pm2
+RUN npm install -g nodemon bower pm2
 
 RUN yarn && bower install
 
