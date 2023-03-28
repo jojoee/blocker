@@ -4,6 +4,8 @@ WORKDIR /code
 
 COPY ./ /code
 
+RUN apt install git
+
 RUN npm install -g nodemon bower pm2
 
 RUN yarn && bower install
