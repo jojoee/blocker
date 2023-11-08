@@ -6,7 +6,7 @@ console.log('Blocker - The Hunter is welcome!')
 
 const config = require('./../../../common/config')
 const blocker = require('./blocker')
-const socketUrl = location.protocol + '//' + location.hostname + ':' + config.serverPort
+const socketUrl = location.protocol + '//' + location.hostname + ':' + location.port
 
 window.COMMON_MODULE = require('./../../../common/module')
 window.UI = require('./ui')
