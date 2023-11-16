@@ -21,7 +21,7 @@ Multiplayer online game using Phaser + WebSocket (Socket.IO).
 
 [![Blocker - Game play 1](https://raw.githubusercontent.com/jojoee/blocker/master/screenshot/play1.jpg "Blocker - Game play 1")](http://blocker.jojoee.com/)
 
-[![Blocker - Debug](https://raw.githubusercontent.com/jojoee/blocker/master/screenshot/debug.jpg "Blocker - Debug")](http://blocker.jojoee.com/)
+[![Blocker - Debug](https://raw.githubusercontent.com/jojoee/blocker/master/screenshot/debug.jpg "Blocker - Debug")](http://blocker.jojoee.com/) [![Greenkeeper badge](https://badges.greenkeeper.io/jojoee/blocker.svg)](https://greenkeeper.io/)
 
 ## Getting Started
 1. Install [Node.js](https://nodejs.org/en/)
